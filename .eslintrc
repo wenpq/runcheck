@@ -6,9 +6,13 @@
     "node": true,
     "mocha": true
   },
-  "extends": "defaults/configurations/walmart/es5",
+  "plugins": [
+    "filenames"
+  ],
   "rules": {
+    "indent": ["error", 2],
     "no-console": 0,
+    "no-magic-numbers": 1,
     "quotes": [2, "single", "avoid-escape"],
     "camelcase": 0,
     "max-statements": 0,
@@ -16,6 +20,8 @@
     "max-len": 0,
     "max-params": [2, 10],
     "operator-assignment": 0,
-    "consistent-this": 0
+    "consistent-this": 0,
+    "filenames/match-regex": [2, "^[a-z-]+$", true],
+    "filenames/match-exported": 2
   }
 }
