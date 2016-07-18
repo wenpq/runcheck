@@ -25,13 +25,13 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'bower_components')));
 
 // use router
-app.use('/', require('./routes/index'));
-app.use('/', require('./routes/user'));
-app.use('/', require('./routes/device'));
-app.use('/', require('./routes/slot'));
-app.use('/', require('./routes/slot-group'));
-app.use('/', require('./routes/checklist'));
-app.use('/', require('./routes/admin'));
+require('./routes/index')(app);
+require('./routes/user')(app);
+require('./routes/device')(app);
+require('./routes/slot')(app);
+require('./routes/slot-group')(app);
+require('./routes/checklist')(app);
+require('./routes/admin')(app);
 
 
 // catch 404 and forward to error handler
@@ -65,6 +65,6 @@ app.use(function (err, req, res, next) {
   });
 });
 
-app.listen(3001, 'localhost');
+app.listen(3000, 'localhost');
 
 module.exports = app;
