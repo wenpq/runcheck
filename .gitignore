@@ -34,3 +34,9 @@ bower_components/
 
 # IDE configure file
 .idea/
+
+# photoes
+userphoto/
+
+# config
+config/
