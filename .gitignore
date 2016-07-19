@@ -38,5 +38,9 @@ bower_components/
 # photoes
 userphoto/
 
-# config
-config/
+# config files
+config/ad.json
+config/auth.json
+config/app.json
+config/mongo.json
+config/redis.json
