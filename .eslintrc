@@ -1,27 +1,46 @@
 {
-  "root": true,
   "env": {
     "browser": true,
     "jquery": true,
-    "node": true,
-    "mocha": true
+    "mocha": true,
+    "node": true
   },
   "plugins": [
     "filenames"
   ],
+  "root": true,
   "rules": {
-    "indent": ["error", 2],
-    "no-console": 0,
-    "no-magic-numbers": 1,
-    "quotes": [2, "single", "avoid-escape"],
     "camelcase": 0,
-    "max-statements": 0,
-    "func-style": 0,
-    "max-len": 0,
-    "max-params": [2, 10],
-    "operator-assignment": 0,
     "consistent-this": 0,
-    "filenames/match-regex": [2, "^[a-z-]+$", true],
-    "filenames/match-exported": 2
+    "filenames/match-exported": 2,
+    "filenames/match-regex": [
+      2,
+      "^[a-z-]+$",
+      true
+    ],
+    "func-style": 0,
+    "indent": [
+      "error",
+      2
+    ],
+    "max-len": 0,
+    "max-params": [
+      2,
+      10
+    ],
+    "max-statements": 0,
+    "no-console": 0,
+    "no-magic-numbers": [
+      "warn", {
+        "ignore": [-1, 0, 1],
+        "ignoreArrayIndexes": true
+      }
+    ],
+    "operator-assignment": 0,
+    "quotes": [
+      2,
+      "single",
+      "avoid-escape"
+    ]
   }
 }
