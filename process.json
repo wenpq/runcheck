@@ -1,0 +1,11 @@
+{
+  "apps" : [{
+    "name": "runcheck",
+    "script": "app.js",
+    "env": {
+      "env": "development"
+    },
+    "error_file": "../logs/out.log",
+    "out_file": "../logs/out.log"
+  }]
+}
