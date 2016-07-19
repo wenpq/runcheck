@@ -1,0 +1,6 @@
+{
+  "port": "3003",
+  "log_dir" : "../logs/",
+  "cookie_sec": "runcheck",
+  "cookie_life": 28800000
+}
