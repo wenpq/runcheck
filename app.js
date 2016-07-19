@@ -6,7 +6,7 @@ var bodyParser = require('body-parser');
 var config = require('./config/config.js');
 var app = express();
 
-//------------------ mongodb -------------------------
+//------------------ mongodb --------------------------------------
 var mongoose = require('mongoose');
 mongoose.connection.close();
 
@@ -49,13 +49,13 @@ mongoose.connection.on('error', function (err) {
 mongoose.connection.on('disconnected', function () {
   console.log('Mongoose default connection disconnected');
 });
-//----------------------------------------------------
+//-----------------------------------------------------------------
 
 
 
 
 
-//------------------ ad client -----------------------
+//------------------ ad client ------------------------------------
 var auth = require('./lib/auth');
 var adClient = require('./lib/ldap-client').client;
 adClient.on('connect', function () {
@@ -67,7 +67,7 @@ adClient.on('timeout', function (message) {
 adClient.on('error', function (error) {
   console.error(error);
 });
-//---------------------------------------------------
+//-----------------------------------------------------------------
 
 
 
@@ -89,13 +89,21 @@ app.use(session({
 
 
 
+//----------------------------other config-------------------------
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
 
 // uncomment after placing your favicon in /public
 // app.use(favicon(path.join(__dirname, 'public', 'favicon.ico')));
-app.use(logger('dev'));
+if (app.get('env') === 'development') {
+  app.use(logger('dev'));
+}
+if (app.get('env') === 'production') {
+  app.use(logger({
+    stream: access_logfile
+  }));
+}
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
   extended: false
@@ -105,11 +113,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(express.static(path.join(__dirname, 'bower_components')));
 app.use(auth.proxied);
 app.use(auth.sessionLocals);
+//-----------------------------------------------------------------
 
 
 
 
-//----------------------- router -----------------------
+//----------------------- router ----------------------------------
 require('./routes/index')(app);
 require('./routes/user')(app);
 require('./routes/device')(app);
@@ -118,8 +127,36 @@ require('./routes/slot-group')(app);
 require('./routes/checklist')(app);
 require('./routes/user')(app);
 require('./routes/admin')(app);
-//----------------------------------------------------
+//-----------------------------------------------------------------
 
-app.listen(3001, 'localhost');
+
+
+
+//--------------------------start and clean------------------------
+var http = require('http');
+app.set('port', process.env.APIPORT || config.app.port);
+var server = http.createServer(app).listen(app.get('port'), function () {
+  console.log('Express server listening on port ' + app.get('port'));
+});
+
+function cleanup() {
+  server._connections = 0;
+  mongoose.connection.close();
+  adClient.unbind(function () {
+    console.log('ldap client stops.');
+  });
+  server.close(function () {
+    console.log('web servers close.');
+    process.exit();
+  });
+
+  setTimeout(function () {
+    console.error('Could not close connections in time, forcing shut down');
+    process.exit(1);
+  }, 30 * 1000);
+}
+process.on('SIGINT', cleanup);
+process.on('SIGTERM', cleanup);
+//-----------------------------------------------------------------
 
 module.exports = app;
