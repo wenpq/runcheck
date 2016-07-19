@@ -1,7 +1,3 @@
-# Logs
-logs
-*.log
-
 # Runtime data
 pids
 *.pid
@@ -28,3 +24,16 @@ node_modules
 
 # Debug log from npm
 npm-debug.log
+
+# config files
+config/ad.json
+config/auth.json
+config/app.json
+config/mongo.json
+config/redis.json
+
+# special folders #
+logs/*
+!logs/readme
+user-photos/*
+!user-photos/readme
