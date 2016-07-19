@@ -6,7 +6,6 @@ var fs = require('fs');
 var path = require('path');
 
 var ad = require('./ad.json');
-var ldap = require('./ldap.json');
 var app = require('./app.json');
 var auth = require('./auth.json');
 var mongo = require('./mongo.json');
