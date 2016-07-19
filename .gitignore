@@ -27,7 +27,6 @@ npm-debug.log
 
 # config files
 config/ad.json
-config/ldap.json
 config/auth.json
 config/app.json
 config/mongo.json
