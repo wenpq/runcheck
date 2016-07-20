@@ -3,7 +3,12 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
 var user = new Schema({
-  _id: String,
+  adid: {
+    type: String,
+    unique: true,
+    lowercase: true,
+    trim: true
+  },
   name: String,
   email: String,
   office: String,
@@ -14,11 +19,7 @@ var user = new Schema({
   devices: [ObjectId],
   slots: [ObjectId],
   slotgroups: [ObjectId],
-  checklists: [ObjectId],
-  subscribe: {
-    type: Boolean,
-    default: false
-  }
+  checklists: [ObjectId]
 });
 
 var User = mongoose.model('User', user);

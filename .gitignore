@@ -37,11 +37,12 @@ bower_components/
 userphoto/
 
 # config files
-config/ad.json
-config/auth.json
-config/app.json
-config/mongo.json
-config/redis.json
+config/*
+!config/ad_change.json
+!config/auth_change.json
+!config/app_change.json
+!config/mongo_change.json
+!config/redis_change.json
 
 # special folders #
 logs/*

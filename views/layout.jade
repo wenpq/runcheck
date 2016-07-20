@@ -2,6 +2,12 @@ doctype html
 html
   head
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
+    meta(name='viewport', content='width=device-width, initial-scale=1.0')
+    link(rel='stylesheet', href='/bootstrap/dist/css/bootstrap.css')
+    link(rel='stylesheet', href='components-font-awesome/css/font-awesome.css')
+    link(rel='stylesheet', href='/stylesheets/style.css')
+    script(type='text/javascript', src='/jquery/dist/jquery.js')
+    script(type='text/javascript', src='/bootstrap/dist/js/bootstrap.js')
     block head
   body
     .navbar-nav.navbar-default.navbar-fixed-top
@@ -15,37 +21,38 @@ html
         .navbar-collapse.collapse
           ul.nav.navbar-nav
             li
-              a(href='#{prefix}/devices/') Devices
+              a(href='/devices/') Devices
             li
-              a(href='#{prefix}/slots/') Slots
+              a(href='/slots/') Slots
             li
-              a(href='#{prefix}/slot-groups/') Slot-groups
+              a(href='/slot-groups/') Slot-groups
             li
-              a(href='#{prefix}/checklists/') Checklists
+              a(href='/checklists/') Checklists
             if (locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
               li
-                a(href='#{prefix}/admin/', target='_blank') Admin
+                a(href='/admin/', target='_blank') Admin
           ul.nav.navbar-nav.navbar-right
             if (locals.session && locals.session.userid)
               li
                 .user
-                  img(src='#{prefix}/adusers/#{session.userid}/photo', title='#{session.username}')
+                  img(src='/users/#{session.userid}/photo', title='#{session.username}')
               li.dropdown
                 a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
                   b.caret
                 ul.dropdown-menu
                   li
-                    a(href='#{prefix}/profile', target='_blank') Profile
+                    a(href='/profile', target='_blank') Profile
                   li
-                    a(href='#{prefix}/logout') Log out
+                    a(href='/logout') Log out
             else
               li
                 i.fa.fa-user.fa-3x
               li
-                a(href='#{prefix}/login') Log in
+                a(href='/login') Log in
     block content
     .container-fluid
       h6.text-right
-        a(href='#{prefix}/release.txt', target='_blank') Release 0.0.1
+        a(href='/release.txt', target='_blank') Release 0.0.1
+
     block js
 
