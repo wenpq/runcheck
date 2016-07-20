@@ -9,9 +9,6 @@ var bodyParser = require('body-parser');
 var session = require('express-session');
 var RedisStore = require('connect-redis')(session);
 
-var routes = require('./routes/index');
-var users = require('./routes/users');
-
 var config = require('./config/config.js');
 
 
@@ -60,6 +57,10 @@ mongoose.connection.on('disconnected', function () {
 
 // mongoDB ends
 
+// mongoose models start
+require('./models/user');
+// mongoose models end
+
 
 // ldap client starts
 var adClient = require('./lib/ldap-client').client;
@@ -75,7 +76,9 @@ adClient.on('error', function (error) {
 // ldap client ends
 
 
-
+var index = require('./routes/index');
+var users = require('./routes/users');
+var auth = require('./lib/auth');
 var app = express();
 
 // view engine setup
@@ -116,8 +119,11 @@ app.use(session({
   }
 }));
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'bower_components')));
 
-app.use('/', routes);
+app.use(auth.sessionLocals);
+
+app.use('/', index);
 app.use('/users', users);
 
 // catch 404 and forward to error handler
