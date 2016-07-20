@@ -32,7 +32,9 @@
       10
     ],
     "max-statements": 0,
-    "no-console": 0,
+    "no-console": [
+      "warn"
+    ],
     "no-magic-numbers": [
       "warn",
       {
