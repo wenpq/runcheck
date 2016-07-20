@@ -1,0 +1,6 @@
+{
+  "port": "3003",
+  "log_dir" : "../logs/",
+  "session_sec": "sec",
+  "session_life": 28800000
+}

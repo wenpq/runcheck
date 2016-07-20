@@ -1,0 +1,14 @@
+{
+  "url": "ldap://intranet.nscl.msu.edu",
+  "adminDn": "cn=svc_cf-user,ou=Service Accounts,dc=intranet,dc=nscl,dc=msu,dc=edu",
+  "adminPassword": "G4m8edxQ",
+  "searchBase": "ou=NSCL Users,dc=intranet,dc=nscl,dc=msu,dc=edu",
+  "searchFilter": "(&(objectClass=user)(sAMAccountName=_id)(|(company=FRIB)(company=NSCL)))",
+  "groupSearchBase": "ou=IFS Distribution Groups,ou=Exchange,dc=intranet,dc=nscl,dc=msu,dc=edu",
+  "groupSearchFilter": "(&(objectClass=group)(sAMAccountName=_id))",
+  "nameFilter": "(&(objectClass=user)(displayName=_name)(|(company=FRIB)(company=NSCL)))",
+  "objAttributes": ["sAMAccountName", "displayName", "company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName", "memberOf"],
+  "memberAttributes": ["sAMAccountName","displayName","company", "mail", "telephoneNumber", "mobile", "physicalDeliveryOfficeName", "memberOf"],
+  "groupAttributes": ["sAMAccountName", "displayName", "mail"],
+  "rawAttributes": ["thumbnailPhoto"]
+}
