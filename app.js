@@ -2,6 +2,7 @@ var express = require('express');
 var path = require('path');
 var favicon = require('serve-favicon');
 var logger = require('morgan');
+var log = require('./lib/log');
 var rotator = require('file-stream-rotator');
 var bodyParser = require('body-parser');
 
@@ -46,15 +47,15 @@ if (config.mongo.auth) {
 mongoose.connect(mongoURL, mongoOptions);
 
 mongoose.connection.on('connected', function () {
-  console.log('Mongoose default connection opened.');
+  log.info('Mongoose default connection opened.');
 });
 
 mongoose.connection.on('error', function (err) {
-  console.log('Mongoose default connection error: ' + err);
+  log.error('Mongoose default connection error: ' + err);
 });
 
 mongoose.connection.on('disconnected', function () {
-  console.log('Mongoose default connection disconnected');
+  log.warn('Mongoose default connection disconnected');
 });
 
 // mongoDB ends
@@ -63,13 +64,13 @@ mongoose.connection.on('disconnected', function () {
 // ldap client starts
 var adClient = require('./lib/ldap-client').client;
 adClient.on('connect', function () {
-  console.log('ldap client connected');
+  log.info('ldap client connected');
 });
 adClient.on('timeout', function (message) {
-  console.error(message);
+  log.watn(message);
 });
 adClient.on('error', function (error) {
-  console.error(error);
+  log.error(error);
 });
 // ldap client ends
 
@@ -109,6 +110,9 @@ app.use(session({
   secret: config.app.session_sec || 'secret',
   cookie: {
     maxAge: config.app.session_life || 28800000
+  },
+  logErrors: function (err) {
+    log.error(err);
   }
 }));
 app.use(express.static(path.join(__dirname, 'public')));
@@ -128,7 +132,7 @@ app.use(function (req, res, next) {
 // development error handler
 // will print stacktrace
 if (app.get('env') === 'development') {
-  app.use(function (err, req, res, next) {
+  app.use(function (err, req, res) {
     res.status(err.status || 500);
     res.render('error', {
       message: err.message,
@@ -139,7 +143,7 @@ if (app.get('env') === 'development') {
 
 // production error handler
 // no stacktraces leaked to user
-app.use(function (err, req, res, next) {
+app.use(function (err, req, res) {
   res.status(err.status || 500);
   res.render('error', {
     message: err.message,
