@@ -5,12 +5,11 @@ body {
 .a-color {
   color: #0088cc;
 }
-.user img {
-  width: 50%;
-  height: auto;
-  margin: 0px auto;
-}
 
+.user img {
+  width: 34px;
+  height: 50px;
+}
 
 /* styles for navbar-default */
 .navbar-default{
