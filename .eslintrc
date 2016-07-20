@@ -5,6 +5,9 @@
     "mocha": true,
     "node": true
   },
+  "extends": [
+    "eslint:recommended"
+  ],
   "plugins": [
     "filenames"
   ],
@@ -29,10 +32,17 @@
       10
     ],
     "max-statements": 0,
-    "no-console": 0,
+    "no-console": [
+      "warn"
+    ],
     "no-magic-numbers": [
-      "warn", {
-        "ignore": [-1, 0, 1],
+      "warn",
+      {
+        "ignore": [
+          -1,
+          0,
+          1
+        ],
         "ignoreArrayIndexes": true
       }
     ],
