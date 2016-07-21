@@ -4,7 +4,7 @@ html
     meta(http-equiv='X-UA-Compatible', content='IE=Edge')
     meta(name='viewport', content='width=device-width, initial-scale=1.0')
     link(rel='stylesheet', href='/bootstrap/dist/css/bootstrap.css')
-    link(rel='stylesheet', href='components-font-awesome/css/font-awesome.css')
+    link(rel='stylesheet', href='/components-font-awesome/css/font-awesome.css')
     link(rel='stylesheet', href='/stylesheets/style.css')
     script(type='text/javascript', src='/jquery/dist/jquery.js')
     script(type='text/javascript', src='/bootstrap/dist/js/bootstrap.js')
@@ -41,7 +41,7 @@ html
                   b.caret
                 ul.dropdown-menu
                   li
-                    a(href='/profile', target='_blank') Profile
+                    a(href='/users/' + locals.session.userid, target='_blank') Profile
                   li
                     a(href='/logout') Log out
             else
