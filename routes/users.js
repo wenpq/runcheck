@@ -230,8 +230,7 @@ users.get('/:id', auth.ensureAuthenticated, function (req, res) {
     }
     if (user) {
       return res.render('user', {
-        user: user,
-        myRoles: req.session.roles
+        user: user
       });
     }
     return res.status(404).send(req.params.id + ' has never logged into the application.');
