@@ -35,7 +35,7 @@ html
             if (locals.session && locals.session.userid)
               li
                 .user
-                  img(src='/users/#{session.userid}/photo', title='#{session.username}')
+                  img.img-responsive(src='/users/#{session.userid}/photo', title='#{session.username}')
               li.dropdown
                 a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
                   b.caret
