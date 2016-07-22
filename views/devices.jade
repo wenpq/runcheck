@@ -2,16 +2,12 @@ extends layout
 
 block head
   title RunCheck devices
-  meta(name='viewport', content='width=device-width, initial-scale=1.0')
-  link(rel='stylesheet', href='/bootstrap/dist/css/bootstrap.css')
-  link(rel='stylesheet', href='/stylesheets/style.css')
 
 
 block content
-  h1= title
-  p Welcome to title
+  .container
+    :marked
+      # Device list
 
 
 block js
-  script(type='text/javascript', src='/jquery/dist/jquery.js')
-  script(type='text/javascript', src='/bootstrap/dist/js/bootstrap.js')
