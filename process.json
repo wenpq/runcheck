@@ -1,11 +1,13 @@
 {
   "apps" : [{
     "name": "runcheck",
-    "script": "app.js",
+    "script": "bin/www",
     "env": {
-      "env": "development"
+      "env": "production"
     },
-    "error_file": "../logs/out.log",
-    "out_file": "../logs/out.log"
+  "error_file"      : "logs/err.log",
+  "out_file"        : "logs/out.log",
+  "merge_logs"      : true,
+  "log_date_format" : "YYYY-MM-DD HH:mm:ss Z"
   }]
 }
