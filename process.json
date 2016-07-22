@@ -3,7 +3,7 @@
     "name": "runcheck",
     "script": "bin/www",
     "env": {
-      "env": "production"
+      "NODE_ENV": "production"
     },
   "error_file"      : "logs/err.log",
   "out_file"        : "logs/out.log",
