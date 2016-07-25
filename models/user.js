@@ -6,8 +6,8 @@ var ObjectId = Schema.Types.ObjectId;
  * adid: use id from AD converted to lower case
  * name: full name
  * lastLoginOn: latest login time
- * roles: DO - device owner, AM - area manager, SME - subject Matter Expert
- * SO - system owner, DD - division director
+ * roles: Leader: the leader of a group or a subject; Admin: the admin of the
+ * application
  * devices: owned devices
  * slots: owned slots
  * slotGroups: owned slot groups
@@ -27,7 +27,7 @@ var user = new Schema({
   mobile: String,
   roles: [{
     type: String,
-    enum: ['DO', 'AM', 'SME', 'SO', 'DD', 'Admin']
+    enum: ['Leader', 'Admin']
   }],
   lastLoginOn: Date,
   devices: [ObjectId],
