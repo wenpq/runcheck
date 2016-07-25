@@ -27,7 +27,8 @@ var user = new Schema({
   mobile: String,
   roles: [{
     type: String,
-    enum: ['Leader', 'Admin']
+    lowercase: true,
+    enum: ['leader', 'admin']
   }],
   lastLoginOn: Date,
   devices: [ObjectId],
