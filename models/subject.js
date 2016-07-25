@@ -17,7 +17,6 @@ var subject = new Schema({
   },
   fullName: {
     type: String,
-    unique: true,
     trim: true
   },
   leader: {
