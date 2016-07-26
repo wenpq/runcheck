@@ -56,6 +56,23 @@ function filterEvent() {
     table.DataTable().columns(index).search(this.value).draw();
   });
 }
+
+function progressBar(checkedValue,totalValue) {
+  var w = '100px';
+  var t = Math.round(checkedValue) + '/' + totalValue;
+  var finished =  checkedValue / totalValue * 100;
+  var bar;
+  if(finished == 100) {
+    bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-success" style="width:' + finished + '%;">' + t + '</div></div>');
+  }else {
+    if(finished < 50) {
+      bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-info" style="width:' + finished + '%;"></div><div class="progress-value">' + t + '</div></div>');
+    }else {
+      bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-info" style="width:' + finished + '%;">' + t + '</div></div>');
+    }
+  }
+  return bar[0].outerHTML;
+}
 //  device table function end
 
 
@@ -97,6 +114,15 @@ var departmentColumn = {
 
 var ownerColumn = personColumn('Owner', 'owner');
 
+var detailsColum = {
+  title: 'Details',
+  data: 'details',
+  render: function (data) {
+    return '<a href="' + '/details/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the device details"><i class="fa fa-gear fa-lg"></i></a>';
+  },
+  order: false
+};
+
 var checklistColumn = {
   title: 'Checklist',
   data: 'checklist',
@@ -104,6 +130,17 @@ var checklistColumn = {
     return '<a href="' + '/checklist/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the checklist"><i class="fa fa fa-list fa-lg"></i></a>';
   },
   order: false
+};
+
+var checkedProgressColumn = {
+  title: 'Checked progress',
+  order: true,
+  type: 'numeric',
+  autoWidth: false,
+  width: '105px',
+  data: function (source) {
+    return progressBar( source.checkedValue, source.totalValue);
+  }
 };
 // device columns end
 
@@ -114,12 +151,15 @@ var domNoTools = "<'row'<'col-md-4'l><'col-md-4'<'text-center'r>><'col-md-4'f>>t
 
 
 $(function () {
-  var deviceColumns = [selectColumn, serialNoColumn, nameColumn, typeColumn, departmentColumn, ownerColumn, checklistColumn];
+  var deviceColumns = [selectColumn, serialNoColumn, nameColumn, typeColumn, departmentColumn, ownerColumn, detailsColum, checklistColumn, checkedProgressColumn ];
   $('#device-table').DataTable({
     ajax: {
-      url: '/devices/json',
+      url: '/devices/json'
     },
     initComplete: function () {
+      /*Holder.run({
+        images: 'img.user'
+      });*/
       console.log('initComplete');
     },
     autoWidth: false,
@@ -134,16 +174,8 @@ $(function () {
     },
     deferRender: true,
     columns: deviceColumns,
-    /*  columns: [
-     { "data": "serialNo" },
-     { "data": "name" },
-     { "data": "type" },
-     { "data": "department" },
-     { "data": "owner" },
-     { "data": "checklist" }
-     ],*/
     order: [
-      [2, 'desc']
+      [2, 'asc']
     ],
     dom: domNoTools
   });
