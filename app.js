@@ -68,12 +68,26 @@ adClient.on('connect', function () {
   log.info('ldap client connected');
 });
 adClient.on('timeout', function (message) {
-  log.watn(message);
+  log.warn(message);
 });
 adClient.on('error', function (error) {
   log.error(error);
 });
 // ldap client ends
+
+// redis store starts
+var redisStore = new RedisStore(config.redis);
+redisStore.on('connect', function () {
+  log.info('redis connected');
+});
+
+redisStore.on('disconnect', function (err) {
+  log.warn('redis disconnected');
+  if (err) {
+    log.error(err);
+  }
+});
+// redis store ends
 
 
 var index = require('./routes/index');
@@ -107,7 +121,7 @@ app.use(bodyParser.urlencoded({
   extended: false
 }));
 app.use(session({
-  store: new RedisStore(config.redis),
+  store: redisStore,
   resave: false,
   saveUninitialized: false,
   secret: config.app.session_sec || 'secret',
