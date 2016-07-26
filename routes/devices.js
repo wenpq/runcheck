@@ -9,29 +9,29 @@ devices.get('/', auth.ensureAuthenticated, function (req, res) {
 
 devices.get('/json', auth.ensureAuthenticated, function (req, res) {
   var devDocs = {
-    "data": [
+    'data': [
       {
-        seridNo: '001',
+        serialNo: '001',
         name: 'name1',
         type: 'type1',
         department: 'department1',
-        owner: 'ObjectId',
+        owner: 'wen',
         checklist: 'ObjectId'
       },
       {
-        seridNo: '002',
+        serialNo: '002',
         name: 'name2',
         type: 'type2',
         department: 'department2',
-        owner: 'ObjectId2',
+        owner: 'wen',
         checklist: 'ObjectId2'
       },
       {
-        seridNo: '002',
+        serialNo: '002',
         name: 'name2',
         type: 'type2',
         department: 'department2',
-        owner: 'ObjectId2',
+        owner: 'wen',
         checklist: 'ObjectId2'
       }
     ]

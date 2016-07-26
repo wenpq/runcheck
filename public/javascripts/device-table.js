@@ -20,7 +20,7 @@ function personColumn(title, key) {
       if (type === 'sort' || type === 'filter') {
         return data;
       } else if (data) {
-        return '<img class="user" data-src="holder.js/27x40?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/adusers/' + data + '/photo" title="' + data + '">';
+        return '<img class="user-img" data-src="holder.js/27x40?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/users/' + data + '/photo" title="' + data + '">';
       } else {
         return '';
       }
@@ -67,10 +67,10 @@ var selectColumn = {
   order: ['desc', 'asc']
 };
 
-var seridNoColumn = {
-  title: 'Serid No',
+var serialNoColumn = {
+  title: 'serial No',
   defaultContent: 'unknown',
-  data: 'seridNo',
+  data: 'serialNo',
   searching: true
 };
 
@@ -95,13 +95,7 @@ var departmentColumn = {
   searching: true
 };
 
-//var ownerColumn = personColumn('Owner', 'owner');
-var ownerColumn = {
-  title: 'Owner',
-  defaultContent: 'unknown',
-  data: 'owner',
-  searching: true
-};
+var ownerColumn = personColumn('Owner', 'owner');
 
 var checklistColumn = {
   title: 'Checklist',
@@ -120,7 +114,7 @@ var domNoTools = "<'row'<'col-md-4'l><'col-md-4'<'text-center'r>><'col-md-4'f>>t
 
 
 $(function () {
-  var deviceColumns = [selectColumn, seridNoColumn, nameColumn, typeColumn, departmentColumn, ownerColumn, checklistColumn];
+  var deviceColumns = [selectColumn, serialNoColumn, nameColumn, typeColumn, departmentColumn, ownerColumn, checklistColumn];
   $('#device-table').DataTable({
     ajax: {
       url: '/devices/json',
@@ -141,7 +135,7 @@ $(function () {
     deferRender: true,
     columns: deviceColumns,
     /*  columns: [
-     { "data": "seridNo" },
+     { "data": "serialNo" },
      { "data": "name" },
      { "data": "type" },
      { "data": "department" },
@@ -150,8 +144,8 @@ $(function () {
      ],*/
     order: [
       [2, 'desc']
-    ]
-    //dom: domNoTools
+    ],
+    dom: domNoTools
   });
   addFilterFoot('#device-table', deviceColumns);
   filterEvent();
