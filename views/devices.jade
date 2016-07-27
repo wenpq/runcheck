@@ -1,13 +1,19 @@
 extends layout
 
 block head
+  link(rel='stylesheet', href='/datatables/media/css/dataTables.bootstrap.min.css')
   title RunCheck devices
 
 
 block content
   .container
-    :marked
-      # Device list
+    br
+    #devices.tab-pane.active
+      table#device-table.table.table-bordered.table-hover
 
 
 block js
+  script(type='text/javascript', src='/datatables/media/js/jquery.dataTables.js')
+  script(type='text/javascript', src='/datatables/media/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='/javascripts/table.js')
+  script(type='text/javascript', src='/javascripts/device-table.js')
