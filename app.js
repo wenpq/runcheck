@@ -78,7 +78,8 @@ adClient.on('error', function (error) {
 
 var index = require('./routes/index');
 var users = require('./routes/users');
-var devices =  require('./routes/devices');
+var devices = require('./routes/devices');
+var slots = require('./routes/slots');
 var auth = require('./lib/auth');
 var app = express();
 
@@ -127,6 +128,7 @@ app.use(auth.sessionLocals);
 app.use('/', index);
 app.use('/users', users);
 app.use('/devices', devices);
+app.use('/slots', slots);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
