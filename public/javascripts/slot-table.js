@@ -2,13 +2,6 @@
 /*global Table: false*/
 
 // slot columns starts
-var selectColumn = {
-  title: '',
-  defaultContent: '<label class="checkbox"><input type="checkbox" class="select-row"></label>',
-  oderDataType: 'dom-checkbox',
-  order: ['desc', 'asc']
-};
-
 var detailsColum = {
   title: 'Details',
   data: 'details',
@@ -18,24 +11,24 @@ var detailsColum = {
   order: false
 };
 
-var FRIBNameColumn = {
-  title: 'FRIB name',
+var nameColumn = {
+  title: 'Name',
   defaultContent: 'unknown',
-  data: 'FRIBName',
+  data: 'name',
   searching: true
 };
 
 var ownerColumn = Table.personColumn('Owner', 'owner');
 
 var areaColumn = {
-  title: 'Area',
+  title: 'Associated area',
   defaultContent: 'unknown',
   data: 'area',
   searching: true
 };
 
 var levelColumn = {
-  title: 'Level',
+  title: 'Level of care',
   defaultContent: 'unknown',
   data: 'level',
   searching: true
@@ -70,6 +63,13 @@ var approvelStatusColumn = {
   data: 'approvalStatus',
   searching: true
 };
+
+var machineModeColumn = {
+  title: 'Associated machine mode(s)',
+  defaultContent: 'unknown',
+  data: 'machineMode',
+  searching: true
+}
 
 var checkedProgressColumn = {
   title: 'Readiness Checked progress',
@@ -107,7 +107,7 @@ var ARRProgressColumn = {
 
 
 $(function () {
-  var slotColumns = [selectColumn, detailsColum, FRIBNameColumn , ownerColumn, areaColumn, levelColumn, deviceTypeColumn, locationColumn, deviceColumn, approvelStatusColumn, checkedProgressColumn, DRRProgressColumn, ARRProgressColumn];
+  var slotColumns = [Table.selectColumn, detailsColum, nameColumn, ownerColumn, areaColumn, levelColumn, deviceTypeColumn, locationColumn, deviceColumn, approvelStatusColumn, machineModeColumn, checkedProgressColumn, DRRProgressColumn, ARRProgressColumn];
   $('#slot-table').DataTable({
     ajax: {
       url: '/slots/json',

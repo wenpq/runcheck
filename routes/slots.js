@@ -6,20 +6,19 @@ slots.get('/', auth.ensureAuthenticated, function (req, res) {
   res.render('slots');
 });
 
-
 slots.get('/json', auth.ensureAuthenticated, function (req, res) {
   var slotDocs = [
     {
-      details: 'ObjectId2',
-      FRIBName: 'FRIBName1',
+      details: 'details link',
+      name: 'FRIBName1',
       owner: 'wen',
       area: 'area1',
-      level: 'enum-low',
+      level: 'enumeration',
       deviceType: 'deviceType1',
       location: 'location1',
-      device: 'device-bojectid',
+      device: 'objectid',
       approvalStatus: 'true',
-
+      machineMode: 'definition unclear',
       ReadinessCheckedValue: 20,
       ReadinessTotalValue: 20,
       DRRCheckedValue: 4,
