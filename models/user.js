@@ -1,17 +1,13 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var ObjectId = Schema.Types.ObjectId;
+
 
 /*******
  * adid: use id from AD converted to lower case
  * name: full name
  * lastLoginOn: latest login time
- * roles: DO - device owner, AM - area manager, SME - subject Matter Expert
- * SO - system owner, DD - division director
- * devices: owned devices
- * slots: owned slots
- * slotGroups: owned slot groups
- * checklists: checklists required to sigh off
+ * roles: Leader: the leader of a group or a subject; Admin: the admin of the
+ * application
  *******/
 var user = new Schema({
   adid: {
@@ -27,13 +23,10 @@ var user = new Schema({
   mobile: String,
   roles: [{
     type: String,
-    enum: ['DO', 'AM', 'SME', 'SO', 'DD']
+    lowercase: true,
+    enum: ['leader', 'admin']
   }],
-  lastLoginOn: Date,
-  devices: [ObjectId],
-  slots: [ObjectId],
-  slotGroups: [ObjectId],
-  checklists: [ObjectId]
+  lastLoginOn: Date
 });
 
 var User = mongoose.model('User', user);

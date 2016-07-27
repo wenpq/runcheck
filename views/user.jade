@@ -1,0 +1,49 @@
+extends layout
+
+block head
+  title FRIB Cable - user profile
+
+block content
+  .container(style="margin-top: 10px")
+    #message
+    #profile.well
+      img(src='/users/#{user.adid}/photo')
+      dl
+        dt Name
+        dd #{user.name}
+        dt Email
+        dd #{user.email}
+        dt Office
+        dd #{user.office}
+        dt Office phone
+        dd #{user.phone}
+        dt Mobile phone
+        dd #{user.mobile}
+        dt Last login on
+        dd #{user.lastLoginOn}
+        dt Roles
+        dd#roles
+          if (session.roles.indexOf('admin') == -1)
+            ul
+              each role in user.roles
+                li= role
+          else
+            .checkbox
+              label
+                if (user.roles.indexOf('admin') > -1)
+                  input(type='checkbox', name='admin', checked)
+                else
+                  input(type='checkbox', name='admin')
+                != ' '
+                | admin
+            .checkbox
+              label
+                if (user.roles.indexOf('leader') > -1)
+                  input(type='checkbox', name='leader', checked)
+                else
+                  input(type='checkbox', name='leader')
+                != ' '
+                | leader
+block js
+  if (session.roles.indexOf('admin') !== -1)
+    script(type='text/javascript', src='/javascripts/user-admin.js')
