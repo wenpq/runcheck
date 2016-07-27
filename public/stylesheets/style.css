@@ -14,3 +14,13 @@ body {
 .navbar-default{
   border-bottom: 1px solid rgb(194, 194, 194);
 }
+
+/* styles for table row selected*/
+.table-hover tbody tr:hover.row-selected > td {
+  background-color: #c09853;
+  opacity: 0.75;
+}
+
+.table-hover tbody tr.row-selected > td {
+  background-color: #c09853;
+}
