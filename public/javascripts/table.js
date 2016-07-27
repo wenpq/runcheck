@@ -1,4 +1,3 @@
-
 var Table = (function (parent) {
   // public columns starts
   var selectColumn = {
@@ -59,7 +58,7 @@ var Table = (function (parent) {
         if (type === 'sort' || type === 'filter') {
           return data;
         } else if (data) {
-          return '<img class="user-img" data-src="holder.js/27x40?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/users/' + data + '/photo" title="' + data + '">';
+          return '<div class="user"><img data-src="holder.js/34x50?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/users/' + data + '/photo" title="' + data + '"></div>';
         } else {
           return '';
         }
@@ -68,25 +67,23 @@ var Table = (function (parent) {
     };
   }
 
-  function progressBar(checkedValue,totalValue) {
+  // TODO: we will need to set the progress to finished when AM OK override
+  // other checkboxes.
+  function progressBar(checkedValue, totalValue) {
     var w = '100px';
     var t = Math.round(checkedValue) + '/' + totalValue;
-    var finished =  checkedValue / totalValue * 100;
+    var finished = checkedValue / totalValue * 100;
     var bar;
-    if(finished == 100) {
-      bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-success" style="width:' + finished + '%;">' + t + '</div></div>');
-    }else {
-      if(finished < 50) {
-        bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-info" style="width:' + finished + '%;"></div><div class="progress-value">' + t + '</div></div>');
-      }else {
-        bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-info" style="width:' + finished + '%;">' + t + '</div></div>');
-      }
+    if (finished == 100) {
+      bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-success" style="width:' + finished + '%;"></div><span>' + t + '</span></div>');
+    } else {
+      bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-info" style="width:' + finished + '%;"></div><span>' + t + '</span></div>');
     }
     return bar[0].outerHTML;
   }
-// filter function end
 
   parent.selectColumn = selectColumn;
+
   parent.addFilterFoot = addFilterFoot;
   parent.selectEvent = selectEvent;
   parent.filterEvent = filterEvent;

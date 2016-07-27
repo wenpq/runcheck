@@ -9,6 +9,7 @@ var User = mongoose.model('User');
 var auth = require('../lib/auth');
 var authConfig = require('../config/config').auth;
 var log = require('../lib/log');
+var reqUtils = require('../lib/req-utils');
 
 var fs = require('fs');
 var pending_photo = {};
@@ -237,25 +238,15 @@ users.get('/:id', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
-users.put('/:id', auth.ensureAuthenticated, function (req, res) {
-  if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
-    return res.status(403).send('You are not authorized to access this resource. ');
-  }
-  if (!req.is('json')) {
-    return res.status(415).json({
-      error: 'json request expected.'
-    });
-  }
-  User.findOneAndUpdate({
-    adid: req.params.id
-  }, req.body).exec(function (err) {
+users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.is('json'), reqUtils.filter('body', ['roles']), reqUtils.sanitize(), reqUtils.exist('id', User, 'adid'), function (req, res) {
+  var user = req[req.params.id];
+  user.roles = req.body.roles;
+  user.save(function(err, newUser) {
     if (err) {
       log.error(err);
-      return res.status(500).json({
-        error: err.message
-      });
+      return res.status(500).send(err.message);
     }
-    return res.status(204).end();
+    return res.json(newUser);
   });
 });
 

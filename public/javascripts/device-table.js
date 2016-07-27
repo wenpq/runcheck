@@ -1,4 +1,3 @@
-
 /*global Table: false*/
 
 // device columns starts
@@ -48,7 +47,7 @@ var checkedProgressColumn = {
   autoWidth: false,
   width: '105px',
   data: function (source) {
-    return Table.progressBar( source.checkedValue, source.totalValue);
+    return Table.progressBar(source.checkedValue, source.totalValue);
   }
 };
 // device columns end
@@ -56,16 +55,16 @@ var checkedProgressColumn = {
 
 $(function () {
   var deviceColumns = [Table.selectColumn, detailsColum, serialNoColumn, nameColumn, typeColumn, departmentColumn, ownerColumn, checkedProgressColumn ];
+
   $('#device-table').DataTable({
     ajax: {
       url: '/devices/json',
       dataSrc: ''
     },
     initComplete: function () {
-      /*Holder.run({
-        images: 'img.user'
-      });*/
-      console.log('initComplete ...');
+      Holder.run({
+        images: '.user img'
+      });
     },
     autoWidth: false,
     processing: true,
