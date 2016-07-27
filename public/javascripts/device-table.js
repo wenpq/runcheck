@@ -10,7 +10,7 @@ var selectColumn = {
 };
 
 var serialNoColumn = {
-  title: 'serial No',
+  title: 'Serial No',
   defaultContent: 'unknown',
   data: 'serialNo',
   searching: true
@@ -43,16 +43,7 @@ var detailsColum = {
   title: 'Details',
   data: 'details',
   render: function (data) {
-    return '<a href="' + '/details/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the device details"><i class="fa fa-gear fa-lg"></i></a>';
-  },
-  order: false
-};
-
-var checklistColumn = {
-  title: 'Checklist',
-  data: 'checklist',
-  render: function (data) {
-    return '<a href="' + '/checklist/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the checklist"><i class="fa fa fa-list fa-lg"></i></a>';
+    return '<a href="' + '/details/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the device details"><i class="fa fa-list-alt fa-2x"></i></a>';
   },
   order: false
 };
@@ -71,7 +62,7 @@ var checkedProgressColumn = {
 
 
 $(function () {
-  var deviceColumns = [selectColumn, serialNoColumn, nameColumn, typeColumn, departmentColumn, ownerColumn, detailsColum, checklistColumn, checkedProgressColumn ];
+  var deviceColumns = [selectColumn, detailsColum, serialNoColumn, nameColumn, typeColumn, departmentColumn, ownerColumn, checkedProgressColumn ];
   $('#device-table').DataTable({
     ajax: {
       url: '/devices/json',
