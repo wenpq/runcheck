@@ -12,8 +12,13 @@ $(function () {
         roles: roles
       })
     }).done(function () {
+      // display a message
+      // update history
     }).fail(function () {
+      // display a message
+      // update history
     }).always(function () {
+      $('#roles input:checkbox').prop('disabled', false);
     });
   })
 });
