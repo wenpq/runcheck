@@ -68,10 +68,9 @@ $(function () {
       dataSrc: ''
     },
     initComplete: function () {
-      /*Holder.run({
-        images: 'img.user'
-      });*/
-      console.log('initComplete ...');
+      Holder.run({
+        images: '.user img'
+      });
     },
     autoWidth: false,
     processing: true,
