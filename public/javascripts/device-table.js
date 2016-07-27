@@ -74,7 +74,8 @@ $(function () {
   var deviceColumns = [selectColumn, serialNoColumn, nameColumn, typeColumn, departmentColumn, ownerColumn, detailsColum, checklistColumn, checkedProgressColumn ];
   $('#device-table').DataTable({
     ajax: {
-      url: '/devices/json'
+      url: '/devices/json',
+      dataSrc: ''
     },
     initComplete: function () {
       /*Holder.run({
