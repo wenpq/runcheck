@@ -49,7 +49,7 @@ var Table = (function (parent) {
         if (type === 'sort' || type === 'filter') {
           return data;
         } else if (data) {
-          return '<img class="user-img" data-src="holder.js/27x40?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/users/' + data + '/photo" title="' + data + '">';
+          return '<div class="user"><img data-src="holder.js/34x50?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/users/' + data + '/photo" title="' + data + '"></div>';
         } else {
           return '';
         }
@@ -66,9 +66,9 @@ var Table = (function (parent) {
     var finished = checkedValue / totalValue * 100;
     var bar;
     if (finished == 100) {
-      bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-success" style="width:' + finished + '%;">' + t + '</div></div>');
+      bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-success" style="width:' + finished + '%;"></div><span>' + t + '</span></div>');
     } else {
-      bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-info" style="width:' + finished + '%;"></div><div class="progress-value">' + t + '</div></div>');
+      bar = $('<div class="progress" style="width: ' + w + ';"><div class="progress-bar progress-bar-info" style="width:' + finished + '%;"></div><span>' + t + '</span></div>');
     }
     return bar[0].outerHTML;
   }
