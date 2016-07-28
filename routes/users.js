@@ -238,9 +238,13 @@ users.get('/:id', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
-users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.is('json'), reqUtils.filter('body', ['roles']), reqUtils.sanitize(), reqUtils.exist('id', User, 'adid'), function (req, res) {
+users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.is('json'), reqUtils.filter('body', ['update']), reqUtils.sanitize(), reqUtils.exist('id', User, 'adid'), function (req, res) {
   var user = req[req.params.id];
-  user.roles = req.body.roles;
+  if (req.body.update.val === true || req.body.update.val === 'true') {
+    user.roles.addToSet(req.body.update.role);
+  } else if (req.body.update.val === false || req.body.update.val === 'false') {
+    user.roles.pull(req.body.update.role);
+  }
   user.save(function(err, newUser) {
     if (err) {
       log.error(err);
