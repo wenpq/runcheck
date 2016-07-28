@@ -12,6 +12,14 @@ var RedisStore = require('connect-redis')(session);
 var config = require('./config/config.js');
 
 
+logger.token('remote-user', function (req) {
+  if (req.session && req.session.userid) {
+    return req.session.userid;
+  } else {
+    return 'unknown';
+  }
+});
+
 
 // mongoDB starts
 var mongoose = require('mongoose');
