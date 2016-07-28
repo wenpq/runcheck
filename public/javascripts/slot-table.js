@@ -69,7 +69,7 @@ var machineModeColumn = {
   defaultContent: 'unknown',
   data: 'machineMode',
   searching: true
-}
+};
 
 var checkedProgressColumn = {
   title: 'Readiness Checked progress',

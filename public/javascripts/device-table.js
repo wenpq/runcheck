@@ -1,4 +1,4 @@
-/*global Table: false*/
+/*global Table: false, Holder: false*/
 
 // device columns starts
 var detailsColum = {
