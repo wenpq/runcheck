@@ -21,15 +21,29 @@ block content
         dd #{user.mobile}
         dt Last login on
         dd #{user.lastLoginOn}
-        //- dt Roles
-        //- dd#roles
-          label.checkbox.inline
-            input(type='checkbox', value='manager')
-            | manager
-          label.checkbox.inline
-            input(type='checkbox', value='admin')
-            | admin
-      //- if (myRoles.indexOf('admin') !== -1)
-        button#modify.btn.btn-primary(type='submit') Modify
-        = ' '
+        dt Roles
+        dd#roles
+          if (session.roles.indexOf('admin') == -1)
+            ul
+              each role in user.roles
+                li= role
+          else
+            .checkbox
+              label
+                if (user.roles.indexOf('admin') > -1)
+                  input(type='checkbox', name='admin', checked)
+                else
+                  input(type='checkbox', name='admin')
+                != ' '
+                | admin
+            .checkbox
+              label
+                if (user.roles.indexOf('leader') > -1)
+                  input(type='checkbox', name='leader', checked)
+                else
+                  input(type='checkbox', name='leader')
+                != ' '
+                | leader
 block js
+  if (session.roles.indexOf('admin') !== -1)
+    script(type='text/javascript', src='/javascripts/user-admin.js')

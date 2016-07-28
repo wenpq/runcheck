@@ -5,12 +5,30 @@ body {
 .a-color {
   color: #0088cc;
 }
-
 .user img {
   height: 50px;
 }
 
 /* styles for navbar-default */
-.navbar-default{
+.navbar-default {
   border-bottom: 1px solid rgb(194, 194, 194);
+}
+
+/* styles for table row selected*/
+.table-hover tbody tr:hover.row-selected > td {
+  background-color: #c09853;
+  opacity: 0.75;
+}
+.table-hover tbody tr.row-selected > td {
+  background-color: #c09853;
+}
+.progress {
+  position: relative;
+  text-align: center;
+}
+.progress span {
+  position: absolute;
+  display: block;
+  width: 100%;
+  color: black;
 }

@@ -6,7 +6,6 @@
     "start": "node ./bin/www"
   },
   "dependencies": {
-    "cookie-parser": "1.4.3",
     "body-parser": "1.15.1",
     "bunyan": "1.8.1",
     "cas.js": "0.1.0",
