@@ -24,7 +24,7 @@ var slot = new Schema({
   DRR: ObjectId,
   ARR: ObjectId,
   machineMode: String,// not in slot excel file
-  InnerDiameter: Number,// Minimum Beam Pipe Inner Diameter (mm)
+  InnerDiameter: String,// Minimum Beam Pipe Inner Diameter (mm)
   flangeLength: Number,// Element Flange to Flange Length (m)
   placeHolder: Number,
   effectiveLength: Number,// Element Effective Length (m)
