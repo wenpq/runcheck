@@ -73,7 +73,7 @@ function fetch_photo_from_ad(id) {
 }
 
 function updateUserProfile(user, res) {
-  var searchFilter = ad.searchFilter.replace('_id', user._id);
+  var searchFilter = ad.searchFilter.replace('_id', user.adid);
   var opts = {
     filter: searchFilter,
     attributes: ad.objAttributes,
@@ -85,12 +85,12 @@ function updateUserProfile(user, res) {
     }
     if (result.length === 0) {
       return res.status(500).json({
-        error: user._id + ' is not found!'
+        error: user.adid + ' is not found!'
       });
     }
     if (result.length > 1) {
       return res.status(500).json({
-        error: user._id + ' is not unique!'
+        error: user.adid + ' is not unique!'
       });
     }
     user.update({
@@ -152,7 +152,7 @@ function addUser(req, res) {
         log.error(err);
         return res.status(500).send(err.message);
       }
-      var url = authConfig.service + '/users/' + newUser._id;
+      var url = authConfig.service + '/users/' + newUser.adid;
       res.set('Location', url);
       return res.status(201).send('The new user is at <a target="_blank" href="' + url + '">' + url + '</a>');
     });
@@ -171,8 +171,7 @@ users.get('/names/:name', auth.ensureAuthenticated, function (req, res) {
     }
     if (user) {
       return res.render('user', {
-        user: user,
-        myRoles: req.session.roles
+        user: user
       });
     }
     return res.status(404).send(req.params.name + ' not found');
@@ -180,16 +179,7 @@ users.get('/names/:name', auth.ensureAuthenticated, function (req, res) {
 });
 
 
-users.post('/', auth.ensureAuthenticated, function (req, res) {
-
-  if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
-    return res.status(403).send('only admin allowed');
-  }
-
-  if (!req.body.name) {
-    return res.status(400).send('need to know name');
-  }
-
+users.post('/', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.filter('body', ['name']), function (req, res) {
   // check if already in db
   User.findOne({
     name: req.body.name
@@ -198,7 +188,7 @@ users.post('/', auth.ensureAuthenticated, function (req, res) {
       return res.status(500).send(err.message);
     }
     if (user) {
-      var url = authConfig.service + '/users/' + user._id;
+      var url = authConfig.service + '/users/' + user.adid;
       return res.status(200).send('The user is at <a target="_blank" href="' + url + '">' + url + '</a>');
     }
     addUser(req, res);
@@ -206,10 +196,7 @@ users.post('/', auth.ensureAuthenticated, function (req, res) {
 
 });
 
-users.get('/json', auth.ensureAuthenticated, function (req, res) {
-  if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
-    return res.status(403).send('You are not authorized to access this resource. ');
-  }
+users.get('/json', auth.ensureAuthenticated, auth.verifyRole('admin'), function (req, res) {
   User.find().exec(function (err, users) {
     if (err) {
       log.error(err);
@@ -245,7 +232,7 @@ users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.i
   } else if (req.body.update.val === false || req.body.update.val === 'false') {
     user.roles.pull(req.body.update.role);
   }
-  user.save(function(err, newUser) {
+  user.save(function (err, newUser) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
