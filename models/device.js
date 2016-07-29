@@ -4,7 +4,12 @@ var ObjectId = Schema.Types.ObjectId;
 var Mixed = Schema.Types.Mixed;
 
 var device = new Schema({
-  serialNo: String,
+  serialNo: {
+    type: String,
+    index: {
+      unique: true
+    }
+  },
   name: String,
   type: String,
   department: String,
