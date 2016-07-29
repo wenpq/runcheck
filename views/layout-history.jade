@@ -1,0 +1,21 @@
+doctype html
+html
+  head
+    include ./head.jade
+    link(rel='stylesheet', href='/datatables/media/css/dataTables.bootstrap.min.css')
+    block head
+  body
+    include ./header.jade
+    .container-fluid
+      .row
+        .col-lg-9.col-md-9.col-sm-12.col-xs-12
+          block content
+        .col-lg-3.col-md-3.col-sm-12.col-xs-12
+          #side
+            block side
+    include ./footer.jade
+    script(type='text/javascript', src='/datatables/media/js/jquery.dataTables.js')
+    script(type='text/javascript', src='/datatables/media/js/dataTables.bootstrap.js')
+    block js
+
+
