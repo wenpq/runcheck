@@ -1,58 +1,11 @@
 doctype html
 html
   head
-    meta(http-equiv='X-UA-Compatible', content='IE=Edge')
-    meta(name='viewport', content='width=device-width, initial-scale=1.0')
-    link(rel='stylesheet', href='/bootstrap/dist/css/bootstrap.css')
-    link(rel='stylesheet', href='/components-font-awesome/css/font-awesome.css')
-    link(rel='stylesheet', href='/stylesheets/style.css')
-    script(type='text/javascript', src='/jquery/dist/jquery.js')
-    script(type='text/javascript', src='/bootstrap/dist/js/bootstrap.js')
+    include ./head.jade
     block head
   body
-    .navbar-nav.navbar-default.navbar-fixed-top
-      .container-fluid
-        .navbar-header.navbar-right
-          button.navbar-toggle(type='button', data-toggle='collapse', data-target='.navbar-collapse')
-            span.sr-only Toggle navigation
-            span.icon-bar
-            span.icon-bar
-            span.icon-bar
-        .navbar-collapse.collapse
-          ul.nav.navbar-nav
-            li
-              a(href='/devices/') Devices
-            li
-              a(href='/slots/') Slots
-            li
-              a(href='/slotgroups/') Slot groups
-            li
-              a(href='/checklists/') Checklists
-            if (locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
-              li
-                a(href='/admin/', target='_blank') Admin
-          ul.nav.navbar-nav.navbar-right
-            if (locals.session && locals.session.userid)
-              li
-                .user
-                  img.img-responsive(src='/users/#{session.userid}/photo', title='#{session.username}')
-              li.dropdown
-                a.dropdown-toggle(href='#', data-toggle='dropdown') #{session.username}
-                  b.caret
-                ul.dropdown-menu
-                  li
-                    a(href='/users/' + locals.session.userid, target='_blank') Profile
-                  li
-                    a(href='/logout') Log out
-            else
-              li
-                i.fa.fa-user.fa-3x
-              li
-                a(href='/login') Log in
+    include ./header.jade
     block content
-    .container-fluid
-      h6.text-right
-        a(href='/release.txt', target='_blank') Release 0.0.1
-
+    include ./footer.jade
     block js
 

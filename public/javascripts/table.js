@@ -58,7 +58,7 @@ var Table = (function (parent) {
         if (type === 'sort' || type === 'filter') {
           return data;
         } else if (data) {
-          return '<div class="user"><img data-src="holder.js/34x50?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/users/' + data + '/photo" title="' + data + '"></div>';
+          return '<img class="user-img-smaller" data-src="holder.js/22x30?size=20&text=' + data.substr(0, 1).toUpperCase() + '" src="/users/' + data + '/photo" title="' + data + '">';
         } else {
           return '';
         }

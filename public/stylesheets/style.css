@@ -9,6 +9,18 @@ body {
   height: 50px;
 }
 
+.user-img-small {
+  height: 40px;
+}
+
+.user-img-smaller {
+  height: 30px;
+}
+
+.user-img-smallest {
+  height: 20px;
+}
+
 /* styles for navbar-default */
 .navbar-default {
   border-bottom: 1px solid rgb(194, 194, 194);
