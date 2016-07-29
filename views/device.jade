@@ -1,0 +1,24 @@
+extends layout
+
+block head
+  link(rel='stylesheet', href='/datatables/media/css/dataTables.bootstrap.min.css')
+  title RunCheck device
+
+
+block content
+  .container(style="margin-top: 10px")
+    .well
+      dl
+        dt Name
+        dd #{device.name}
+        dt Serial Number
+        dd #{device.serialNo}
+        dt Type
+        dd #{device.type}
+        dt Department
+        dd #{device.department}
+        dt Owner
+        dd #{device.owner}
+  .container(style="margin-top: 10px")
+    .well
+      p CHECKLIST HERE
