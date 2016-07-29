@@ -19,12 +19,12 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
       device: 'objectid',
       approvalStatus: 'true',
       machineMode: 'definition unclear',
-      ReadinessCheckedValue: 20,
-      ReadinessTotalValue: 20,
+      ReadinessCheckedValue: 10,
+      ReadinessTotalValue: 10,
       DRRCheckedValue: 4,
-      DRRTotalValue: 17,
-      ARRCheckedValue: 15,
-      ARRTotalValue:16
+      DRRTotalValue: 10,
+      ARRCheckedValue: 0,
+      ARRTotalValue:10
     }
   ];
   res.status(200).json(slotDocs);
