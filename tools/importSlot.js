@@ -2,15 +2,30 @@ var XLSX = require('xlsx');
 var sutil = require('./utils');
 var Slot = require('../models/slot').Slot;
 var slotSchema = require('../models/slot').slotSchema;
+var config = require('../config/config.js');
+var log = require('../lib/log');
+var async = require('async');
 
+// mongoDB starts
 var mongoose = require('mongoose');
-mongoose.connect('mongodb://localhost/runcheck');
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error:'));
-db.once('open', function() {
-  console.log('mongodb://localhost/runcheck connected.');
-});
 
+var mongoURL = 'mongodb://' + (config.mongo.address || 'localhost') + ':' + (config.mongo.port || '27017') + '/' + (config.mongo.db || 'runcheck');
+mongoose.connect(mongoURL);
+mongoose.connection.on('connected', function () {
+  log.info('Mongoose default connection opened.');
+});
+mongoose.connection.on('error', function (err) {
+  log.error('Mongoose default connection error: ' + err);
+});
+mongoose.connection.on('disconnected', function () {
+  log.warn('Mongoose default connection disconnected');
+});
+// mongoDB ends
+
+
+/*                 Config starts              */
+var force = false; // Save data is forbidden, if DB already had slots data
+var fileName = 'slot-data.xlsx';
 var slotFieldList =   [ ['system', 'System'],
   ['subsystem', 'Sub-\r\nsystem'],
   ['deviceNaming', 'Device'],
@@ -32,9 +47,11 @@ var slotFieldList =   [ ['system', 'System'],
   ['end2endLength', 'Accumulated end-to-end Length (m)'],
   ['comment', 'Comment']
 ];
+/*                 Config end              */
 
-/*                  read slot data               */
-var workbook = XLSX.readFile('slot-data.xlsx');
+
+// Read slot data from file
+var workbook = XLSX.readFile(fileName);
 var branch1 = workbook.Sheets['branch1'];
 var branch2 = workbook.Sheets['branch2'];
 // merge branch1 and branch2
@@ -48,31 +65,35 @@ slots = slots.filter(function(x) {
   return x.system && x.subsystem && x.beamlinePosition ? true: false;
 });
 
-
-/*for(var i=0; i<slots.length; i++) {
-  var sobj = new Slot(slots[i]);
-  sobj.DRR = mongoose.Types.ObjectId(sobj.DRR);
-  sobj.ARR = mongoose.Types.ObjectId(sobj.ARR);
-  sobj.save(function (err) {
-    if (err) {
-      console.error(err);
-      db.close();
-      process.exit(1);
-    }
-  });
-}*/
-
-slots.forEach(function(s) {
+function saveSlot(s,callback) {
   var sobj = new Slot(s);
+  // convert string to ObjectId
   sobj.DRR = mongoose.Types.ObjectId(sobj.DRR);
   sobj.ARR = mongoose.Types.ObjectId(sobj.ARR);
-  sobj.save(function (err) {
+  sobj.save(function (err,doc) {
     if (err) {
-      console.error(err);
-      db.close();
+      log.error(err);
+      mongoose.connection.close();
       process.exit(1);
     }
+    console.log(doc.name + ' saved');
+    callback();
   });
+}
+
+// check if there is slot collection
+mongoose.connection.on('open', function () {
+  mongoose.connection.db.listCollections({name: 'slots'})
+    .next(function(err, collinfo) {
+      if (collinfo && force === false) {
+        console.error('Forbiden, DB already has slots data. Please set force = true, if you want to continue to import data.');
+        mongoose.connection.close();
+      }else {
+        // Save Data
+        async.each(slots, saveSlot, function() {
+          console.log('Success, all data saved.');
+          mongoose.connection.close();
+        });
+      }
+    });
 });
-
-

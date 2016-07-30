@@ -1,9 +1,9 @@
 # Import lattice data in Excel to MongoDB
 Use xlsx library to read data.
 
-Data files are uploaded on trelleo. there are some format changes between the Original file and the current file.
-
+Data files are uploaded on trello.com. there are some format changes between the Original file and the current file. Each sheet saves one branch,
 The following is the data format in current file:
+
 | systm         |subsytem         | devie        |
 | ------------- | ---------------- | ------------- |
 | foo           | 123              | abc           |
