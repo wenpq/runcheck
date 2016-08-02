@@ -21,4 +21,75 @@ block content
         dd #{device.owner}
   .container(style="margin-top: 10px")
     .well
-      p CHECKLIST HERE
+      if device.checklist.length
+        form#updateChecklist(method="POST")
+          input(type="hidden" name="action" value="updateChecklist")
+          table.table
+            thead
+              tr
+                for item in device.checklist
+                  th.text-center #{item.subject} OK
+            tbody
+              tr
+                for item in device.checklist
+                  td.text-center
+                    if item.required
+                      select(name="#{item.subject}" value="#{item.value}")
+                        for checklistValue in checklistValues
+                          if item.value === checklistValue
+                            option(selected="selected")= checklistValue
+                          else
+                            option= checklistValue
+                    else
+                      span N/A
+          .row
+            .col-xs-6.text-left
+              button(type="button" onclick="$('#configChecklist,#updateChecklist').toggleClass('hidden');")  Edit
+            .col-xs-6.text-right
+              button(type="submit") Save
+
+        form#configChecklist.hidden(method="POST")
+          input(type="hidden" name="action" value="configChecklist")
+          table.table
+            thead
+              tr
+                th
+                for item in device.checklist
+                  th.text-center #{item.subject} OK
+            tbody
+              tr
+                th Required
+                for item in device.checklist
+                  td.text-center
+                    if item.required
+                      input(type="checkbox" name="#{item.subject}" value="true" checked="checked")
+                    else
+                      input(type="checkbox" name="#{item.subject}" value="true")
+          .row
+            .col-xs-6.text-left
+              button(type="button" onclick="$('#configChecklist,#updateChecklist').toggleClass('hidden');") Cancel
+            .col-xs-6.text-right
+              button(type="submit") Save
+              
+      else
+        button#addChecklist(onclick="$('#configChecklist,#addChecklist').toggleClass('hidden');") Request Checklist
+
+        form#configChecklist.hidden(method="POST")
+          input(type="hidden" name="action" value="configChecklist")
+          table.table
+            thead
+              tr
+                th
+                for checklistSubject in checklistSubjects
+                  th.text-center #{checklistSubject} OK
+            tbody
+              tr
+                th Required
+                for checklistSubject in checklistSubjects
+                  td.text-center
+                    input(type="checkbox" name="#{checklistSubject}" value="true")
+          .row
+            .col-xs-6.text-left
+              button(type="button" onclick="$('#configChecklist,#addChecklist').toggleClass('hidden');") Cancel
+            .col-xs-6.text-right
+              button(type="submit") Save
