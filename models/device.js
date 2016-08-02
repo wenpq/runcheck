@@ -17,7 +17,10 @@ var checklistItem = new Schema({
     type: String,
     enum: checklistSubjects
   },
-  required: Boolean,
+  required: {
+    type: Boolean,
+    default: true
+  },
   value: {
     type: String,
     enum: checklistValues,

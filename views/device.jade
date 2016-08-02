@@ -87,7 +87,7 @@ block content
                 th Required
                 for checklistSubject in checklistSubjects
                   td.text-center
-                    input(type="checkbox" name="#{checklistSubject}" value="true")
+                    input(type="checkbox" name="#{checklistSubject}" value="true" checked="checked")
           .row
             .col-xs-6.text-left
               button(type="button" onclick="$('#configChecklist,#addChecklist').toggleClass('hidden');") Cancel
