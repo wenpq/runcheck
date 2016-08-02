@@ -52,3 +52,4 @@ user-photos/*
 
 # data in excel
 tools/*.xlsx
+tools/*.json

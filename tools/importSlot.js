@@ -1,99 +1,93 @@
-var XLSX = require('xlsx');
 var sutil = require('./utils');
-var Slot = require('../models/slot').Slot;
-var slotSchema = require('../models/slot').slotSchema;
 var config = require('../config/config.js');
-var log = require('../lib/log');
-var async = require('async');
-
-// mongoDB starts
 var mongoose = require('mongoose');
+var program = require('commander');
+var path = require('path');
+var fs = require('fs');
 
-var mongoURL = 'mongodb://' + (config.mongo.address || 'localhost') + ':' + (config.mongo.port || '27017') + '/' + (config.mongo.db || 'runcheck');
-mongoose.connect(mongoURL);
-mongoose.connection.on('connected', function () {
-  log.info('Mongoose default connection opened.');
-});
-mongoose.connection.on('error', function (err) {
-  log.error('Mongoose default connection error: ' + err);
-});
-mongoose.connection.on('disconnected', function () {
-  log.warn('Mongoose default connection disconnected');
-});
-// mongoDB ends
-
-
-/*                 Config starts              */
-var force = false; // Save data is forbidden, if DB already had slots data
-var fileName = 'slot-data.xlsx';
-var slotFieldList =   [ ['system', 'System'],
-  ['subsystem', 'Sub-\r\nsystem'],
-  ['deviceNaming', 'Device'],
-  ['beamlinePosition', 'Beam line position (dm)'],
-  ['name', 'Name'],
-  ['deviceType', 'Device Type'],
-  ['elementName', 'Element Name'],
-  ['level', 'Level of Care'],
-  ['DRR', 'Associated DHR'],
-  ['ARR', 'Associated ARR'],
-  ['InnerDiameter', 'Minimum Beam Pipe Inner Diameter (mm)'],
-  ['flangeLength', 'Element Flange to Flange Length (m)'],
-  ['placeHolder', 'PLACE HOLDER '],
-  ['effectiveLength', 'Element Effective Length (m)'],
-  ['coordinateZ', 'Global Coordinate Z (m)'],
-  ['coordinateY', 'Global Coordinate Y (m)'],
-  ['coordinateX', 'Global Coordinate X (m)'],
-  ['center2centerLength', 'Accumulated center-to-center Length (m)'],
-  ['end2endLength', 'Accumulated end-to-end Length (m)'],
-  ['comment', 'Comment']
-];
-/*                 Config end              */
-
-
-// Read slot data from file
-var workbook = XLSX.readFile(fileName);
-var branch1 = workbook.Sheets['branch1'];
-var branch2 = workbook.Sheets['branch2'];
-// merge branch1 and branch2
-var slots = XLSX.utils.sheet_to_json(branch1);
-var slots2 = XLSX.utils.sheet_to_json(branch2);
-slots.push(slots2);
-
-sutil.fieldFixed(slots, slotSchema, slotFieldList);
-// delete object that (system || subsystem || beamlinePosition) is empty
-slots = slots.filter(function(x) {
-  return x.system && x.subsystem && x.beamlinePosition ? true: false;
-});
-
-function saveSlot(s,callback) {
-  var sobj = new Slot(s);
-  // convert string to ObjectId
-  sobj.DRR = mongoose.Types.ObjectId(sobj.DRR);
-  sobj.ARR = mongoose.Types.ObjectId(sobj.ARR);
-  sobj.save(function (err,doc) {
-    if (err) {
-      log.error(err);
-      mongoose.connection.close();
-      process.exit(1);
-    }
-    console.log(doc.name + ' saved');
-    callback();
+// get arguments starts
+var inputPath;
+program.version('0.0.1')
+  .option('-d, --dryrun', 'validate data by schema in MongoDB.')
+  .option('-m, --mongo', 'save data in defoult MongoDB.')
+  .option('-o, --outfile [outfle]', 'save data in specified file.')
+  .option('-f, --force', 'force to save n MongoDB when the DB already has data.')
+  .arguments('<spec>')
+  .action(function (sp) {
+    inputPath = sp;
   });
-}
+program.parse(process.argv);
+// get arguments end
 
-// check if there is slot collection
-mongoose.connection.on('open', function () {
-  mongoose.connection.db.listCollections({name: 'slots'})
-    .next(function(err, collinfo) {
-      if (collinfo && force === false) {
-        console.error('Forbiden, DB already has slots data. Please set force = true, if you want to continue to import data.');
-        mongoose.connection.close();
-      }else {
-        // Save Data
-        async.each(slots, saveSlot, function() {
-          console.log('Success, all data saved.');
-          mongoose.connection.close();
-        });
-      }
+// check path starts
+if (inputPath === undefined) {
+  console.error('Need the input xlsx spec file path!');
+  process.exit(1);
+}
+var suffix = inputPath.split('.').pop();
+if (suffix !== 'xlsx') {
+  console.error('File format must be xlsx.');
+  process.exit(1);
+}
+var realPath = path.resolve(process.cwd(), inputPath);
+if (!fs.existsSync(realPath)) {
+  console.log(realPath);
+  console.error(realPath + ' does not exist.');
+  console.error('Please input a valid spec file path.');
+  process.exit(1);
+}
+// check path end
+
+
+console.log('----------Import Data from xlsx file to MongoDB-------------');
+var slots = sutil.getSlotJson(realPath);
+console.log('Get ' + slots.length + ' entries from ' + realPath);
+sutil.slotValidate(slots,function(err, data) {
+  if (err) {
+    console.error(err);
+  }
+  console.log('All data validation completed, Can be saved in MongoDB now.');
+  if (program.dryrun) {
+    console.log('Dry run end');
+  }
+  if (program.outfile) {
+    sutil.saveFile(data,program.outfile);
+  }
+  if (program.mongo) {
+    // connect mongo starts
+    var mongoURL = 'mongodb://' + (config.mongo.address || 'localhost') + ':' + (config.mongo.port || '27017') + '/' + (config.mongo.db || 'runcheck');
+    mongoose.connect(mongoURL);
+    mongoose.connection.on('connected', function () {
+      console.log('Mongoose default connection opened.');
     });
+    mongoose.connection.on('error', function (err) {
+      console.error('Mongoose default connection error: ' + err);
+    });
+    mongoose.connection.on('disconnected', function () {
+      console.log('Mongoose default connection disconnected');
+      process.exit(0);
+    });
+    // save to mongo DB
+    saveInMongo(data, function(count){
+      console.log(count + ' entries are saved(' + ' total are ' + data.length + ' )');
+      mongoose.connection.close();
+    });
+  }
 });
+
+
+function saveInMongo(data, callback) {
+  mongoose.connection.on('connected', function () {
+    mongoose.connection.db.listCollections({name: 'slots'})
+      .next(function (err, collinfo) {
+        // if MongoDB already had slots data, give up saving
+        if (collinfo && (typeof program.force) === 'undefined') {
+          console.log('Can not save, because MongoDB already had slots data. You can force to save by adding [-f | --force] option.');
+          callback();
+        } else {
+          // Save Data
+          sutil.saveModel(data, callback);
+        }
+      });
+  })
+}

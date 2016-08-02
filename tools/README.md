@@ -9,7 +9,20 @@ The following is the branch data format of one sheet in modified file:
 | foo           | 123              | abc           |
 | bar           | 345              | def           |
 
-The following are the main steps for importing slot data:
+The following are the main steps for slot data filter:
   - delete column named 'Distance from Artemis source (m)' in slots data.
   - if type of field is number, delete the unit in field.
   - if column 'systm' or 'subsytem' or 'devie' or 'Beam line position (dm)' are empty, delete the row.
+
+```
+Usage: node importSlot [options] <spec>
+
+  Options:
+
+    -h, --help              output usage information
+    -V, --version           output the version number
+    -d, --dryrun            validate data by schema in MongoDB.
+    -m, --mongo             save data in defoult MongoDB.
+    -o, --outfile [outfle]  save data in specified file.
+    -f, --force             force to save n MongoDB when the DB already has data.
+```
