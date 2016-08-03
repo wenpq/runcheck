@@ -5,7 +5,7 @@ var ObjectId = Schema.Types.ObjectId;
 var slot = new Schema({
   system: String,
   subsystem: String,
-  deviceNaming: String,// mapping to device column in slot excel file
+  deviceNaming: String,// mapping to 'Device' column in slot excel file
   beamlinePosition: Number,// Beam line position (dm)
   name: {
     type: String,
@@ -15,20 +15,13 @@ var slot = new Schema({
   },
   deviceType: String,
   elementName: String,
-  area: String, // not in slot excel file
   level: {
     type: String,
     default: 'Low',
     enum: ['Low', 'Medium', 'High']
   },
-  approvalStatus: {// not in slot excel file
-    type: Boolean,
-    default: false
-  },
-  device: ObjectId,
   DRR: ObjectId,
   ARR: ObjectId,
-  machineMode: String,// not in slot excel file
   InnerDiameter: String,// Minimum Beam Pipe Inner Diameter (mm)
   flangeLength: Number,// Element Flange to Flange Length (m)
   placeHolder: Number,
@@ -39,7 +32,17 @@ var slot = new Schema({
   center2centerLength: Number,// Accumulated center-to-center Length (m)
   end2endLength: Number,// Accumulated end-to-end Length (m)
   comment: String,
-  artemisDistance: Number// Distance from Artemis source (m)
+  artemisDistance: Number,// Distance from Artemis source (m) ???
+
+  // the following atrributes not in slot excel file
+  area: String,
+  device: ObjectId,
+  approvalStatus: {
+    type: Boolean,
+    default: false
+  },
+  machineMode: String,
+  inGroup: ObjectId
 });
 
 var Slot = mongoose.model('Slot', slot);
