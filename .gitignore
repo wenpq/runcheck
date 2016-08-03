@@ -50,3 +50,6 @@ logs/*
 user-photos/*
 !user-photos/readme
 
+# data in excel
+tools/*.xlsx
+tools/*.json
