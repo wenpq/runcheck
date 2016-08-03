@@ -64,6 +64,7 @@ function handleErr(err, cb) {
 }
 
 function addHistory(schema, options) {
+  options = options || {};
   if (options.watchAll === true) {
     options.fieldsToWatch = schema.paths.getOwnPropertyNames();
   }
