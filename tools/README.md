@@ -1,4 +1,5 @@
-# Import lattice data in Excel to MongoDB
+# This directory contains the tools for importing data into the application
+## Import lattice data from an xlsx file
 Use xlsx library to read data.
 
 Data files are uploaded on trello.com runcheck sprint2 board. There are some format changes between the Original file and the modified file. Each sheet saves one branch,
@@ -15,7 +16,7 @@ The following are the main steps for slot data filter:
   - if column 'systm' or 'subsytem' or 'devie' or 'Beam line position (dm)' are empty, delete the row.
 
 ```
-Usage: node importSlot [options] <spec>
+Usage: node import-slots [options] <spec>
 
   Options:
 
