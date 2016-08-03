@@ -6,7 +6,12 @@ block head
 
 block content
   .container
-    :marked
-      # Slot group list
+    br
+    #slot-groups.tab-pane.active
+      table#slot-groups-table.table.table-responsive.table-condensed.table-bordered.table-hover
 
 block js
+  script(type='text/javascript', src='/datatables/media/js/jquery.dataTables.js')
+  script(type='text/javascript', src='/datatables/media/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='/javascripts/table.js')
+  script(type='text/javascript', src='/javascripts/slot-group-table.js')

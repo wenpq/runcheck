@@ -7,7 +7,12 @@ var slot = new Schema({
   subsystem: String,
   deviceNaming: String,// mapping to device column in slot excel file
   beamlinePosition: Number,// Beam line position (dm)
-  name: String,
+  name: {
+    type: String,
+    index: {
+      unique: true
+    }
+  },
   deviceType: String,
   elementName: String,
   area: String, // not in slot excel file
