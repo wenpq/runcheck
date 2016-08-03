@@ -38,6 +38,7 @@ userphoto/
 
 # config files
 config/*
+!config/README.md
 !config/ad_change.json
 !config/auth_change.json
 !config/app_change.json
@@ -46,7 +47,10 @@ config/*
 
 # special folders #
 logs/*
-!logs/readme
+!logs/README.md
 user-photos/*
-!user-photos/readme
+!user-photos/README.md
 
+# data in excel
+tools/*.xlsx
+tools/*.json
