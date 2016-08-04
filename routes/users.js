@@ -208,20 +208,9 @@ users.get('/json', auth.ensureAuthenticated, auth.verifyRole('admin'), function 
   });
 });
 
-users.get('/:id', auth.ensureAuthenticated, function (req, res) {
-  User.findOne({
-    adid: req.params.id
-  }).exec(function (err, user) {
-    if (err) {
-      log.error(err);
-      return res.status(500).send(err.message);
-    }
-    if (user) {
-      return res.render('user', {
-        user: user
-      });
-    }
-    return res.status(404).send(req.params.id + ' has never logged into the application.');
+users.get('/:id', auth.ensureAuthenticated, reqUtils.exist('id', User, 'adid'), function (req, res) {
+  return res.render('user', {
+    user: req[req.params.id]
   });
 });
 
@@ -232,7 +221,7 @@ users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.i
   } else if (req.body.update.val === false || req.body.update.val === 'false') {
     user.roles.pull(req.body.update.role);
   }
-  user.save(function (err, newUser) {
+  user.saveWithHistory(req.session.userid, function (err, newUser) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
@@ -242,37 +231,12 @@ users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.i
 });
 
 // get from the db not ad
-users.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
-  User.findOne({
-    adid: req.params.id
-  }).exec(function (err, user) {
-    if (err) {
-      log.error(err);
-      return res.status(500).json({
-        error: err.mesage
-      });
-    }
-    return res.json(user);
-  });
+users.get('/:id/json', auth.ensureAuthenticated, reqUtils.exist('id', User, 'adid'), function (req, res) {
+  return res.json(req[req.params.id]);
 });
 
-users.get('/:id/refresh', auth.ensureAuthenticated, function (req, res) {
-  if (req.session.roles === undefined || req.session.roles.indexOf('admin') === -1) {
-    return res.status(403).send('You are not authorized to access this resource. ');
-  }
-  User.findOne({
-    adid: req.params.id
-  }).exec(function (err, user) {
-    if (err) {
-      log.error(err);
-      return res.status(500).send(err.message);
-    }
-    if (user) {
-      updateUserProfile(user, res);
-    } else {
-      return res.status(404).send(req.params.id + ' is not in the application.');
-    }
-  });
+users.get('/:id/refresh', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.exist('id', User, 'adid'), function (req, res) {
+  updateUserProfile(req[req.params.id], res);
 });
 
 users.get('/:id/photo', auth.ensureAuthenticated, function (req, res) {
