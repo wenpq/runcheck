@@ -3,6 +3,8 @@ var Schema = mongoose.Schema;
 var Mixed = Schema.Types.Mixed;
 var ObjectId = Schema.Types.ObjectId;
 
+var debug = require('debug')('runcheck:history');
+
 var log = require('../lib/log');
 
 var _ = require('underscore');
@@ -26,7 +28,7 @@ var change = new Schema({
 /**********
  * a: at, the date of the history
  * b: by, the author of the history
- * k: kind, the object's kind
+ * t: type, the object's type
  * i: id, the object's id
  * c: the array of changes
  **********/
@@ -37,7 +39,7 @@ var history = new Schema({
     default: Date.now()
   },
   b: {
-    type: Date,
+    type: String,
     required: true
   },
   t: {
@@ -77,7 +79,10 @@ function addHistory(schema, options) {
     .valueOf();
 
   schema.add({
-    __updates: [ObjectId]
+    __updates: [{
+      type: ObjectId,
+      ref: History.modelName
+    }]
   });
 
   schema.methods.saveWithHistory = function (userid, cb) {
@@ -98,11 +103,13 @@ function addHistory(schema, options) {
           a: Date.now(),
           b: userid,
           c: c,
-          t: this.schemaName,
-          i: this._id
+          t: doc.constructor.modelName,
+          i: doc._id
         });
+        debug(h);
         h.save(function (err, historyDoc) {
           if (err) {
+            debug(err);
             return handleErr(err, cb);
           }
           doc.__updates.push(historyDoc._id);
