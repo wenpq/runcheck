@@ -33,12 +33,16 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
 slots.post('/AddGroupValidate',auth.ensureAuthenticated, function (req, res) {
   var passData = req.body.slots;
   var rejectData = req.body.slots;
-  console.log(req.body.slots);
   res.status(200).json({
     passData: passData,
     rejectData: rejectData
   });
 });
 
+
+slots.post('/AddGroup',auth.ensureAuthenticated, function (req, res) {
+  var passData = req.body.slots;
+  res.status(200).end();
+});
 
 module.exports = slots;
