@@ -1,5 +1,7 @@
 # the list of tests
 
-## models/history.js
-
-### schema change
+## `model-history-test.js` for `models/history.js` 
+### `addHistory()`
+plugin history to a **schema**
+### `saveWithHistory()`
+use the instance methods in a document

@@ -13,6 +13,9 @@
   ],
   "root": true,
   "rules": {
+    "callback-return": [
+      "warn"
+    ],
     "camelcase": 0,
     "consistent-this": 0,
     "filenames/match-exported": 2,
