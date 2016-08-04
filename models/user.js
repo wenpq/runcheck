@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var addHistory = require('./history').addHistory;
 
 
 /*******
@@ -29,7 +30,12 @@ var user = new Schema({
   lastLoginOn: Date
 });
 
+user.plugin(addHistory, {
+  fieldsToWatch: ['roles']
+});
+
 var User = mongoose.model('User', user);
 module.exports = {
-  User: User
+  User: User,
+  userSchema: user
 };
