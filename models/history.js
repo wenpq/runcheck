@@ -57,15 +57,25 @@ var history = new Schema({
 
 var History = mongoose.model('History', history);
 
+/**
+ * handle the error
+ * @param  {Error}   err
+ * @param  {Function} cb
+ */
 function handleErr(err, cb) {
   if (err) {
     log.error(err);
     if (cb && _.isFunction(cb)) {
-      cb(err);
+      return cb(err);
     }
   }
 }
 
+/**
+ * add History plugin
+ * @param {Schema} schema
+ * @param {Object} options
+ */
 function addHistory(schema, options) {
   options = options || {};
   if (options.watchAll === true) {
@@ -86,6 +96,11 @@ function addHistory(schema, options) {
     }]
   });
 
+  /**
+   * model instance method to save with history
+   * @param  {String}   userid the user making this update
+   * @param  {Function} cb     the callback when save is done
+   */
   schema.methods.saveWithHistory = function (userid, cb) {
     assert.equal(typeof userid, 'string', 'need a user id');
     assert.equal(typeof cb, 'function', 'need a callback function');
