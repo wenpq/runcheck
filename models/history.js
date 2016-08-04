@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var Mixed = Schema.Types.Mixed;
 var ObjectId = Schema.Types.ObjectId;
+var assert = require('assert');
 
 var debug = require('debug')('runcheck:history');
 
@@ -86,6 +87,8 @@ function addHistory(schema, options) {
   });
 
   schema.methods.saveWithHistory = function (userid, cb) {
+    assert.equal(typeof userid, 'string', 'need a user id');
+    assert.equal(typeof cb, 'function', 'need a callback function');
     var doc = this;
     var c = [];
     var h;
@@ -121,10 +124,8 @@ function addHistory(schema, options) {
           })
         });
       }
-
     }
   };
-
 }
 
 
