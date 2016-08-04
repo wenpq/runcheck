@@ -35,6 +35,7 @@ var slot = new Schema({
   artemisDistance: Number,// Distance from Artemis source (m) ???
 
   // the following atrributes not in slot excel file
+  owner: ObjectId,
   area: String,
   device: ObjectId,
   approvalStatus: {
