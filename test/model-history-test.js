@@ -1,3 +1,8 @@
+/************
+ * run the following script to start a mongo instance on port 27018 at /tmp/db
+ * mongod --port 27018 --dbpath /tmp/db
+ ***********/
+
 require('should');
 var debug = require('debug')('runcheck:test');
 var mongoose = require('mongoose');
@@ -69,7 +74,7 @@ describe('model/history', function () {
     });
   });
 
-  describe('#saveWithHistory', function () {
+  describe('#saveWithHistory()', function () {
     it('history contains updates already saved', function (done) {
       UserTest.findOne({
         adid: 'test'
