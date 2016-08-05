@@ -50,49 +50,62 @@ slots.post('/addGroupValidate',auth.ensureAuthenticated, function (req, res) {
   var passDataId = [];
   var rejectDataName = [];
   var count = 0;
-  Slot.find({
-    '_id': {$in: req.body.slotIds}
-  }, function (err, docs) {
+  // find slot groups
+  SlotGroup.find(function(err, groupOption) {
     if (err) {
       console.error(err);
       return res.status(500).send(err.message);
     }
-    docs.forEach(function (d) {
-      if (d.inGroup) {
-        rejectDataName.push(d.name);
-      } else {
-        passDataId.push(d._id);
+    // validate slot
+    Slot.find({
+      '_id': {$in: req.body.slotIds}
+    }, function (err, docs) {
+      if (err) {
+        console.error(err);
+        return res.status(500).send(err.message);
       }
-      count = count + 1;
-      if (count === docs.length) {
-        res.status(200).json({
-          passDataId: passDataId,
-          rejectDataName: rejectDataName
-        });
-      }
+      docs.forEach(function (d) {
+        if (d.inGroup) {
+          rejectDataName.push(d.name);
+        } else {
+          passDataId.push(d._id);
+        }
+        count = count + 1;
+        if (count === docs.length) {
+          res.status(200).json({
+            passDataId: passDataId,
+            rejectDataName: rejectDataName,
+            groupOption: groupOption
+          });
+        }
+      });
     });
   });
 });
 
 
 slots.post('/addGroup',auth.ensureAuthenticated, function (req, res) {
-  // find slotGroup id by name
-  SlotGroup.find({'name': req.body.slotGroupName}, function(err, slotGroup){
+  // change slots of slotGroup
+  SlotGroup.findOne({'name': req.body.slotGroupName}, function(err, slotGroup){
     if(err) {
       console.error(err);
       return res.status(500).send(err.message);
     }
-    // save id
-    Slot.update({ '_id': {$in: req.body.slotIds}
-    }, {
-      inGroup: slotGroup[0]._id
-    }, function(err) {
+    slotGroup.slots = slotGroup.slots.concat(req.body.slotIds);// concat array
+    slotGroup.save(function(err) {
       if(err) {
         console.error(err);
         return res.status(500).send(err.message);
       }
-      res.status(200).end();
-    })
+      // change inGroup of slot
+      Slot.update({ '_id': {$in: req.body.slotIds}}, {inGroup: slotGroup._id}, {multi: true}, function(err,docs) {
+        if(err) {
+          console.error(err);
+          return res.status(500).send(err.message);
+        }
+        res.status(200).end();
+      })
+    });
   });
 });
 
