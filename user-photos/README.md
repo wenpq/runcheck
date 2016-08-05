@@ -1,1 +1,1 @@
-This directory is created to keep user photoes.
+This directory is created to keep user photos.
