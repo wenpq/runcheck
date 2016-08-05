@@ -46,7 +46,7 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
 
 });
 
-slots.post('/AddGroupValidate',auth.ensureAuthenticated, function (req, res) {
+slots.post('/addGroupValidate',auth.ensureAuthenticated, function (req, res) {
   var passDataId = [];
   var rejectDataName = [];
   var count = 0;
@@ -75,7 +75,7 @@ slots.post('/AddGroupValidate',auth.ensureAuthenticated, function (req, res) {
 });
 
 
-slots.post('/AddGroup',auth.ensureAuthenticated, function (req, res) {
+slots.post('/addGroup',auth.ensureAuthenticated, function (req, res) {
   // find slotGroup id by name
   SlotGroup.find({'name': req.body.slotGroupName}, function(err, slotGroup){
     if(err) {

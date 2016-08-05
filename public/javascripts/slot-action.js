@@ -10,7 +10,7 @@ $('#addGroup').click(function (e) {
 
   $.ajax({
     url: '/slotGroups/json',
-    contentType: 'application/json',
+    contentType: 'application/json'
   }).done(function (data) {
     $('#modalLabel').html('Add slots to slot group');
     var option = '<option>...</option>';
@@ -36,7 +36,7 @@ $('#addGroup').click(function (e) {
       slotIds.push(href.split('/')[2]);
     });
     $.ajax({
-      url: './AddGroupValidate',
+      url: './addGroupValidate',
       type: 'Post',
       contentType: 'application/json',
       data: JSON.stringify({
@@ -44,22 +44,33 @@ $('#addGroup').click(function (e) {
       })
     }).done(function (data) {
       validateSlot = data;
-      if(data.rejectDataName.length > 0) {
-        $('.modal-body .panel').addClass('panel-warning');
-        var heading = '<div class="panel-heading">Warning: Group conflict! the following slots are already in other group.</div>';
+      var panelClass;
+      var panel;
+      var footer;
+      if(data.rejectDataName.length === slotIds.length) {
+        panelClass = 'panel-danger';
+        panel = '<div class="panel-heading">Error: Group conflict! All slots have been in other groups.</div>';
+        footer = '<button data-dismiss="modal" aria-hidden="true" class="btn" id="modal-cancel">Cancel</button>';
+      }else if(data.rejectDataName.length > 0) {
+        panelClass = 'panel-warning';
+        var heading = '<div class="panel-heading">Warning: Group conflict! the following slots have been in other groups.</div>';
         var warning = '';
         data.rejectDataName.forEach(function(x){
           warning = warning + '<div class="panel-body">' + x+ '</div>';
         });
-        $('.modal-body .panel').html(heading + warning);
-        $('#modal .modal-footer').html('<button id="modal-add" class="btn btn-primary" data-dismiss="modal">Add without the above slots</button>' +
-          '<button data-dismiss="modal" aria-hidden="true" class="btn" id="modal-cancel">Cancel</button>');
-      } else {
-        $('.modal-body .panel').addClass('panel-success');
-        $('.modal-body .panel').html('<div class="panel-heading">Success: All slots can be added.</div>');
-        $('#modal .modal-footer').html('<button id="modal-add" class="btn btn-primary" data-dismiss="modal">Add</button>' +
-          '<button data-dismiss="modal" aria-hidden="true" class="btn" id="modal-cancel">Cancel</button>');
+        panel = heading + warning;
+        footer = '<button id="modal-add" class="btn btn-primary" data-dismiss="modal">Add anyway</button>' +
+          '<button data-dismiss="modal" aria-hidden="true" class="btn" id="modal-cancel">Cancel</button>';
+      }else {
+        panelClass = 'panel-success';
+        panel = '<div class="panel-heading">Success: All slots can be added.</div>';
+        footer = '<button id="modal-add" class="btn btn-primary" data-dismiss="modal">Add</button>' +
+          '<button data-dismiss="modal" aria-hidden="true" class="btn" id="modal-cancel">Cancel</button>';
       }
+      $('.modal-body .panel').addClass(panelClass);
+      $('.modal-body .panel').html(panel);
+      $('#modal .modal-footer').html(footer);
+
     }).fail(function (jqXHR) {
       reset();
       $('#modal').modal('hide');
@@ -76,7 +87,7 @@ $('#modal').on('click','#modal-cancel',function (e) {
 $('#modal').on('click','#modal-add',function (e) {
   e.preventDefault();
   $.ajax({
-    url: './AddGroup',
+    url: './addGroup',
     type: 'Post',
     contentType: 'application/json',
     data: JSON.stringify({
