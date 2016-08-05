@@ -54,6 +54,13 @@
       2,
       "single",
       "avoid-escape"
+    ],
+    "space-before-function-paren": [
+      "warn",
+      {
+        "anonymous": "always",
+        "named": "never"
+      }
     ]
   }
 }
