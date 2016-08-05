@@ -2,6 +2,8 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var addHistory = require('./history').addHistory;
 
+var checklistSubjects = require('./device').checklistSubjects;
+
 
 /*******
  * adid: use id from AD converted to lower case
@@ -27,6 +29,10 @@ var user = new Schema({
     lowercase: true,
     enum: ['leader', 'admin']
   }],
+  expert: {
+    type: String,
+    enum: checklistSubjects
+  },
   lastLoginOn: Date
 });
 
