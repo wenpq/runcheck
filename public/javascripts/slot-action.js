@@ -89,7 +89,7 @@ $('#modal').on('click','#modal-add',function (e) {
       slotGroupName: slotGroupName
     })
   }).done(function () {
-    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: All slots have been added in' + slotGroupName + '.</div>');
+    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: ' + passDataId.length  + ' slots have been added in ' + slotGroupName + '.</div>');
     reset();
   }).fail(function (jqXHR) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Cannot Add to Group: ' + jqXHR.responseText +  '</div>');
