@@ -64,21 +64,40 @@ slots.post('/addGroupValidate',auth.ensureAuthenticated, function (req, res) {
         console.error(err);
         return res.status(500).send(err.message);
       }
+      // divied two parts by inGroup field
+      var rejectData = [];
       docs.forEach(function (d) {
         if (d.inGroup) {
-          rejectDataName.push(d.name);
+          rejectData.push(d);
         } else {
           passDataId.push(d._id);
         }
-        count = count + 1;
-        if (count === docs.length) {
-          res.status(200).json({
-            passDataId: passDataId,
-            rejectDataName: rejectDataName,
-            groupOption: groupOption
-          });
-        }
       });
+
+      if(rejectData.length > 0) {
+        rejectData.forEach(function (r) {
+          SlotGroup.findOne({'_id': r.inGroup}, function(err, conflictGroup) {
+            rejectDataName.push({
+              slot: r.name,
+              conflictGroup: conflictGroup.name
+            });
+            count = count + 1;
+            if (count === rejectData.length) {
+              res.status(200).json({
+                passDataId: passDataId,
+                rejectDataName: rejectDataName,
+                groupOption: groupOption
+              });
+            }
+          });
+        });
+      }else {
+        res.status(200).json({
+          passDataId: passDataId,
+          rejectDataName: rejectDataName,
+          groupOption: groupOption
+        });
+      }
     });
   });
 });

@@ -26,16 +26,21 @@ $('#addGroup').click(function (e) {
     passDataId = data.passDataId;
     var panelClass;
     var panel;
-    var footer = '<button data-dismiss="modal" aria-hidden="true" class="btn" id="modal-cancel">Cancel</button>'
+    var footer = '<button data-dismiss="modal" aria-hidden="true" class="btn" id="modal-cancel">Cancel</button>';
     if(data.passDataId.length === 0) {
       panelClass = 'panel-danger';
-      panel = '<div class="panel-heading">Error: Group conflict! All slots have been in other groups.</div>';
-    }else if(data.rejectDataName.length > 0) {
-      panelClass = 'panel-warning';
-      var heading = '<div class="panel-heading">Warning: Group conflict! the following slots have been in other groups.</div>';
+      var heading = '<div class="panel-heading">Error: Group conflict! All slots have been in other groups.</div>';
       var warning = '';
       data.rejectDataName.forEach(function(x){
-        warning = warning + '<div class="panel-body">' + x+ '</div>';
+        warning = warning + '<div class="panel-body">' + x.slot + ' in ' + x.conflictGroup + ' group.</div>';
+      });
+      panel = heading + warning;
+    }else if(data.rejectDataName.length > 0) {
+      panelClass = 'panel-warning';
+      heading = '<div class="panel-heading">Warning: Group conflict! the following slots have been in other groups.</div>';
+      warning = '';
+      data.rejectDataName.forEach(function(x){
+        warning = warning + '<div class="panel-body">' + x.slot + ' in ' + x.conflictGroup + ' group.</div>';
       });
       panel = heading + warning;
     }else {
