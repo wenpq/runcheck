@@ -19,12 +19,13 @@ block content
               form.form-inline
                 label Please select one slot group:
                 select.form-control
-
-
             .modal-footer
     form.form-inline
-      button.btn.btn-primary#addGroup
+      button.btn.btn-primary.group-edit#addGroup
         | Add to group
+      | &nbsp
+      button.btn.btn-primary.group-edit#removeGroup
+        | Remove from group
     br
     #slots.tab-pane.active
       table#slot-table.table.table-bordered.table-hover

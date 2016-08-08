@@ -46,9 +46,20 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
 
 });
 
+/*
+return json data:
+ {
+   passDataId: // slot Ids can be added
+   conflictDataName: {
+     slot: // conflict slot name
+     conflictGroup:// conflict slot group name
+   }
+   groupOption:
+ }
+ */
 slots.post('/addGroupValidate',auth.ensureAuthenticated, function (req, res) {
   var passDataId = [];
-  var rejectDataName = [];
+  var conflictDataName = [];
   var count = 0;
   // find slot groups
   SlotGroup.find(function(err, groupOption) {
@@ -65,27 +76,27 @@ slots.post('/addGroupValidate',auth.ensureAuthenticated, function (req, res) {
         return res.status(500).send(err.message);
       }
       // divied two parts by inGroup field
-      var rejectData = [];
+      var conflictData = [];
       docs.forEach(function (d) {
         if (d.inGroup) {
-          rejectData.push(d);
+          conflictData.push(d);
         } else {
           passDataId.push(d._id);
         }
       });
 
-      if(rejectData.length > 0) {
-        rejectData.forEach(function (r) {
+      if(conflictData.length > 0) {
+        conflictData.forEach(function (r) {
           SlotGroup.findOne({'_id': r.inGroup}, function(err, conflictGroup) {
-            rejectDataName.push({
+            conflictDataName.push({
               slot: r.name,
               conflictGroup: conflictGroup.name
             });
             count = count + 1;
-            if (count === rejectData.length) {
+            if (count === conflictData.length) {
               res.status(200).json({
                 passDataId: passDataId,
-                rejectDataName: rejectDataName,
+                conflictDataName: conflictDataName,
                 groupOption: groupOption
               });
             }
@@ -94,7 +105,7 @@ slots.post('/addGroupValidate',auth.ensureAuthenticated, function (req, res) {
       }else {
         res.status(200).json({
           passDataId: passDataId,
-          rejectDataName: rejectDataName,
+          conflictDataName: conflictDataName,
           groupOption: groupOption
         });
       }
@@ -102,6 +113,45 @@ slots.post('/addGroupValidate',auth.ensureAuthenticated, function (req, res) {
   });
 });
 
+/*
+ return json data:
+ {
+   passDataId: // slot Ids can be removed
+   conflictDataName: {
+     slot: // conflict slot name
+   }
+ }
+ */
+slots.post('/removeGroupValidate',auth.ensureAuthenticated, function (req, res) {
+  var passDataId = [];
+  var conflictDataName = [];
+  var count = 0;
+  // validate slot
+  Slot.find({
+    '_id': {$in: req.body.slotIds}
+  }, function (err, docs) {
+    if (err) {
+      console.error(err);
+      return res.status(500).send(err.message);
+    }
+    docs.forEach(function (d) {
+      if (d.inGroup) {
+        passDataId.push(d._id);
+      } else {
+        conflictDataName.push({
+          slot: d.name
+        });
+      }
+      count = count + 1;
+      if (count === docs.length) {
+        res.status(200).json({
+          passDataId: passDataId,
+          conflictDataName: conflictDataName
+        });
+      }
+    });
+  });
+});
 
 slots.post('/addGroup',auth.ensureAuthenticated, function (req, res) {
   // change slots of slotGroup
@@ -117,13 +167,46 @@ slots.post('/addGroup',auth.ensureAuthenticated, function (req, res) {
         return res.status(500).send(err.message);
       }
       // change inGroup of slot
-      Slot.update({ '_id': {$in: req.body.slotIds}}, {inGroup: slotGroup._id}, {multi: true}, function(err,docs) {
+      Slot.update({ '_id': {$in: req.body.slotIds}}, {inGroup: slotGroup._id}, {multi: true}, function(err) {
         if(err) {
           console.error(err);
           return res.status(500).send(err.message);
         }
         res.status(200).end();
       })
+    });
+  });
+});
+
+slots.post('/removeGroup',auth.ensureAuthenticated, function (req, res) {
+  // delete items in inGroup field of slot
+  Slot.update({ '_id': {$in: req.body.slotIds}}, {inGroup: null}, {multi: true}, function(err) {
+    if(err) {
+      console.error(err);
+      return res.status(500).send(err.message);
+    }
+    // delete specified slots of slotGroup
+    SlotGroup.find(function(err, docs){
+      if(err) {
+        console.error(err);
+        return res.status(500).send(err.message);
+      }
+      var count = 0;
+      docs.forEach(function(slotGroup) {
+        slotGroup.slots = slotGroup.slots.filter(function (x) {
+          return req.body.slotIds.indexOf(String(x)) === -1;
+        });
+        slotGroup.save(function(err) {
+          if (err) {
+            console.error(err);
+            return res.status(500).send(err.message);
+          }
+          count = count + 1;
+          if (count === docs.length) {
+            res.status(200).end();
+          }
+        })
+      });
     });
   });
 });
