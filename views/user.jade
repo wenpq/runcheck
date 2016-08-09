@@ -23,27 +23,47 @@ block content
         dd #{user.lastLoginOn}
         dt Roles
         dd#roles
-          if (session.roles.indexOf('admin') == -1)
-            ul
-              each role in user.roles
-                li= role
+          if (session.roles.admin)
+            form.form-horizontal
+              .form-group
+                .col-sm-2
+                .col-sm-10
+                  .checkbox
+                    label
+                      if (user.roles.admin)
+                        input(type='checkbox', name='roles.admin', checked)
+                      else
+                        input(type='checkbox', name='roles.admin')
+                      != ' '
+                      | admin
+                  .checkbox
+                    label
+                      if (user.roles.leader)
+                        input(type='checkbox', name='roles.leader', checked)
+                      else
+                        input(type='checkbox', name='roles.leader')
+                      != ' '
+                      | leader
+              .form-group
+                label.contol-label.col-sm-2 Expert for
+                .col-sm-10
+                  select.form-control(name='expert')
+                    option(value='', disabled=true, selected) choose
+                    each subject in subjects
+                      option(value=''+subject)= subject
+              button.btn.btn-default(type='reset') reset
+              != '  '
+              button.btn.btn-primary(type='submit', disabled)#update update
           else
-            .checkbox
-              label
-                if (user.roles.indexOf('admin') > -1)
-                  input(type='checkbox', name='admin', checked)
-                else
-                  input(type='checkbox', name='admin')
-                != ' '
-                | admin
-            .checkbox
-              label
-                if (user.roles.indexOf('leader') > -1)
-                  input(type='checkbox', name='leader', checked)
-                else
-                  input(type='checkbox', name='leader')
-                != ' '
-                | leader
+            ul
+              if (user.roles.admin)
+                li admin
+              if (user.roles.leader)
+                li leader
+            if (user.expert)
+              .row
+                label.contol-label.col-sm-2 Expert for
+                .col-sm-10= user.expert
 block js
-  if (session.roles.indexOf('admin') !== -1)
+  if (session.roles.admin)
     script(type='text/javascript', src='/javascripts/user-admin.js')
