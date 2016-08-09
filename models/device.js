@@ -2,11 +2,12 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
-var checklistValues = ['N', 'Y', 'YC']
-var checklistSubjects = ['DO', 'EE', 'ME', 'CRYO', 'CTRLS', 'PHYS', 'ESHQ', 'AM']
+var checklistValues = ['N', 'Y', 'YC'];
+var subjects = ['EE', 'ME', 'CRYO', 'CTRLS', 'PHYS', 'ESHQ'];
+var checklistSubjects = ['DO'].concat(subjects).concat('AM');
 
 /*******
- * A ChecklistItem is a element of a checklist. 
+ * A ChecklistItem is a element of a checklist.
  * subject: name of the subject (ie department)
  * required: indicate if approval is required
  * value: indicate state of this item
@@ -63,5 +64,6 @@ var Device = mongoose.model('Device', device);
 module.exports = {
   Device: Device,
   checklistValues: checklistValues,
-  checklistSubjects: checklistSubjects
+  checklistSubjects: checklistSubjects,
+  subjects: subjects
 };
