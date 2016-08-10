@@ -2,36 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
-var checklistValues = ['N', 'Y', 'YC'];
-var subjects = ['EE', 'ME', 'CRYO', 'CTRLS', 'PHYS', 'ESHQ'];
-var checklistSubjects = ['DO'].concat(subjects).concat('AM');
-
-/*******
- * A ChecklistItem is a element of a checklist.
- * subject: name of the subject (ie department)
- * required: indicate if approval is required
- * value: indicate state of this item
- * comment: extra information
- *******/
-var checklistItem = new Schema({
-  subject: {
-    type: String,
-    enum: checklistSubjects
-  },
-  required: {
-    type: Boolean,
-    default: true
-  },
-  value: {
-    type: String,
-    enum: checklistValues,
-    default: checklistValues[0],
-  },
-  comment: {
-    type: String,
-    default: ''
-  }
-});
+var checklist = require('./checklist').deviceChecklistSchema;
 
 
 var device = new Schema({
@@ -46,7 +17,7 @@ var device = new Schema({
   department: String,
   owner: String,
   details: ObjectId,
-  checklist: [checklistItem],
+  checklist: checklist,
   checkedValue: {
     type: Number,
     default: 0,
@@ -62,8 +33,5 @@ var device = new Schema({
 var Device = mongoose.model('Device', device);
 
 module.exports = {
-  Device: Device,
-  checklistValues: checklistValues,
-  checklistSubjects: checklistSubjects,
-  subjects: subjects
+  Device: Device
 };
