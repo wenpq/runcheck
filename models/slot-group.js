@@ -6,9 +6,8 @@ var Mixed = Schema.Types.Mixed;
 var slotGroup = new Schema({
   name: {
     type: String,
-    index: {
-      unique: true
-    }
+    index: true,
+    unique: true
   },
   area: String,
   descripton: String,

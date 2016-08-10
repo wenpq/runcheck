@@ -5,7 +5,7 @@ var detailsColum = {
   title: 'Details',
   data: '_id',
   render: function (data) {
-    return '<a href="' + '/devices/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the device details"><i class="fa fa-list-alt fa-2x"></i></a>';
+    return '<a href="' + '/devices/' + data + '" target="_blank" data-toggle="tooltip" title="go to the device details"><i class="fa fa-list-alt fa-2x"></i></a>';
   },
   order: false
 };
@@ -56,7 +56,7 @@ var checkedProgressColumn = {
 $(function () {
   var deviceColumns = [Table.selectColumn, detailsColum, serialNoColumn, nameColumn, typeColumn, departmentColumn, ownerColumn, checkedProgressColumn ];
 
-  $('#device-table').DataTable({
+  $('#devices-table').DataTable({
     ajax: {
       url: '/devices/json',
       dataSrc: ''
@@ -82,7 +82,7 @@ $(function () {
       [2, 'asc']
     ]
   });
-  Table.addFilterFoot('#device-table', deviceColumns);
+  Table.addFilterFoot('#devices-table', deviceColumns);
   Table.filterEvent();
   Table.selectEvent();
 });

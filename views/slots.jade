@@ -21,19 +21,17 @@ block content
                 select.form-control
             .modal-footer
     form.form-inline
-      button.btn.btn-primary.group-edit#addGroup
+      button.btn.btn-primary#addGroup
         | Add to group
-      | &nbsp
-      button.btn.btn-primary.group-edit#removeGroup
-        | Remove from group
     br
     #slots.tab-pane.active
-      table#slot-table.table.table-bordered.table-hover
+      table#slots-table.table.table-bordered.table-hover
 
 
 block js
   script(type='text/javascript', src='/datatables/media/js/jquery.dataTables.js')
   script(type='text/javascript', src='/datatables/media/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='/holderjs/holder.min.js')
   script(type='text/javascript', src='/javascripts/table.js')
-  script(type='text/javascript', src='/javascripts/slot-table.js')
-  script(type='text/javascript', src='/javascripts/slot-action.js')
+  script(type='text/javascript', src='/javascripts/slots-table.js')
+  script(type='text/javascript', src='/javascripts/slots-action.js')

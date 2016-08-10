@@ -152,7 +152,7 @@ app.use('/', index);
 app.use('/users', users);
 app.use('/devices', devices);
 app.use('/slots', slots);
-app.use('/slotGroups', slotGroups);
+app.use('/slotgroups', slotGroups);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

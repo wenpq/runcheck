@@ -9,9 +9,8 @@ var slot = new Schema({
   beamlinePosition: Number,// Beam line position (dm)
   name: {
     type: String,
-    index: {
-      unique: true
-    }
+    index: true,
+    unique: true
   },
   deviceType: String,
   elementName: String,

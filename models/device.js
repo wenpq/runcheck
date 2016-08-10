@@ -6,9 +6,8 @@ var Mixed = Schema.Types.Mixed;
 var device = new Schema({
   serialNo: {
     type: String,
-    index: {
-      unique: true
-    }
+    index: true,
+    unique: true
   },
   name: String,
   type: String,

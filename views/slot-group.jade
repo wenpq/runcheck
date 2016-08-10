@@ -2,9 +2,36 @@ extends layout-history
 
 block head
   link(rel='stylesheet', href='/datatables/media/css/dataTables.bootstrap.min.css')
-  title RunCheck device
+  title RunCheck slot group
 
 
 block content
-  .container(style="margin-top: 10px")
-    h2 this is slot group detail page.
+  .container-fluid
+    br
+    #message
+      #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
+        .modal-dialog
+          .modal-content
+            .modal-header
+              h3#modalLabel
+            .modal-body
+              .panel
+              form.form-inline
+                label Please select one slot group:
+                select.form-control
+            .modal-footer
+    form.form-inline
+      button.btn.btn-primary#remove
+        | Remove
+    br
+    #slots.tab-pane.active
+      table#spec-slots-table.table.table-bordered.table-hover
+
+
+block js
+  script(type='text/javascript', src='/datatables/media/js/jquery.dataTables.js')
+  script(type='text/javascript', src='/datatables/media/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='/holderjs/holder.min.js')
+  script(type='text/javascript', src='/javascripts/table.js')
+  script(type='text/javascript', src='/javascripts/slots-table.js')
+  script(type='text/javascript', src='/javascripts/slot-group-action.js')

@@ -1,12 +1,12 @@
 
-/*global Table: false*/
+/*global Table: false, Holder: false*/
 
 // slot columns starts
 var detailsColum = {
   title: 'Details',
   data: 'details',
   render: function (data) {
-    return '<a href="' + '/details/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the slot details"><i class="fa fa-list-alt fa-2x"></i></a>';
+    return '<a href="' + '/details/' + data + '" target="_blank" data-toggle="tooltip" title="go to the slot details"><i class="fa fa-list-alt fa-2x"></i></a>';
   },
   order: false
 };
@@ -105,19 +105,17 @@ var ARRProgressColumn = {
 };
 // slot columns end
 
-
+var slotColumns = [Table.selectColumn, detailsColum, nameColumn, ownerColumn, areaColumn, levelColumn, deviceTypeColumn, locationColumn, deviceColumn, approvelStatusColumn, machineModeColumn, checkedProgressColumn, DRRProgressColumn, ARRProgressColumn];
 $(function () {
-  var slotColumns = [Table.selectColumn, detailsColum, nameColumn, ownerColumn, areaColumn, levelColumn, deviceTypeColumn, locationColumn, deviceColumn, approvelStatusColumn, machineModeColumn, checkedProgressColumn, DRRProgressColumn, ARRProgressColumn];
-  $('#slot-table').DataTable({
+  $('#slots-table').DataTable({
     ajax: {
-      url: '/slots/json',
+      url: './json',
       dataSrc: ''
     },
     initComplete: function () {
-      /*Holder.run({
-        images: 'img.user'
-      });*/
-      console.log('initComplete ...');
+      Holder.run({
+        images: '.user img'
+      });
     },
     autoWidth: true,
     processing: true,
@@ -135,7 +133,36 @@ $(function () {
       [2, 'asc']
     ]
   });
-  Table.addFilterFoot('#slot-table', slotColumns);
+  Table.addFilterFoot('#slots-table', slotColumns);
+
+  $('#spec-slots-table').DataTable({
+    ajax: {
+      url: window.location.href +'/slots',
+      dataSrc: ''
+    },
+    initComplete: function () {
+      Holder.run({
+        images: '.user img'
+      });
+    },
+    autoWidth: true,
+    processing: true,
+    pageLength: 10,
+    lengthMenu: [
+      [10, 50, 100, -1],
+      [10, 50, 100, 'All']
+    ],
+    oLanguage: {
+      loadingRecords: 'Please wait - loading data from the server ...'
+    },
+    deferRender: true,
+    columns: slotColumns,
+    order: [
+      [2, 'asc']
+    ]
+  });
+  Table.addFilterFoot('#spec-slots-table', slotColumns);
+
   Table.filterEvent();
   Table.selectEvent();
 });
