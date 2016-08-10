@@ -112,11 +112,7 @@ slotGroups.post('/validateAdd', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
-// we need to do validation here. check if a slot id exists and the slot.inGroup is undefined. why???
-function slotIdExist(req, res, next){
-  next();
-}
-slotGroups.put('/:gid/slot/:sid', auth.ensureAuthenticated, slotIdExist, function (req, res) {
+slotGroups.put('/:gid/slot/:sid', auth.ensureAuthenticated, function (req, res) {
   SlotGroup.update({_id: req.params.gid}, {$addToSet: {slots: req.params.sid} }, function(err) {
     if(err) {
       console.error(err);
@@ -133,7 +129,7 @@ slotGroups.put('/:gid/slot/:sid', auth.ensureAuthenticated, slotIdExist, functio
 });
 
 
-slotGroups.delete('/:gid/slot/:sid', auth.ensureAuthenticated, slotIdExist, function (req, res) {
+slotGroups.get('/:gid/slot/:sid', auth.ensureAuthenticated, function (req, res) {
   SlotGroup.update({_id: req.params.gid}, {$pull: {slots: req.params.sid} }, function(err) {
     if(err) {
       console.error(err);

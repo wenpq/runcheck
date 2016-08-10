@@ -4,7 +4,7 @@
 // slot columns starts
 var detailsColum = {
   title: 'Details',
-  data: 'details',
+  data: '_id',
   render: function (data) {
     return '<a href="' + '/details/' + data + '" target="_blank" data-toggle="tooltip" title="go to the slot details"><i class="fa fa-list-alt fa-2x"></i></a>';
   },

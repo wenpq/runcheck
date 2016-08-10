@@ -79,7 +79,7 @@ $('#addGroup').click(function (e) {
 $('.modal-body').on('change', 'select', function() {
   selectGroupId = $('option:selected').attr('name');
   if (passData.length !== 0) {
-    var footer = '<button id="modal-submit" class="btn btn-primary" data-dismiss="modal">Submt</button>' +
+    var footer = '<button id="modal-submit" class="btn btn-primary" data-dismiss="modal">Confirm</button>' +
       '<button data-dismiss="modal" aria-hidden="true" class="btn" id="modal-cancel">Cancel</button>';
     $('#modal .modal-footer').html(footer);
   }

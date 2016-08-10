@@ -1,4 +1,4 @@
-extends layout-history
+extends layout
 
 block head
   link(rel='stylesheet', href='/datatables/media/css/dataTables.bootstrap.min.css')
@@ -14,11 +14,6 @@ block content
           .modal-content
             .modal-header
               h3#modalLabel
-            .modal-body
-              .panel
-              form.form-inline
-                label Please select one slot group:
-                select.form-control
             .modal-footer
     form.form-inline
       button.btn.btn-primary#remove

@@ -19,7 +19,7 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
     // data just for test.
     docs.forEach(function(d) {
       var slotDoc = {
-        details: d._id,
+        _id: d._id,
         name: d.name,
         owner: 'wen',
         area: 'unknow in xlsx',
@@ -84,39 +84,6 @@ slots.post('/removeGroupValidate',auth.ensureAuthenticated, function (req, res) 
           conflictDataName: conflictDataName
         });
       }
-    });
-  });
-});
-
-slots.post('/removeGroup',auth.ensureAuthenticated, function (req, res) {
-  // delete items in inGroup field of slot
-  Slot.update({ '_id': {$in: req.body.slotIds}}, {inGroup: null}, {multi: true}, function(err) {
-    if(err) {
-      console.error(err);
-      return res.status(500).send(err.message);
-    }
-    // delete specified slots of slotGroup
-    SlotGroup.find(function(err, docs){
-      if(err) {
-        console.error(err);
-        return res.status(500).send(err.message);
-      }
-      var count = 0;
-      docs.forEach(function(slotGroup) {
-        slotGroup.slots = slotGroup.slots.filter(function (x) {
-          return req.body.slotIds.indexOf(String(x)) === -1;
-        });
-        slotGroup.save(function(err) {
-          if (err) {
-            console.error(err);
-            return res.status(500).send(err.message);
-          }
-          count = count + 1;
-          if (count === docs.length) {
-            res.status(200).end();
-          }
-        })
-      });
     });
   });
 });
