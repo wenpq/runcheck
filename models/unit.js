@@ -3,7 +3,7 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
 /*******
- * A subject is a unit or a cross-unit topic, and the leader has its
+ * A unit is a real org unit or a virtual unit, and the leader has its
  * authorization. The admin maintains it for the authorization control.
  * name: the short name
  * fullName: the long name
@@ -12,7 +12,7 @@ var ObjectId = Schema.Types.ObjectId;
  * slots: owned slots
  * slotGroups: owned slot groups
  *******/
-var subject = new Schema({
+var unit = new Schema({
   name: {
     type: String,
     unique: true,
@@ -33,7 +33,7 @@ var subject = new Schema({
   slotGroups: [ObjectId]
 });
 
-var Subject = mongoose.model('Subject', subject);
+var Unit = mongoose.model('Unit', unit);
 module.exports = {
-  Subject: Subject
+  Unit: Unit
 };

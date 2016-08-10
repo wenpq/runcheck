@@ -29,7 +29,7 @@ var userSchema = require('../models/user').userSchema;
 var History = require('../models/history').History;
 var plugin = require('../models/history').addHistory;
 userSchema.plugin(plugin, {
-  fieldsToWatch: ['name', 'email', 'roles']
+  fieldsToWatch: ['name', 'email', 'roles.admin', 'roles.leader']
 });
 debug('the test user schema is: ' + util.inspect(userSchema, false, null));
 var UserTest = mongoose.model('UserTest', userSchema);
@@ -87,19 +87,14 @@ describe('model/history', function () {
           if (hErr) {
             done(hErr);
           }
+          debug(user);
+          debug(h);
           h.b.should.equal('test');
           h.t.should.equal(user.constructor.modelName);
           h.i.toString().should.equal(user._id.toString());
-          h.c.length.should.equal(2);
-          var i;
-          for (i = 0; i < h.c.length; i += 1) {
-            if (h.c[i].p === 'name') {
-              h.c[i].v.should.equal('test user');
-            } else {
-              h.c[i].p.should.equal('roles');
-              h.c[i].v.length.should.equal(0);
-            }
-          }
+          h.c.length.should.equal(1);
+          h.c[0].p.should.equal('name');
+          h.c[0].v.should.equal('test user');
           done();
         });
       });
@@ -114,6 +109,7 @@ describe('model/history', function () {
         }
         user.office = 'somewhere';
         user.email = 'test@runcheck';
+        user.roles.admin = true;
         user.saveWithHistory('test1', function (err, newUser) {
           if (err) {
             return done(err);
@@ -124,12 +120,20 @@ describe('model/history', function () {
             if (hErr) {
               done(hErr);
             }
+            debug(h);
             h.b.should.equal('test1');
             h.t.should.equal(newUser.constructor.modelName);
             h.i.toString().should.equal(newUser._id.toString());
-            h.c.length.should.equal(1);
-            h.c[0].p.should.equal('email');
-            h.c[0].v.should.equal('test@runcheck');
+            h.c.length.should.equal(2);
+            var i;
+            for (i = 0; i < h.c.length; i += 1) {
+              if (h.c[i].p === 'email') {
+                h.c[i].v.should.equal('test@runcheck');
+              } else {
+                h.c[i].p.should.equal('roles.admin');
+                h.c[i].v.should.equal(true);
+              }
+            }
             done();
           });
         });

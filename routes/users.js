@@ -1,5 +1,6 @@
 var express = require('express');
 var users = express.Router();
+var debug = require('debug')('runcheck:users');
 
 var ad = require('../config/ad.json');
 var ldapClient = require('../lib/ldap-client');
@@ -10,6 +11,7 @@ var auth = require('../lib/auth');
 var authConfig = require('../config/config').auth;
 var log = require('../lib/log');
 var reqUtils = require('../lib/req-utils');
+var subjects = require('../models/checklist').subjects;
 
 var fs = require('fs');
 var pending_photo = {};
@@ -130,13 +132,6 @@ function addUser(req, res) {
     if (result.length > 1) {
       return res.status(400).send(req.body.name + ' is not unique!');
     }
-    var roles = [];
-    if (req.body.manager) {
-      roles.push('manager');
-    }
-    if (req.body.admin) {
-      roles.push('admin');
-    }
     var user = new User({
       adid: result[0].sAMAccountName.toLowerCase(),
       name: result[0].displayName,
@@ -144,7 +139,7 @@ function addUser(req, res) {
       office: result[0].physicalDeliveryOfficeName,
       phone: result[0].telephoneNumber,
       mobile: result[0].mobile,
-      roles: roles
+      roles: req.body.roles
     });
 
     user.save(function (err, newUser) {
@@ -209,18 +204,17 @@ users.get('/json', auth.ensureAuthenticated, auth.verifyRole('admin'), function 
 });
 
 users.get('/:id', auth.ensureAuthenticated, reqUtils.exist('id', User, 'adid'), function (req, res) {
+  debug(req[req.params.id]);
   return res.render('user', {
-    user: req[req.params.id]
+    user: req[req.params.id],
+    subjects: subjects
   });
 });
 
-users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.is('json'), reqUtils.filter('body', ['update']), reqUtils.sanitize(), reqUtils.exist('id', User, 'adid'), function (req, res) {
+users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.is('json'), reqUtils.filter('body', ['roles', 'subject']), reqUtils.sanitize(), reqUtils.exist('id', User, 'adid'), function (req, res) {
   var user = req[req.params.id];
-  if (req.body.update.val === true || req.body.update.val === 'true') {
-    user.roles.addToSet(req.body.update.role);
-  } else if (req.body.update.val === false || req.body.update.val === 'false') {
-    user.roles.pull(req.body.update.role);
-  }
+  user.roles = req.body.roles;
+  user.subject = req.body.subject;
   user.saveWithHistory(req.session.userid, function (err, newUser) {
     if (err) {
       log.error(err);
