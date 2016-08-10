@@ -11,7 +11,7 @@ var auth = require('../lib/auth');
 var authConfig = require('../config/config').auth;
 var log = require('../lib/log');
 var reqUtils = require('../lib/req-utils');
-var subjects = require('../models/device').subjects;
+var subjects = require('../models/checklist').subjects;
 
 var fs = require('fs');
 var pending_photo = {};
