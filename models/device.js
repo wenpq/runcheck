@@ -8,9 +8,8 @@ var checklist = require('./checklist').deviceChecklistSchema;
 var device = new Schema({
   serialNo: {
     type: String,
-    index: {
-      unique: true
-    }
+    index: true,
+    unique: true
   },
   name: String,
   type: String,
