@@ -3,6 +3,7 @@ var slotGroups = express.Router();
 var auth = require('../lib/auth');
 var SlotGroup = require('../models/slot-group').SlotGroup;
 var Slot = require('../models/slot').Slot;
+var reqUtils = require('../lib/req-utils');
 
 slotGroups.get('/', auth.ensureAuthenticated, function (req, res) {
   res.render('slot-groups');
@@ -113,119 +114,62 @@ slotGroups.post('/validateAdd', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
-// the middleware to check before add or remove start
-// check if a slot id and slot group id exists
-function checkSlotId(req, res, next){
-  Slot.find({_id : req.params.sid }, function (err, docs) {
-    if (err){
-      console.error(err);
-      return res.status(500).send(err.message);
-    }
-    if (docs.length === 0) {
-      return res.status(404).send('Slot of ' + req.params.sid + ' not found.');
-    }
-    next();
-  });
-}
-// check whether SlotGroup.id is exist
-function checkSlotGroupId(req, res, next){
-  SlotGroup.find({_id : req.params.gid }, function (err, docs) {
-    if (err){
-      console.error(err);
-      return res.status(500).send(err.message);
-    }
-    if (docs.length === 0) {
-      return res.status(404).send('Slot group of ' + req.params.gid + ' not found.');
-    }
-    next();
-  });
-}
-// check whether slot.inGroup is null
-function checkInGroupNull(req, res, next){
-  Slot.findOne({_id : req.params.sid}, function (err, doc) {
-    if (err){
-      console.error(err);
-      return res.status(500).send(err.message);
-    }
-    if ( doc.inGroup) {
-      return res.status(403).send('The inGroup field in group of ' + req.params.gid + ' is not null.');
-    }
-    next();
-  });
-}
-// check whether slot.inGroup is not null
-function checkInGroupNotNull(req, res, next){
-  Slot.findOne({_id : req.params.sid}, function (err, doc) {
-    if (err){
-      console.error(err);
-      return res.status(500).send(err.message);
-    }
-    if (doc.inGroup) {
-      next();
-    }else {
-      return res.status(403).send('The inGroup field in group of ' + req.params.gid + ' is null.');
-    }
-  });
-}
-// check whether slot is not in slot group
-function checkSlotNotInGroup(req, res, next){
-  SlotGroup.find({ _id : req.params.gid, slots: {$elemMatch: {$eq: req.params.sid}}}, function (err, docs) {
-    if (err){
-      console.error(err);
-      return res.status(500).send(err.message);
-    }
-    if (docs.length > 0) {
-      return res.status(403).send('Slot ' + req.params.sid + 'is in slot group ' + req.params.gid);
-    }
-    next();
-  });
-}
-// check whether slot is in slot group
-function checkSlotInGroup(req, res, next){
-  SlotGroup.find({ _id : req.params.gid, slots: {$elemMatch: {$eq: req.params.sid}}}, function (err, docs) {
-    if (err){
-      console.error(err);
-      return res.status(500).send(err.message);
-    }
-    if (docs.length === 0) {
-      return res.status(403).send('Slot ' + req.params.sid + 'is not in slot group ' + req.params.gid);
-    }
-    next();
-  });
-}
-// the middleware to check before add end
+slotGroups.put('/:gid/slot/:sid', auth.ensureAuthenticated, reqUtils.exist('gid', SlotGroup), reqUtils.exist('sid', Slot), function (req, res) {
+  // check whether slot is not in slot group
+  if (req[req.params.gid].slots.indexOf(req.params.sid) !== -1) {
+    return res.status(403).send('Can not add: Slot ' + req.params.sid + ' is in slot group ' + req.params.gid);
+  }
+  // check whether slot.inGroup is null
+  if (req[req.params.sid].inGroup) {
+    return res.status(403).send('Can not add: The inGroup field in group of ' + req.params.gid + ' is not null.');
+  }
 
-
-slotGroups.put('/:gid/slot/:sid', auth.ensureAuthenticated, checkSlotId, checkSlotGroupId, checkInGroupNull, checkSlotNotInGroup, function (req, res) {
-  SlotGroup.update({_id: req.params.gid}, {$addToSet: {slots: req.params.sid} }, function(err) {
-    if(err) {
+  // add to .slots
+  req[req.params.gid].slots.addToSet(req.params.sid);
+  req[req.params.gid].save(function(err) {
+    if (err) {
       console.error(err);
       return res.status(500).send(err.message);
     }
-    Slot.update({_id: req.params.sid}, {inGroup: req.params.gid}, function(err) {
-      if(err) {
+    // change inGroup
+    req[req.params.sid].inGroup = req.params.gid;
+    req[req.params.sid].save(function(err) {
+      if (err) {
         console.error(err);
         return res.status(500).send(err.message);
       }
       return res.status(200).end();
-    });
+    })
   });
 });
 
 
-slotGroups.delete('/:gid/slot/:sid', auth.ensureAuthenticated, checkSlotId, checkSlotGroupId, checkInGroupNotNull, checkSlotInGroup, function (req, res) {
-  SlotGroup.update({_id: req.params.gid}, {$pull: {slots: req.params.sid} }, function(err) {
-    if(err) {
+slotGroups.delete('/:gid/slot/:sid', auth.ensureAuthenticated, reqUtils.exist('gid', SlotGroup), reqUtils.exist('sid', Slot), function (req, res) {
+  // check whether slot is in slot group
+  if (req[req.params.gid].slots.indexOf(req.params.sid) === -1) {
+    return res.status(403).send('Can not remove: Slot ' + req.params.sid + ' is not in slot group ' + req.params.gid);
+  }
+  // check whether slot.inGroup is not null
+  if (!req[req.params.sid].inGroup) {
+    return res.status(403).send('Can not remove: The inGroup field in group of ' + req.params.gid + ' is null.');
+  }
+
+  // pull to .slots
+  req[req.params.gid].slots.pull(req.params.sid);
+  req[req.params.gid].save(function(err) {
+    if (err) {
       console.error(err);
       return res.status(500).send(err.message);
     }
-    Slot.update({_id: req.params.sid}, {inGroup: null}, function(err) {
-      if(err) {
+    // change inGroup to null
+    req[req.params.sid].inGroup = null;
+    req[req.params.sid].save(function(err) {
+      if (err) {
         console.error(err);
         return res.status(500).send(err.message);
       }
       return res.status(200).end();
-    });
+    })
   });
 });
 
