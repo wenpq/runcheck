@@ -8,7 +8,7 @@ var drrChecklistSubjects = ['DO'].concat(subjects).concat('AM');
 var arrChecklistSubjects = ['DO'].concat(subjects).concat('AM');
 
 /*******
- * A ChecklistItem is the value of an subject in a checklist.
+ * A checklistItem is the response of a subject in a checklist.
  * required: indicate if approval is required
  * value: indicate state of this item
  * comment: extra information
@@ -29,6 +29,23 @@ var checklistItem = {
   }
 };
 
+/*******
+ * A mandatoryChecklistItem is the response of a subject which is always required.
+ * value: indicate state of this item
+ * comment: extra information
+ *******/
+var mandatoryChecklistItem = {
+  value: {
+    type: String,
+    enum: checklistValues,
+    default: checklistValues[0],
+  },
+  comment: {
+    type: String,
+    default: ''
+  }
+}
+
 var deviceChecklist = {
   required: {
     type: Boolean,
@@ -36,8 +53,12 @@ var deviceChecklist = {
   }
 };
 deviceChecklistSubjects.forEach(function (s) {
-  deviceChecklist[s] = checklistItem;
-})
+  if (s === 'DO') {
+    deviceChecklist[s] = mandatoryChecklistItem;
+  } else {
+    deviceChecklist[s] = checklistItem;
+  }
+});
 
 var deviceChecklistSchema = new Schema(deviceChecklist);
 
