@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var ObjectId = Schema.Types.ObjectId;
 
 var checklistValues = ['N', 'Y', 'YC'];
 var subjects = ['EE', 'ME', 'CRYO', 'CTRLS', 'PHYS', 'ESHQ'];
@@ -60,6 +59,9 @@ var arrChecklistSchema = new Schema(arrChecklist);
 
 module.exports = {
   checklistValues: checklistValues,
+  deviceChecklistSubjects: deviceChecklistSubjects,
+  drrChecklistSubjects: drrChecklistSubjects,
+  arrChecklistSubjects: arrChecklistSubjects,
   subjects: subjects,
   deviceChecklistSchema: deviceChecklistSchema,
   drrChecklistSchema: drrChecklistSchema,
