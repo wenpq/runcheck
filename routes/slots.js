@@ -46,46 +46,4 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
 
 });
 
-/*
- return json data:
- {
-   passDataId: // slot Ids can be removed
-   conflictDataName: {
-     slot: // conflict slot name
-     conflictGroup:// conflict slot group name
-   }
-   groupOption:
- }
- */
-slots.post('/removeGroupValidate',auth.ensureAuthenticated, function (req, res) {
-  var passDataId = [];
-  var conflictDataName = [];
-  var count = 0;
-  // validate slot
-  Slot.find({
-    '_id': {$in: req.body.slotIds}
-  }, function (err, docs) {
-    if (err) {
-      console.error(err);
-      return res.status(500).send(err.message);
-    }
-    docs.forEach(function (d) {
-      if (d.inGroup) {
-        passDataId.push(d._id);
-      } else {
-        conflictDataName.push({
-          slot: d.name
-        });
-      }
-      count = count + 1;
-      if (count === docs.length) {
-        res.status(200).json({
-          passDataId: passDataId,
-          conflictDataName: conflictDataName
-        });
-      }
-    });
-  });
-});
-
 module.exports = slots;

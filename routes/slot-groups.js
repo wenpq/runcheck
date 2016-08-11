@@ -41,6 +41,7 @@ slotGroups.get('/:id/slots', auth.ensureAuthenticated, function (req, res) {
       console.error(err);
       return res.status(500).send(err.message);
     }
+    console.log('$$:' + doc);
     Slot.find({ _id: {$in: doc.slots }},function(err, docs) {
       if (err) {
         console.error(err);
@@ -112,7 +113,7 @@ slotGroups.post('/validateAdd', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
-// the middleware to check before add or remove slot to group start
+// the middleware to check before add or remove start
 // check if a slot id and slot group id exists
 function checkSlotId(req, res, next){
   Slot.find({_id : req.params.sid }, function (err, docs) {
@@ -139,7 +140,7 @@ function checkSlotGroupId(req, res, next){
     next();
   });
 }
-// check whether slot.inGroup is Null
+// check whether slot.inGroup is null
 function checkInGroupNull(req, res, next){
   Slot.findOne({_id : req.params.sid}, function (err, doc) {
     if (err){
@@ -152,6 +153,7 @@ function checkInGroupNull(req, res, next){
     next();
   });
 }
+// check whether slot.inGroup is not null
 function checkInGroupNotNull(req, res, next){
   Slot.findOne({_id : req.params.sid}, function (err, doc) {
     if (err){
@@ -178,6 +180,7 @@ function checkSlotNotInGroup(req, res, next){
     next();
   });
 }
+// check whether slot is in slot group
 function checkSlotInGroup(req, res, next){
   SlotGroup.find({ _id : req.params.gid, slots: {$elemMatch: {$eq: req.params.sid}}}, function (err, docs) {
     if (err){
@@ -190,7 +193,7 @@ function checkSlotInGroup(req, res, next){
     next();
   });
 }
-// the middleware to check before add or remove slot to group end
+// the middleware to check before add end
 
 
 slotGroups.put('/:gid/slot/:sid', auth.ensureAuthenticated, checkSlotId, checkSlotGroupId, checkInGroupNull, checkSlotNotInGroup, function (req, res) {
@@ -210,7 +213,7 @@ slotGroups.put('/:gid/slot/:sid', auth.ensureAuthenticated, checkSlotId, checkSl
 });
 
 
-slotGroups.get('/:gid/slot/:sid', auth.ensureAuthenticated, checkSlotId, checkSlotGroupId, checkInGroupNotNull, checkSlotInGroup, function (req, res) {
+slotGroups.delete('/:gid/slot/:sid', auth.ensureAuthenticated, checkSlotId, checkSlotGroupId, checkInGroupNotNull, checkSlotInGroup, function (req, res) {
   SlotGroup.update({_id: req.params.gid}, {$pull: {slots: req.params.sid} }, function(err) {
     if(err) {
       console.error(err);

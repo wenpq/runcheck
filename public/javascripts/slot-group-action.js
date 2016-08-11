@@ -1,5 +1,4 @@
 var passData;
-var selectGroupId;
 $('#remove').click(function (e) {
   e.preventDefault();
   if ($('.row-selected').length == 0) {
@@ -9,7 +8,7 @@ $('#remove').click(function (e) {
   var selectedData = []; // no validation for removing, passData equals selectedData
   $('.row-selected').each(function() {
     var href = $(this).closest('tr').children().eq(1).children().attr('href');
-    var name = $(this).closest('tr').children().eq(2).val();
+    var name = $(this).closest('tr').children().eq(2).text();
     selectedData.push({
       id: href.split('/')[2],
       name: name
@@ -36,7 +35,7 @@ $('#modal').on('click','#modal-submit',function (e) {
     (function (i) {
       $.ajax({
         url: url,
-        type: 'GET'
+        type: 'DELETE'
       }).done(function () {
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: ' + passData[i].name  + ' is removed.</div>');
         if(i==passData.length-1){
@@ -63,7 +62,6 @@ function reset() {
     '<select class="form-control"></select> ' +
     '</form>');
   passData = null;
-  selectGroupId = null;
 }
 
 function deleteRow() {
