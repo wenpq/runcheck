@@ -30,7 +30,12 @@ var checklistItem = {
   }
 };
 
-var deviceChecklist = {};
+var deviceChecklist = {
+  required: {
+    type: Boolean,
+    default: false
+  }
+};
 deviceChecklistSubjects.forEach(function (s) {
   deviceChecklist[s] = checklistItem;
 })
