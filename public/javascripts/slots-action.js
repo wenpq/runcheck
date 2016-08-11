@@ -93,16 +93,21 @@ $('#modal').on('click','#modal-cancel',function (e) {
 $('#modal').on('click','#modal-submit',function (e) {
   e.preventDefault();
   for (var i=0; i< passData.length; i++) {
-    var url = '/slotGroups/' + selectGroupId + '/slot/' + passData[i].id;
+    var url = '/slotGroups/addSlots';
     (function (i) {
       $.ajax({
         url: url,
-        type: 'PUT'
+        type: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({
+          gid: selectGroupId,
+          sid: passData[i].id
+        })
       }).done(function () {
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: ' + passData[i].name  + ' is added.</div>');
         if(i==passData.length-1)reset();
       }).fail(function (jqXHR) {
-        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + 'Error: ' + jqXHR.responseText + '. add ' + passData[i].name + ' field.</div>');
+        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + 'Error: ' + jqXHR.responseText + ', add ' + passData[i].name + ' faild.</div>');
         if(i==passData.length-1)reset();
       });
     })(i);
