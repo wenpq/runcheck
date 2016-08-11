@@ -48,7 +48,7 @@ block content
                 label.contol-label.col-sm-2 Expert for
                 .col-sm-10
                   select.form-control(name='expert')
-                    option(value='') no subject
+                    option(value='') None
                     each subject in subjects
                       if (user.expert === subject)
                         option(value=''+subject, selected)= subject
@@ -70,3 +70,4 @@ block content
 block js
   if (session.roles.admin)
     script(type='text/javascript', src='/javascripts/user-admin.js')
+    script(type='text/javascript', src='/formbinder/binder.js')

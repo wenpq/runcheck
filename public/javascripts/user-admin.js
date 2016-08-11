@@ -2,22 +2,20 @@ $(function () {
   $('form input,select').change(function () {
     $('#update').prop('disabled', false);
   });
+  var binder = new Binder.FormBinder(document.forms[0]);
+  var model = binder.serialize();
   $('#update').click(function (e) {
     e.preventDefault();
-    var data = {
-      roles: {
-        admin: $('input[name="roles.admin"]').prop('checked'),
-        leader: $('input[name="roles.leader"]').prop('checked')
-      },
-      expert: $('select[name="expert"]').val() === '' ? null : $('select[name="expert"]').val()
-    };
+    var data = binder.serialize();
     $.ajax({
       type: 'PUT',
       contentType: 'application/json',
       data: JSON.stringify(data)
-    }).done(function () {
+    }).done(function (json) {
       // display a message
       // update history
+      binder.deserialize(json);
+      model = json;
     }).fail(function () {
       // display a message
       // update history
@@ -25,7 +23,9 @@ $(function () {
       $('#update').prop('disabled', false);
     });
   });
-  $('#reset').click(function () {
+  $('#reset').click(function (e) {
+    e.preventDefault();
+    binder.deserialize(model);
     $('#update').prop('disabled', true);
   });
 });
