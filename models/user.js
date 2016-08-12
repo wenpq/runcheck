@@ -11,8 +11,7 @@ var subjects = require('./device').subjects;
  * lastLoginOn: latest login time
  * roles: leader: the leader of a group or a subject; admin: the admin of the
  * application
- * expert: the subject matter, the default is undefined. Set to undefined to
- * remove.
+ * expert: the subject matter. Set to null to remove.
  *******/
 var user = new Schema({
   adid: {
@@ -44,7 +43,7 @@ var user = new Schema({
 });
 
 user.plugin(addHistory, {
-  fieldsToWatch: ['roles.admin', 'roles.leader', 'subject']
+  fieldsToWatch: ['roles.admin', 'roles.leader', 'expert']
 });
 
 var User = mongoose.model('User', user);

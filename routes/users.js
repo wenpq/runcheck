@@ -220,16 +220,19 @@ users.get('/:id', auth.ensureAuthenticated, reqUtils.exist('id', User, 'adid'), 
   });
 });
 
-users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.is('json'), reqUtils.filter('body', ['roles', 'subject']), reqUtils.sanitize(), reqUtils.exist('id', User, 'adid'), function (req, res) {
+users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.is('json'), reqUtils.filter('body', ['roles', 'expert']), reqUtils.sanitize('body'), reqUtils.exist('id', User, 'adid'), function (req, res) {
   var user = req[req.params.id];
-  user.roles = req.body.roles;
-  user.subject = req.body.subject;
+  user.set(req.body);
   user.saveWithHistory(req.session.userid, function (err, newUser) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
-    return res.json(newUser);
+    if (newUser) {
+      return res.json(newUser);
+    } else {
+      return res.status(200).send('nothing changed.');
+    }
   });
 });
 
