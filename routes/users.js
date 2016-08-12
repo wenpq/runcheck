@@ -204,10 +204,19 @@ users.get('/json', auth.ensureAuthenticated, auth.verifyRole('admin'), function 
 });
 
 users.get('/:id', auth.ensureAuthenticated, reqUtils.exist('id', User, 'adid'), function (req, res) {
-  debug(req[req.params.id]);
-  return res.render('user', {
-    user: req[req.params.id],
-    subjects: subjects
+  var user = req[req.params.id];
+  user.populate('__updates', function (err, newUser) {
+    debug(newUser);
+    if (err) {
+      log.error(err);
+      return res.status(500).json({
+        error: err.message
+      });
+    }
+    return res.render('user', {
+      user: newUser,
+      subjects: subjects
+    });
   });
 });
 
