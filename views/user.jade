@@ -48,10 +48,13 @@ block content
                 label.contol-label.col-sm-2 Expert for
                 .col-sm-10
                   select.form-control(name='expert')
-                    option(value='', disabled=true, selected) choose
+                    option(value='') None
                     each subject in subjects
-                      option(value=''+subject)= subject
-              button.btn.btn-default(type='reset') reset
+                      if (user.expert === subject)
+                        option(value=''+subject, selected)= subject
+                      else
+                        option(value=''+subject)= subject
+              button.btn.btn-default(type='reset')#reset reset
               != '  '
               button.btn.btn-primary(type='submit', disabled)#update update
           else
@@ -64,6 +67,10 @@ block content
               .row
                 label.contol-label.col-sm-2 Expert for
                 .col-sm-10= user.expert
+block side
+  each h in user.__updates.reverse()
+    +change(h)
 block js
   if (session.roles.admin)
     script(type='text/javascript', src='/javascripts/user-admin.js')
+    script(type='text/javascript', src='/formbinder/binder.js')

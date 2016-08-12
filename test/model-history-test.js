@@ -140,4 +140,34 @@ describe('model/history', function () {
       });
     });
   });
+
+  describe('#saveHistory()', function () {
+    it('save an arbitrary history', function (done) {
+      UserTest.findOne({
+        adid: 'test'
+      }, function (err, user) {
+        if (err) {
+          return done(err);
+        }
+        user.office = 'somewhere else';
+        user.saveHistory('test1', [{
+          p: 'user.office',
+          v: 'somewhere else'
+        }], function (err, hid) {
+          if (err) {
+            return done(err);
+          }
+          History.findById(hid, function (hErr, h) {
+            h.b.should.equal('test1');
+            h.t.should.equal(user.constructor.modelName);
+            h.i.toString().should.equal(user._id.toString());
+            h.c.length.should.equal(1);
+            h.c[0].p.should.equal('user.office');
+            h.c[0].v.should.equal('somewhere else');
+            done();
+          });
+        });
+      });
+    });
+  });
 });
