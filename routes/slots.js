@@ -2,7 +2,7 @@ var express = require('express');
 var slots = express.Router();
 var auth = require('../lib/auth');
 var Slot = require('../models/slot').Slot;
-var SlotGroup = require('../models/slot-group').SlotGroup;
+var log = require('../lib/log');
 
 slots.get('/', auth.ensureAuthenticated, function (req, res) {
   res.render('slots');
@@ -12,7 +12,7 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
   var slotDocs = [];
   Slot.find(function (err, docs) {
     if (err) {
-      console.error(err);
+      log.error(err);
       return res.status(500).send(err.message);
     }
     var count = 0;

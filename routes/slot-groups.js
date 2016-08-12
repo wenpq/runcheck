@@ -4,6 +4,7 @@ var auth = require('../lib/auth');
 var SlotGroup = require('../models/slot-group').SlotGroup;
 var Slot = require('../models/slot').Slot;
 var reqUtils = require('../lib/req-utils');
+var log = require('../lib/log');
 
 slotGroups.get('/', auth.ensureAuthenticated, function (req, res) {
   res.render('slot-groups');
@@ -13,7 +14,7 @@ slotGroups.get('/', auth.ensureAuthenticated, function (req, res) {
 slotGroups.get('/json', auth.ensureAuthenticated, function (req, res) {
   SlotGroup.find(function(err, docs) {
     if (err) {
-      console.error(err);
+      log.error(err);
       return res.status(500).send(err.message);
     }
     res.status(200).json(docs);
@@ -28,7 +29,7 @@ slotGroups.get('/:id', auth.ensureAuthenticated, function (req, res) {
 slotGroups.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
   SlotGroup.findOne({_id: req.params.id },function(err, doc) {
     if (err) {
-      console.error(err);
+      log.error(err);
       return res.status(500).send(err.message);
     }
     res.status(200).json(doc);
@@ -39,12 +40,12 @@ slotGroups.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
 slotGroups.get('/:id/slots', auth.ensureAuthenticated, function (req, res) {
   SlotGroup.findOne({ _id: req.params.id },{ slots: 1, _id: 0 }, function(err, doc) {
     if (err) {
-      console.error(err);
+      log.error(err);
       return res.status(500).send(err.message);
     }
     Slot.find({ _id: {$in: doc.slots }},function(err, docs) {
       if (err) {
-        console.error(err);
+        log.error(err);
         return res.status(500).send(err.message);
       }
       res.status(200).json(docs);
@@ -74,7 +75,7 @@ slotGroups.post('/validateAdd', auth.ensureAuthenticated, function (req, res) {
     '_id': {$in: req.body.slotIds}
   }, function (err, docs) {
     if (err) {
-      console.error(err);
+      log.error(err);
       return res.status(500).send(err.message);
     }
     // divied two parts by inGroup field
@@ -127,14 +128,14 @@ slotGroups.post('/addSlots', auth.ensureAuthenticated, reqUtils.exist('gid', Slo
   req[req.body.gid].slots.addToSet(req.body.sid);
   req[req.body.gid].save(function(err) {
     if (err) {
-      console.error(err);
+      log.error(err);
       return res.status(500).send(err.message);
     }
     // change inGroup
     req[req.body.sid].inGroup = req.body.gid;
     req[req.body.sid].save(function(err) {
       if (err) {
-        console.error(err);
+        log.error(err);
         return res.status(500).send(err.message);
       }
       var url = '/slotGroups/' + req.body.gid + '/slot/' + req.body.sid;
@@ -157,12 +158,12 @@ slotGroups.delete('/:gid/slot/:sid', auth.ensureAuthenticated, reqUtils.exist('g
   // temparay soltuton for verson error
   SlotGroup.update({_id: req.params.gid},{ $pull: {slots: req.params.sid} }, function(err) {
     if (err) {
-      console.error(err);
+      log.error(err);
       return res.status(500).send(err.message);
     }
     Slot.update({_id: req.params.sid},{inGroup: null}, function(err){
       if (err) {
-        console.error(err);
+        log.error(err);
         return res.status(500).send(err.message);
       }
       return res.status(200).end();
