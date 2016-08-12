@@ -31,7 +31,7 @@ $('#modal').on('click','#modal-cancel',function (e) {
 $('#modal').on('click','#modal-submit',function (e) {
   e.preventDefault();
   for (var i=0; i< passData.length; i++) {
-    var url = window.location.href + '/slot/' + passData[i].id;
+    var url = window.location.href + '/slots/' + passData[i].id;
     (function (i) {
       $.ajax({
         url: url,

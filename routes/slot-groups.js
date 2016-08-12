@@ -114,31 +114,31 @@ slotGroups.post('/validateAdd', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
-slotGroups.post('/addSlots', auth.ensureAuthenticated, reqUtils.exist('gid', SlotGroup, '_id', 'body'), reqUtils.exist('sid', Slot, '_id', 'body'), function (req, res) {
+slotGroups.post('/:gid/slots', auth.ensureAuthenticated, reqUtils.exist('gid', SlotGroup), reqUtils.exist('sid', Slot, '_id', 'body'), function (req, res) {
   // check whether slot is not in slot group
-  if (req[req.body.gid].slots.indexOf(req.body.sid) !== -1) {
-    return res.status(403).send('Can not add: Slot ' + req.body.sid + ' is in slot group ' + req.body.gid);
+  if (req[req.params.gid].slots.indexOf(req.body.sid) !== -1) {
+    return res.status(409).send('Conflict: slot ' + req.body.sid + ' is in slot group ' + req.params.gid);
   }
   // check whether slot.inGroup is null
   if (req[req.body.sid].inGroup) {
-    return res.status(403).send('Can not add: The inGroup field in group of ' + req.body.gid + ' is not null.');
+    return res.status(409).send('Conflict: the inGroup field in group of ' + req.params.gid + ' is not null.');
   }
 
   // add to .slots
-  req[req.body.gid].slots.addToSet(req.body.sid);
-  req[req.body.gid].save(function(err) {
+  req[req.params.gid].slots.addToSet(req.body.sid);
+  req[req.params.gid].save(function(err) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
     // change inGroup
-    req[req.body.sid].inGroup = req.body.gid;
+    req[req.body.sid].inGroup = req.params.gid;
     req[req.body.sid].save(function(err) {
       if (err) {
         log.error(err);
         return res.status(500).send(err.message);
       }
-      var url = '/slotGroups/' + req.body.gid + '/slot/' + req.body.sid;
+      var url = '/slotGroups/' + req.params.gid + '/slots/' + req.body.sid;
       res.location(url);
       return res.status(201).end();
     })
@@ -146,16 +146,16 @@ slotGroups.post('/addSlots', auth.ensureAuthenticated, reqUtils.exist('gid', Slo
 });
 
 
-slotGroups.delete('/:gid/slot/:sid', auth.ensureAuthenticated, reqUtils.exist('gid', SlotGroup), reqUtils.exist('sid', Slot), function (req, res) {
+slotGroups.delete('/:gid/slots/:sid', auth.ensureAuthenticated, reqUtils.exist('gid', SlotGroup), reqUtils.exist('sid', Slot), function (req, res) {
   // check whether slot is in slot group
   if (req[req.params.gid].slots.indexOf(req.params.sid) === -1) {
-    return res.status(403).send('Can not remove: Slot ' + req.params.sid + ' is not in slot group ' + req.params.gid);
+    return res.status(409).send('Conflict: slot ' + req.params.sid + ' is not in slot group ' + req.params.gid);
   }
   // check whether slot.inGroup is not null
   if (!req[req.params.sid].inGroup) {
-    return res.status(403).send('Can not remove: The inGroup field in group of ' + req.params.gid + ' is null.');
+    return res.status(409).send('Conflict: the inGroup field in group of ' + req.params.gid + ' is null.');
   }
-  // temparay soltuton for verson error
+  // temparay soltuton for version error
   SlotGroup.update({_id: req.params.gid},{ $pull: {slots: req.params.sid} }, function(err) {
     if (err) {
       log.error(err);

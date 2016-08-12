@@ -93,14 +93,13 @@ $('#modal').on('click','#modal-cancel',function (e) {
 $('#modal').on('click','#modal-submit',function (e) {
   e.preventDefault();
   for (var i=0; i< passData.length; i++) {
-    var url = '/slotGroups/addSlots';
+    var url = '/slotGroups/' + selectGroupId + '/slots';
     (function (i) {
       $.ajax({
         url: url,
         type: 'POST',
         contentType: 'application/json',
         data: JSON.stringify({
-          gid: selectGroupId,
           sid: passData[i].id
         })
       }).done(function () {
