@@ -154,8 +154,8 @@ slotGroups.delete('/:gid/slot/:sid', auth.ensureAuthenticated, reqUtils.exist('g
   if (!req[req.params.sid].inGroup) {
     return res.status(403).send('Can not remove: The inGroup field in group of ' + req.params.gid + ' is null.');
   }
-
-  SlotGroup.findOneAndUpdate({_id: req.params.gid},{ $pull: {slots: req.params.sid} }, function(err) {
+  // temparay soltuton for verson error
+  SlotGroup.update({_id: req.params.gid},{ $pull: {slots: req.params.sid} }, function(err) {
     if (err) {
       console.error(err);
       return res.status(500).send(err.message);
@@ -167,26 +167,6 @@ slotGroups.delete('/:gid/slot/:sid', auth.ensureAuthenticated, reqUtils.exist('g
       }
       return res.status(200).end();
     });
-
-  // pull to .slots
-/*  console.log('$$: sid' + req.params.sid + '    version: ' + req[req.params.gid].__v);
-  // req[req.params.gid].slots.pull(req.params.sid);
-  req[req.params.gid].save(function(err,gdoc) {
-    if (err) {
-      console.error(err);
-      return res.status(500).send(err.message);
-    }
-    req[req.params.gid] = gdoc; // solve VersionError
-    // change inGroup to null
-    req[req.params.sid].inGroup = null;
-    req[req.params.sid].save(function(err, sdoc) {
-      if (err) {
-        console.error(err);
-        return res.status(500).send(err.message);
-      }
-      req[req.params.gid] = sdoc; // solve VersionError
-      return res.status(200).end();
-    })*/
   });
 });
 
