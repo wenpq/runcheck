@@ -17,7 +17,7 @@ header
             a(href='/slotgroups/') Slot groups
           li
             a(href='/checklists/') Checklists
-          if (locals.session && locals.session.userid && locals.session.roles && locals.session.roles.indexOf('admin') !== -1)
+          if (locals.session && locals.session.userid && locals.session.roles && locals.session.roles.admin)
             li
               a(href='/admin/', target='_blank') Admin
         ul.nav.navbar-nav.navbar-right

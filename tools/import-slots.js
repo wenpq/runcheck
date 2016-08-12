@@ -44,7 +44,7 @@ if (!fs.existsSync(realPath)) {
 console.log('----------Import Data from xlsx file to MongoDB-------------');
 var slots = sutil.getSlotJson(realPath);
 console.log('Get ' + slots.length + ' entries from ' + realPath);
-sutil.slotValidate(slots,function(err, data) {
+sutil.slotValidate(slots, function (err, data) {
   if (err) {
     console.error(err);
   }
@@ -53,12 +53,32 @@ sutil.slotValidate(slots,function(err, data) {
     console.log('Dry run end');
   }
   if (program.outfile) {
-    sutil.saveFile(data,program.outfile);
+    sutil.saveFile(data, program.outfile);
   }
   if (program.mongo) {
     // connect mongo starts
     var mongoURL = 'mongodb://' + (config.mongo.address || 'localhost') + ':' + (config.mongo.port || '27017') + '/' + (config.mongo.db || 'runcheck');
-    mongoose.connect(mongoURL);
+    var mongoOptions = {
+      db: {
+        native_parser: true
+      },
+      server: {
+        poolSize: 5,
+        socketOptions: {
+          connectTimeoutMS: 30000,
+          keepAlive: 1
+        }
+      }
+    };
+    if (config.mongo.user && config.mongo.pass) {
+      mongoOptions.user = config.mongo.user;
+      mongoOptions.pass = config.mongo.pass;
+    }
+
+    if (config.mongo.auth) {
+      mongoOptions.auth = config.mongo.auth;
+    }
+    mongoose.connect(mongoURL, mongoOptions);
     mongoose.connection.on('connected', function () {
       console.log('Mongoose default connection opened.');
     });
@@ -70,7 +90,7 @@ sutil.slotValidate(slots,function(err, data) {
       process.exit(0);
     });
     // save to mongo DB
-    saveInMongo(data, function(count){
+    saveInMongo(data, function (count) {
       console.log(count + ' entries are saved(' + ' total are ' + data.length + ' )');
       mongoose.connection.close();
     });
@@ -80,16 +100,17 @@ sutil.slotValidate(slots,function(err, data) {
 
 function saveInMongo(data, callback) {
   mongoose.connection.on('connected', function () {
-    mongoose.connection.db.listCollections({name: 'slots'})
-      .next(function (err, collinfo) {
-        // if MongoDB already had slots data, give up saving
-        if (collinfo && (typeof program.force) === 'undefined') {
-          console.log('Can not save, because MongoDB already had slots data. You can force to save by adding [-f | --force] option.');
-          callback();
-        } else {
-          // Save Data
-          sutil.saveModel(data, callback);
-        }
-      });
+    mongoose.connection.db.listCollections({
+      name: 'slots'
+    }).next(function (err, collinfo) {
+      // if MongoDB already had slots data, give up saving
+      if (collinfo && (typeof program.force) === 'undefined') {
+        console.log('Can not save, because MongoDB already had slots data. You can force to save by adding [-f | --force] option.');
+        callback();
+      } else {
+        // Save Data
+        sutil.saveModel(data, callback);
+      }
+    });
   })
 }

@@ -1,7 +1,9 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
-var Mixed = Schema.Types.Mixed;
+
+var checklist = require('./checklist').deviceChecklistSchema;
+
 
 var device = new Schema({
   serialNo: {
@@ -14,7 +16,7 @@ var device = new Schema({
   department: String,
   owner: String,
   details: ObjectId,
-  checklist: Mixed,
+  checklist: checklist,
   checkedValue: {
     type: Number,
     default: 0,

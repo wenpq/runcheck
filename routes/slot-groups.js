@@ -113,7 +113,7 @@ slotGroups.post('/validateAdd', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
-slotGroups.post('/addSlots', auth.ensureAuthenticated, reqUtils.exist('gid', SlotGroup, 'body'), reqUtils.exist('sid', Slot, 'body'), function (req, res) {
+slotGroups.post('/addSlots', auth.ensureAuthenticated, reqUtils.exist('gid', SlotGroup, '_id', 'body'), reqUtils.exist('sid', Slot, '_id', 'body'), function (req, res) {
   // check whether slot is not in slot group
   if (req[req.body.gid].slots.indexOf(req.body.sid) !== -1) {
     return res.status(403).send('Can not add: Slot ' + req.body.sid + ' is in slot group ' + req.body.gid);
