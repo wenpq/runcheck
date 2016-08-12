@@ -38,20 +38,18 @@ $('#modal').on('click','#modal-submit',function (e) {
         type: 'DELETE'
       }).done(function () {
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: ' + passData[i].name  + ' is removed.</div>');
-        if(i==passData.length-1){
-          deleteRow();
-          reset();
-        }
       }).fail(function (jqXHR) {
         $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + 'Error: ' + jqXHR.responseText + '. remove ' + passData[i].name + ' faild.</div>');
-        if(i==passData.length-1){
-          deleteRow();
-          reset();
-        }
       });
     })(i);
   }
+  $(document).ajaxStop(function () {
+    deleteRow();
+    reset();
+  });
 });
+
+
 
 function reset() {
   $('.modal-body').html( '<div class="panel"> ' +

@@ -104,13 +104,14 @@ $('#modal').on('click','#modal-submit',function (e) {
         })
       }).done(function () {
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: ' + passData[i].name  + ' is added.</div>');
-        if(i==passData.length-1)reset();
       }).fail(function (jqXHR) {
         $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + 'Error: ' + jqXHR.responseText + ', add ' + passData[i].name + ' faild.</div>');
-        if(i==passData.length-1)reset();
       });
     })(i);
   }
+  $(document).ajaxStop(function () {
+    reset();
+  });
 });
 
 function reset() {
