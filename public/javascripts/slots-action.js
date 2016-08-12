@@ -92,6 +92,7 @@ $('#modal').on('click','#modal-cancel',function (e) {
 
 $('#modal').on('click','#modal-submit',function (e) {
   e.preventDefault();
+  var count = 1;
   for (var i=0; i< passData.length; i++) {
     var url = '/slotGroups/' + selectGroupId + '/slots';
     (function (i) {
@@ -104,14 +105,21 @@ $('#modal').on('click','#modal-submit',function (e) {
         })
       }).done(function () {
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: ' + passData[i].name  + ' is added.</div>');
+        if(count==passData.length){
+          reset();
+        }else {
+          count++;
+        }
       }).fail(function (jqXHR) {
         $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + 'Error: ' + jqXHR.responseText + ', add ' + passData[i].name + ' faild.</div>');
+        if(count==passData.length){
+          reset();
+        }else {
+          count++;
+        }
       });
     })(i);
   }
-  $(document).ajaxStop(function () {
-    reset();
-  });
 });
 
 function reset() {

@@ -30,6 +30,7 @@ $('#modal').on('click','#modal-cancel',function (e) {
 
 $('#modal').on('click','#modal-submit',function (e) {
   e.preventDefault();
+  var count = 1;
   for (var i=0; i< passData.length; i++) {
     var url = window.location.href + '/slots/' + passData[i].id;
     (function (i) {
@@ -38,18 +39,25 @@ $('#modal').on('click','#modal-submit',function (e) {
         type: 'DELETE'
       }).done(function () {
         $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: ' + passData[i].name  + ' is removed.</div>');
+        if(count==passData.length){
+          deleteRow();
+          reset();
+        }else {
+          count++;
+        }
       }).fail(function (jqXHR) {
         $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + 'Error: ' + jqXHR.responseText + '. remove ' + passData[i].name + ' faild.</div>');
+        count++;
+        if(count==passData.length){
+          deleteRow();
+          reset();
+        }else {
+          count++;
+        }
       });
     })(i);
   }
-  $(document).ajaxStop(function () {
-    deleteRow();
-    reset();
-  });
 });
-
-
 
 function reset() {
   $('.modal-body').html( '<div class="panel"> ' +
