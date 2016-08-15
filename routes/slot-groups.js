@@ -78,7 +78,10 @@ slotGroups.post('/validateAdd', auth.ensureAuthenticated, function (req, res) {
       log.error(err);
       return res.status(500).send(err.message);
     }
-    // divied two parts by inGroup field
+    if(docs.ength === 0) {
+      return res.status(404).send('slots not found.');
+    }
+    // divied two parts by inGroup failed
     var conflictData = [];
     docs.forEach(function (d) {
       if (d.inGroup) {
@@ -92,6 +95,13 @@ slotGroups.post('/validateAdd', auth.ensureAuthenticated, function (req, res) {
     if(conflictData.length > 0) {
       conflictData.forEach(function (r) {
         SlotGroup.findOne({'_id': r.inGroup}, function(err, conflictGroup) {
+          if(err){
+            log.error(err);
+            return res.status(500).send(err.message);
+          }
+          if(conflictGroup == null) {
+            return res.status(404).send(r.inGroup + ' not found.');
+          }
           conflictDataName.push({
             slot: r.name,
             conflictGroup: conflictGroup.name
@@ -114,59 +124,84 @@ slotGroups.post('/validateAdd', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
-slotGroups.post('/:gid/slots', auth.ensureAuthenticated, reqUtils.exist('gid', SlotGroup), reqUtils.exist('sid', Slot, '_id', 'body'), function (req, res) {
-  // check whether slot is not in slot group
-  if (req[req.params.gid].slots.indexOf(req.body.sid) !== -1) {
-    return res.status(409).send('Conflict: slot ' + req.body.sid + ' is in slot group ' + req.params.gid);
-  }
-  // check whether slot.inGroup is null
-  if (req[req.body.sid].inGroup) {
-    return res.status(409).send('Conflict: the inGroup field in group of ' + req.params.gid + ' is not null.');
-  }
 
-  // add to .slots
-  req[req.params.gid].slots.addToSet(req.body.sid);
-  req[req.params.gid].save(function(err) {
-    if (err) {
-      log.error(err);
-      return res.status(500).send(err.message);
-    }
-    // change inGroup
-    req[req.body.sid].inGroup = req.params.gid;
-    req[req.body.sid].save(function(err) {
-      if (err) {
-        log.error(err);
-        return res.status(500).send(err.message);
+slotGroups.post('/:gid/addSlots', function (req, res) {
+  var passData = req.body.passData;
+  var count = 0;
+  var errMsg = [];
+  var doneMsg = [];
+  passData.forEach(function(d){
+    Slot.update({_id: d.id, inGroup: null}, {inGroup: req.params.gid}, function(err,raw) {
+      if(err || raw.nModified == 0) {
+        var msg = err ? err.message : d.name + ' not matched';
+        log.error(msg);
+        errMsg.push('Failed: ' + d.name + msg);
+        count++;
+        if (count === passData.length ) {
+          return res.status(201).json({
+            errMsg: errMsg,
+            doneMsg: doneMsg
+          });
+        }
+      }else {
+        SlotGroup.update({_id: req.params.gid}, {$addToSet: {slots: d.id} }, function(err,raw) {
+          count++;
+          if(err || raw.nModified == 0) {
+            var msg = err ? err.message : 'group not matched';
+            log.error(msg);
+            errMsg = errMsg.push('Failed: ' + msg);
+          }else {
+            doneMsg.push('Success: ' + d.name + ' is added.');
+          }
+          if (count === passData.length ) {
+            return res.status(201).json({
+              errMsg: errMsg,
+              doneMsg: doneMsg
+            });
+          }
+        })
       }
-      var url = '/slotGroups/' + req.params.gid + '/slots/' + req.body.sid;
-      res.location(url);
-      return res.status(201).end();
-    })
+    });
   });
 });
 
 
-slotGroups.delete('/:gid/slots/:sid', auth.ensureAuthenticated, reqUtils.exist('gid', SlotGroup), reqUtils.exist('sid', Slot), function (req, res) {
-  // check whether slot is in slot group
-  if (req[req.params.gid].slots.indexOf(req.params.sid) === -1) {
-    return res.status(409).send('Conflict: slot ' + req.params.sid + ' is not in slot group ' + req.params.gid);
-  }
-  // check whether slot.inGroup is not null
-  if (!req[req.params.sid].inGroup) {
-    return res.status(409).send('Conflict: the inGroup field in group of ' + req.params.gid + ' is null.');
-  }
-  // temparay soltuton for version error
-  SlotGroup.update({_id: req.params.gid},{ $pull: {slots: req.params.sid} }, function(err) {
-    if (err) {
-      log.error(err);
-      return res.status(500).send(err.message);
-    }
-    Slot.update({_id: req.params.sid},{inGroup: null}, function(err){
-      if (err) {
-        log.error(err);
-        return res.status(500).send(err.message);
+slotGroups.post('/:gid/removeSlots', function (req, res) {
+  var passData = req.body.passData;
+  var count = 0;
+  var errMsg = [];
+  var doneMsg = [];
+  passData.forEach(function(d){
+    Slot.update({_id: d.id, inGroup: { $ne : null }}, {inGroup: null}, function(err, raw) {
+      if(err || raw.nModified == 0) {
+        count++;
+        var msg = err ? err.message : d.name + ' not matched';
+        log.error(msg);
+        errMsg.push('Failed: ' + msg);
+        if (count === passData.length ) {
+          return res.status(201).json({
+            errMsg: errMsg,
+            doneMsg: doneMsg
+          });
+        }
+      }else {
+        SlotGroup.update({_id: req.params.gid}, {$pull: {slots: d.id} }, function(err,raw) {
+          count++;
+          if(err || raw.nModified == 0) {
+            var msg = err ? err.message : 'group not matched';
+            log.error(msg);
+            errMsg = errMsg.push('Failed: ' + msg);
+          }else {
+            doneMsg.push('Success: ' + d.name + ' is removed.');
+          }
+          if (count === passData.length ) {
+            return res.status(200).json({
+              errMsg: errMsg,
+              doneMsg: doneMsg
+            });
+          }
+        })
       }
-      return res.status(200).end();
     });
   });
 });

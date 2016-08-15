@@ -30,33 +30,36 @@ $('#modal').on('click','#modal-cancel',function (e) {
 
 $('#modal').on('click','#modal-submit',function (e) {
   e.preventDefault();
-  var count = 1;
-  for (var i=0; i< passData.length; i++) {
-    var url = window.location.href + '/slots/' + passData[i].id;
-    (function (i) {
-      $.ajax({
-        url: url,
-        type: 'DELETE'
-      }).done(function () {
-        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: ' + passData[i].name  + ' is removed.</div>');
-        if(count==passData.length){
-          deleteRow();
-          reset();
-        }else {
-          count++;
-        }
-      }).fail(function (jqXHR) {
-        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + 'Error: ' + jqXHR.responseText + '. remove ' + passData[i].name + ' faild.</div>');
-        count++;
-        if(count==passData.length){
-          deleteRow();
-          reset();
-        }else {
-          count++;
-        }
-      });
-    })(i);
-  }
+  var url = window.location.href + '/removeSlots';
+  $.ajax({
+    url: url,
+    type: 'Post',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      passData: passData,
+    })
+  }).done(function (data) {
+    if(data.doneMsg.length) {
+      var s = '';
+      for(var i = 0; i < data.doneMsg.length; i++){
+        s =  s + data.doneMsg[i]+ '<br>';
+      }
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' +  s +'</div>');
+    }
+    if(data.errMsg.length) {
+      var es = '';
+      for(i = 0; i < data.errMsg.length; i++){
+        es =  es + data.errMsg[i]+ '<br>';
+      }
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' +  es +'</div>');
+    }
+    reloadTable();
+    reset();
+  }).fail(function (jqXHR) {
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' +  jqXHR.responseText + '</div>');
+    reloadTable();
+    reset();
+  });
 });
 
 function reset() {
@@ -70,6 +73,6 @@ function reset() {
   passData = null;
 }
 
-function deleteRow() {
-  $('#spec-slots-table').DataTable().rows($('.row-selected')).remove().draw();
+function reloadTable() {
+  $('#spec-slots-table').DataTable().ajax.reload();
 }
