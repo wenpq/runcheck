@@ -13,6 +13,8 @@ var log = require('../lib/log');
 var reqUtils = require('../lib/req-utils');
 var subjects = require('../models/checklist').subjects;
 
+var moment = require('moment');
+
 var fs = require('fs');
 var pending_photo = {};
 var options = {
@@ -215,7 +217,8 @@ users.get('/:id', auth.ensureAuthenticated, reqUtils.exist('id', User, 'adid'), 
     }
     return res.render('user', {
       user: newUser,
-      subjects: subjects
+      subjects: subjects,
+      moment: moment
     });
   });
 });
