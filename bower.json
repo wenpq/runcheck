@@ -21,6 +21,7 @@
     "components-font-awesome": "4.6.3",
     "datatables": "1.10.12",
     "holderjs": "2.9.3",
-    "formbinder": "https://github.com/dongliu/formbinder.git"
+    "formbinder": "https://github.com/dongliu/formbinder.git",
+    "moment": "2.14.1"
   }
 }
