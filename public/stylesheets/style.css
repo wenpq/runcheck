@@ -44,3 +44,7 @@ body {
   width: 100%;
   color: black;
 }
+
+.modal-content {
+  margin-top: 30%;
+}

@@ -7,6 +7,36 @@ block head
 block content
   .container
     br
+    #message
+      #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
+        .modal-dialog
+          .modal-content
+            .modal-header
+              h3 Create new sot group
+            .modal-body
+              form.form-horizontal
+                .form-group
+                  label.col-sm-2.control-label Name
+                  .col-sm-10
+                    input#c-name.form-control(type='text', placeholder='Slot group Name')
+                .form-group
+                  label.col-sm-2.control-label Area
+                  .col-sm-10
+                    input#c-area.form-control(type='text', placeholder='Area')
+                .form-group
+                  label.col-sm-2.control-label Description
+                  .col-sm-10
+                    input#c-description.form-control(type='text', placeholder='A brief description')
+                .form-group
+                  .col-sm-offset-2.col-sm-10
+                    button#c-confirm.btn.btn-primary(type='submit') Confrm
+                    | &nbsp
+                    button#c-cancel.btn.btn-defalt Cancel
+              #message2
+    form.form-inline
+      button.btn.btn-primary#new
+        | New Group
+    br
     #slot-groups.tab-pane.active
       table#slot-groups-table.table.table-responsive.table-condensed.table-bordered.table-hover
 
@@ -16,3 +46,4 @@ block js
   script(type='text/javascript', src='/holderjs/holder.min.js')
   script(type='text/javascript', src='/javascripts/table.js')
   script(type='text/javascript', src='/javascripts/slot-groups-table.js')
+  script(type='text/javascript', src='/javascripts/slot-groups-action.js')

@@ -5,10 +5,12 @@ var detailsColum = {
   title: 'Details',
   data: '_id',
   render: function (data) {
-    return '<a href="' + '/slotGroups/' + data + '" target="_blank" data-toggle="tooltip" title="go to the slots group details"><i class="fa fa-list-alt fa-2x"></i></a>';
+    return '<a href="' + '/slotGroups/' + data + '" target="_blank" data-toggle="tooltip" title="go to the slot group details"><i class="fa fa-list-alt fa-2x"></i></a>';
   },
   order: false
 };
+
+var createByColumn = Table.personColumn('Created by', 'createdBy');
 
 var nameColumn = {
   title: 'Name',
@@ -34,7 +36,7 @@ var discriptionColumn = {
 
 
 $(function () {
-  var slotGroupColumns = [Table.selectColumn, detailsColum, nameColumn, areaColumn, discriptionColumn];
+  var slotGroupColumns = [Table.selectColumn, detailsColum, createByColumn, nameColumn, areaColumn, discriptionColumn];
 
   $('#slot-groups-table').DataTable({
     ajax: {

@@ -13,7 +13,11 @@ var slotGroup = new Schema({
   descripton: String,
   slots: [ObjectId],
   ARRChecklist: Mixed,
-  DRRChecklist: Mixed
+  DRRChecklist: Mixed,
+  createdBy: String,
+  createdOn: {
+    type: Date,
+    default: Date.now }
 });
 
 var SlotGroup = mongoose.model('SlotGroup', slotGroup);
