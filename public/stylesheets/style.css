@@ -44,3 +44,8 @@ body {
   width: 100%;
   color: black;
 }
+
+#side {
+  max-height: 150vh;
+  overflow-y: auto;
+}
