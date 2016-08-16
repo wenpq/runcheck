@@ -67,9 +67,9 @@ block content
               .row
                 label.contol-label.col-sm-2 Expert for
                 .col-sm-10= user.expert
-block side
+block history
   each h in user.__updates.reverse()
-    +change(h)
+    +change(h, moment)
 block js
   if (session.roles.admin)
     script(type='text/javascript', src='/javascripts/user-admin.js')

@@ -1,22 +1,23 @@
-mixin change(h)
-  .change(id= h._id)
-    img.user-img-smaller(data-src='holder.js/22x30?size=20&text=' + h.b.substr(0, 1).toUpperCase(), src= '/users/' + h.b + '/photo', title= h.b)
-    = ' '
-    | updated
-    - var i = 0
-    each change in h.c
+mixin change(h, moment)
+  if (typeof h == 'object')
+    .change(id= h._id)
+      img.user-img-smaller(data-src='holder.js/22x30?size=20&text=' + h.b.substr(0, 1).toUpperCase(), src= '/users/' + h.b + '/photo', title= h.b)
       = ' '
-      span.property.mark= change.p
-      = ' '
-      | to
-      = ' '
-      span.value.mark= change.v
-      - i += 1
-      if (i == h.c.length)
+      | updated
+      - var i = 0
+      each change in h.c
         = ' '
-      else
-        = ', and '
-    = ' '
-    | at
-    = ' '
-    span.date= moment(h.a).format('MMM D YYYY,  h:mm:ss a')
+        span.property.mark= change.p
+        = ' '
+        | to
+        = ' '
+        span.value.mark= change.v
+        - i += 1
+        if (i == h.c.length)
+          = ' '
+        else
+          = ', and '
+      = ' '
+      | at
+      = ' '
+      span.date= moment(h.a).format('MMM D YYYY,  h:mm:ss a')
