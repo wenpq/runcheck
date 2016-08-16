@@ -4,9 +4,9 @@ block head
   title FRIB runcheck - #{user.name}
 
 block content
-  .container(style="margin-top: 10px")
-    #message
-    #profile.well
+  #message
+  .well(style="margin-top: 10px")
+    #profile
       img(src='/users/#{user.adid}/photo')
       dl
         dt Name
@@ -73,4 +73,5 @@ block side
 block js
   if (session.roles.admin)
     script(type='text/javascript', src='/javascripts/user-admin.js')
+    script(type='text/javascript', src='/holderjs/holder.min.js')
     script(type='text/javascript', src='/formbinder/binder.js')
