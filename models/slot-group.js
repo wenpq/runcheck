@@ -10,7 +10,7 @@ var slotGroup = new Schema({
     unique: true
   },
   area: String,
-  descripton: String,
+  description: String,
   slots: [ObjectId],
   ARRChecklist: Mixed,
   DRRChecklist: Mixed,

@@ -26,17 +26,17 @@ var areaColumn = {
   searching: true
 };
 
-var discriptionColumn = {
-  title: 'Discription',
+var descriptionColumn = {
+  title: 'Description',
   defaultContent: 'unknown',
-  data: 'discription',
+  data: 'description',
   searching: true
 };
 // slotGroup columns end
 
 
 $(function () {
-  var slotGroupColumns = [Table.selectColumn, detailsColum, createByColumn, nameColumn, areaColumn, discriptionColumn];
+  var slotGroupColumns = [Table.selectColumn, detailsColum, createByColumn, nameColumn, areaColumn, descriptionColumn];
 
   $('#slot-groups-table').DataTable({
     ajax: {

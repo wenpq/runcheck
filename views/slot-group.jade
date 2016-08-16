@@ -16,13 +16,36 @@ block content
               h3#modalLabel
             .modal-footer
     form.form-inline
-      button.btn.btn-primary#remove
-        | Remove
-    br
-    #slots.tab-pane.active
-      table#spec-slots-table.table.table-bordered.table-hover
-
-
+      .panel.panel-default
+        .panel-heading
+          strong Basic Infomation
+        .panel-body
+          .container
+            table.table
+              thead
+                tr
+                  th Name
+                  th Created By
+                  th Created On
+                  th Area
+                  th Description
+              tbody
+                tr
+                  td #{group.name}
+                  td #{group.createdBy}
+                  td #{group.createdOn}
+                  td #{group.area}
+                  td #{group.description}
+      .panel.panel-default
+        .panel-heading
+          strong Slots
+        .panel-body
+          button.btn.btn-primary#remove
+            | Remove
+          br
+          br
+          #slots.tab-pane.active
+            table#spec-slots-table.table.table-bordered.table-hover
 block js
   script(type='text/javascript', src='/datatables/media/js/jquery.dataTables.js')
   script(type='text/javascript', src='/datatables/media/js/dataTables.bootstrap.js')
