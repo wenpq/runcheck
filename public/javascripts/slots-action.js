@@ -114,9 +114,9 @@ $('#modal').on('click','#modal-submit',function (e) {
       }
       $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' +  es +'</div>');
     }
-    reset();
   }).fail(function (jqXHR) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
+  }).always(function () {
     reset();
   });
 });
