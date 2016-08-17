@@ -3,7 +3,6 @@ var slotGroups = express.Router();
 var auth = require('../lib/auth');
 var SlotGroup = require('../models/slot-group').SlotGroup;
 var Slot = require('../models/slot').Slot;
-var reqUtils = require('../lib/req-utils');
 var log = require('../lib/log');
 
 slotGroups.get('/', auth.ensureAuthenticated, function (req, res) {
@@ -23,19 +22,14 @@ slotGroups.get('/json', auth.ensureAuthenticated, function (req, res) {
 
 
 slotGroups.get('/:id', auth.ensureAuthenticated, function (req, res) {
-  res.render('slot-group');
-});
-
-slotGroups.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
   SlotGroup.findOne({_id: req.params.id },function(err, doc) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
-    res.status(200).json(doc);
+    res.render('slot-group',{group: doc});
   });
 });
-
 
 slotGroups.get('/:id/slots', auth.ensureAuthenticated, function (req, res) {
   SlotGroup.findOne({ _id: req.params.id },{ slots: 1, _id: 0 }, function(err, doc) {
@@ -53,6 +47,24 @@ slotGroups.get('/:id/slots', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
+
+slotGroups.post('/new', auth.ensureAuthenticated, function (req, res) {
+  var group = new SlotGroup({ name: req.body.name,
+    area: req.body.area,
+    description: req.body.description,
+    createdBy: req.session.userid,
+    createdOn: Date.now()
+  });
+  group.save(function(err, newDoc) {
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
+    }
+    var url = '/slotGroups/' + newDoc._id;
+    res.set('Location', url);
+    return res.status(201).send('You can see the new slot group at <a href="' + url + '">' + url + '</a>');
+  });
+});
 
 /*
  Validation for adding slot to group, return json data:

@@ -53,11 +53,10 @@ $('#modal').on('click','#modal-submit',function (e) {
       }
       $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' +  es +'</div>');
     }
-    reloadTable();
-    reset();
   }).fail(function (jqXHR) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' +  jqXHR.responseText + '</div>');
-    reloadTable();
+  }).always(function() {
+    $('#spec-slots-table').DataTable().ajax.reload();// reload table
     reset();
   });
 });
@@ -71,8 +70,4 @@ function reset() {
     '<select class="form-control"></select> ' +
     '</form>');
   passData = null;
-}
-
-function reloadTable() {
-  $('#spec-slots-table').DataTable().ajax.reload();
 }
