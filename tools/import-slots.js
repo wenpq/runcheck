@@ -1,6 +1,4 @@
 #!/usr/bin/env node
-
-var sutil = require('./utils');
 var config = require('../config/config.js');
 var mongoose = require('mongoose');
 var program = require('commander');
@@ -13,7 +11,7 @@ program.version('0.0.1')
   .option('-d, --dryrun', 'validate data by schema in MongoDB.')
   .option('-m, --mongo', 'save data in defoult MongoDB.')
   .option('-o, --outfile [outfle]', 'save data in specified file.')
-  .option('-f, --force', 'force to save n MongoDB when the DB already has data.')
+  .option('-f, --force', 'force to save in MongoDB when the DB already has data.')
   .arguments('<spec>')
   .action(function (sp) {
     inputPath = sp;
@@ -23,28 +21,54 @@ program.parse(process.argv);
 
 // check path starts
 if (inputPath === undefined) {
-  console.error('Need the input xlsx spec file path!');
-  process.exit(1);
-}
-var suffix = inputPath.split('.').pop();
-if (suffix !== 'xlsx') {
-  console.error('File format must be xlsx.');
+  console.error('Need the input config file path!');
   process.exit(1);
 }
 var realPath = path.resolve(process.cwd(), inputPath);
 if (!fs.existsSync(realPath)) {
   console.log(realPath);
   console.error(realPath + ' does not exist.');
-  console.error('Please input a valid spec file path.');
+  console.error('Please input a valid config file path.');
   process.exit(1);
 }
 // check path end
 
 
+// check global.lconfig starts
+global.lconfig = require(realPath);
+// essential field
+var essential = ['name','model','collection','file','nameMap','position'];
+for(var i = 0; i < essential.length; i++) {
+  if(!global.lconfig[essential[i]]) {
+    console.error('error: ' + essential[i] + ' is required in config file.');
+    process.exit(1);
+  }
+}
+// suffix must be xlsx
+var suffix = global.lconfig.file.split('.').pop();
+if (suffix !== 'xlsx') {
+  console.error('error: File format must be xlsx.');
+  process.exit(1);
+}
+// array field
+if(!Array.isArray(global.lconfig.position)) {
+  console.error('error: sheet field must be array');
+  process.exit(1);
+}
+if(!Array.isArray(global.lconfig.nameMap)) {
+  console.error('error: nameMap field must be array');
+  process.exit(1);
+}
+// check confg end
+
+
 console.log('----------Import Data from xlsx file to MongoDB-------------');
-var slots = sutil.getSlotJson(realPath);
-console.log('Get ' + slots.length + ' entries from ' + realPath);
-sutil.slotValidate(slots, function (err, data) {
+var sutil = require('./utils');
+
+var datalist = sutil.getXlsxJson(global.lconfig.file);
+console.log('Get ' + datalist.length + ' entries from ' + global.lconfig.file);
+
+sutil.dataValidate(datalist, function (err, data) {
   if (err) {
     console.error(err);
   }
@@ -101,11 +125,11 @@ sutil.slotValidate(slots, function (err, data) {
 function saveInMongo(data, callback) {
   mongoose.connection.on('connected', function () {
     mongoose.connection.db.listCollections({
-      name: 'slots'
+      name: global.lconfig.collection
     }).next(function (err, collinfo) {
-      // if MongoDB already had slots data, give up saving
+      // if MongoDB already had data, give up saving
       if (collinfo && (typeof program.force) === 'undefined') {
-        console.log('Can not save, because MongoDB already had slots data. You can force to save by adding [-f | --force] option.');
+        console.log('Can not save, because MongoDB already had ' + global.lconfig.name + ' data. You can force to save by adding [-f | --force] option.');
         callback();
       } else {
         // Save Data

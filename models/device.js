@@ -32,5 +32,5 @@ var device = new Schema({
 var Device = mongoose.model('Device', device);
 
 module.exports = {
-  Device: Device
+  Device: Device,
 };
