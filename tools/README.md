@@ -36,7 +36,7 @@ use json format file as configuration. Currently, there are three files in drect
 *  slot-config2.json, for slot data import
 *  device-config.json, for device data mport
 
-### essential attributes
+#### essential attributes
 * file
 The specified .xlsx fle path or name.
 * name
@@ -52,21 +52,23 @@ two-dimensional array, The mapping relation betwwen raw column value in file and
     ["serialNo", "FRIB Part Number (w/ SN when applicable)"],
   ]
 ```
-That mean the column, value of which is "FRIB Part Number (w/ SN when applicable)", equals the "serialNo" field in MongoDB.
+That means the column, value of which is "FRIB Part Number (w/ SN when applicable)", equals the "serialNo" field in MongoDB.
 * position
 Json Objects list, the data position in file, include sheet name and data range. For example:
+
 | systm         |subsytem          | devie         |
 | ------------- | ---------------- | ------------- |
 | foo           | 123              | abc           |
 | bar           | 345              | def           |
- If the table is in Devices sheet, the 'system' is in cell A2, and the 'def' is in cell D66, position should be defined like this
+
+ If the table is in Devices sheet, the 'system' is in cell A2, and the 'def' is in cell D66, position should be defined like the following format:
 ```
   "position":[
     {
       "sheet": "Devices",
       "range": "A2:D66"
 ```
-### optional  attributes
+#### optional  attributes
 * filterField
 String list, if a field is defined in filterField and the field(column) vaue is null, the row of data would be omitted.
 
