@@ -1,3 +1,4 @@
+include helper-mixin
 doctype html
 html
   head
@@ -12,6 +13,7 @@ html
           block content
         .col-lg-3.col-md-3.col-sm-12.col-xs-12
           #side
+            h3 History
             block side
     include ./footer.jade
     script(type='text/javascript', src='/datatables/media/js/jquery.dataTables.js')

@@ -2,9 +2,9 @@ var express = require('express');
 var devices = express.Router();
 var auth = require('../lib/auth');
 var Device = require('../models/device').Device;
-var checklistValues = require('../models/device').checklistValues;
-var checklistSubjects = require('../models/device').checklistSubjects;
-var log = require('../lib/log');
+var checklistValues = require('../models/checklist').checklistValues;
+var checklistSubjects = require('../models/checklist').deviceChecklistSubjects;
+
 
 devices.get('/', auth.ensureAuthenticated, function (req, res) {
   res.render('devices');
@@ -12,119 +12,122 @@ devices.get('/', auth.ensureAuthenticated, function (req, res) {
 
 
 devices.get('/json', auth.ensureAuthenticated, function (req, res) {
-  Device.find(function(err, devDocs) {
-    if(err){
-      log.error(err.message);
+  Device.find(function (err, devices) {
+    if (err) {
+      return res.status(500).json({
+        error: {
+          status: err
+        }
+      });
     }
-    res.status(200).json(devDocs);
-  })
+    return res.status(200).json(devices);
+  });
 });
 
 
 devices.get('/:id', auth.ensureAuthenticated, function (req, res) {
-  var deviceId = req.params['id']
-  for( var idx=0; idx<devDocs.length; idx+=1 ) {
-    if( devDocs[idx]._id.equals(deviceId) ) {
-      res.render('device', { 
-        device: devDocs[idx],
-        checklistValues: checklistValues,
-        checklistSubjects: checklistSubjects
+  Device.findById(req.params['id'], function (err, device) {
+    if (err) {
+      return res.status(404).render('error', {
+        error: {
+          status: err
+        }
       });
-      return
     }
-  }
-  res.status(404).render('error', {
-    error:{
-      status:'Device not Found'
-    }
+    return res.render('device', {
+      device: device,
+      checklistValues: checklistValues,
+      checklistSubjects: checklistSubjects
+    });
   });
 });
 
 
 devices.post('/:id', auth.ensureAuthenticated, function (req, res) {
-  var idx = 0, device = null;
-  var nRequired = 0, nChecked = 0;
-  var deviceId = req.params['id'];
-  for( idx=0; idx<devDocs.length; idx+=1 ) {
-    if( devDocs[idx]._id.equals(deviceId) ) {
-      device = devDocs[idx];
+  Device.findById(req.params['id'], function (err, device) {
+    var idx, item, subject, status = 404;
+    var nRequired = 0, nChecked = 0;
+    if (err) {
+      return res.status(status).render('error', {
+        error: {
+          status: err
+        }
+      });
     }
-  }
-  if( !device ) {
-    res.status(404).render('error', {
-      error:{
-        status:'Device not Found'
-      }
-    });
-  }
-
-  if( req.body['action'] === 'configChecklist' ) {
-    if( !device.checklist.length ) {
-      for( idx=0; idx<checklistSubjects.length; idx+=1 ) {
-        device.checklist.push({
-          subject: checklistSubjects[idx],
-          required: false,
-        });
-      }
-    }
-
-    for( idx=0; idx<device.checklist.length; idx+=1 ) {
-      if( req.body.hasOwnProperty(device.checklist[idx].subject) 
-          && req.body[device.checklist[idx].subject] === 'true' ) {
-        device.checklist[idx].required = true;
+    if (req.body['action'] === 'require-checklist') {
+      if (device.checklist) {
+        status = 200;
+        // checklist already created
+        device.checklist.required = true;
       } else {
-        device.checklist[idx].required = false;
-      }
-      // need to update the total required and checked
-      if( device.checklist[idx].required ) {
-        nRequired += 1;
-        if( (device.checklist[idx].value === 'Y')
-            || (device.checklist[idx].value === 'YC') ) {
-          nChecked += 1;
-        }
+        status = 201;
+        // create checklist based on its schema
+        device.checklist = { required: true };
       }
     }
-
-    device.totalValue = nRequired;
-    device.checkedValue = nChecked;
-  }
-  
-  if( req.body['action'] === 'updateChecklist' ) {
-    for( idx=0; idx<device.checklist.length; idx+=1 ) {
-      if( req.body.hasOwnProperty(device.checklist[idx].subject) ) {
-        device.checklist[idx].value = req.body[device.checklist[idx].subject];
-      }
-      // need to update the total required and checked
-      if( device.checklist[idx].required ) {
-        nRequired += 1;
-        if( (device.checklist[idx].value === 'Y')
-            || (device.checklist[idx].value === 'YC') ) {
-          nChecked += 1;
+    if (req.body['action'] === 'config-checklist') {
+      for (idx in checklistSubjects) {
+        subject = checklistSubjects[idx];
+        item = device.checklist[subject];
+        if (item.required !== undefined) {
+          if (req.body[subject] && req.body[subject] === 'true') {
+            item.required = true;
+          } else {
+            item.required = false;
+          }
+        }
+        // need to update the total required and checked
+        if (item.required != false) {
+          nRequired += 1;
+          if ((item.value === 'Y') || (item.value === 'YC') ) {
+            nChecked += 1;
+          }
         }
       }
+      device.totalValue = nRequired;
+      device.checkedValue = nChecked;
+      status = 200;
     }
-
-    device.totalValue = nRequired;
-    device.checkedValue = nChecked;
-  }
-
-  res.status(200).render('device', {
-    device: device,
-    checklistValues: checklistValues,
-    checklistSubjects: checklistSubjects
+    if (req.body['action'] === 'update-checklist') {
+      for (idx in checklistSubjects) {
+        subject = checklistSubjects[idx];
+        item = device.checklist[subject];
+        if (req.body[subject]) {
+          item.value = req.body[subject];
+        }
+        // need to update the total required and checked
+        if (item.required !== false) {
+          nRequired += 1;
+          if ((item.value === 'Y') || (item.value === 'YC')) {
+            nChecked += 1;
+          }
+        }
+      }
+      device.totalValue = nRequired;
+      device.checkedValue = nChecked;
+      status = 200;
+    }
+    // TODO: save the device to the db
+    res.status(status).render('device', {
+      device: device,
+      checklistValues: checklistValues,
+      checklistSubjects: checklistSubjects
+    });
   });
 });
 
 
 devices.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
-  var deviceId = req.params['id']
-  for( var idx=0; idx<devDocs.length; idx+=1 ) {
-    if( deviceId === devDocs[idx]._id ) {
-      res.status(200).json(devDocs[idx]);
-      return
+  Device.findById(req.params['id'], function (err, device) {
+    if (err) {
+      return res.status(404).render('error', {
+        error: {
+          status: err
+        }
+      });
     }
-  }
-  res.status(404).send('device not found');
+    res.status(200).json(device);
+  });
 });
 
 

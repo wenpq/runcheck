@@ -30,7 +30,7 @@ Usage: node xlsx-mongo [options] <spec>
     -a, --append            force to append data in MongoDB when the DB already has data.
 ```
 ## configuration file
-use json format file as configuration. Currently, there are there files in drectory:
+use json format file as configuration. Currently, there are three files in drectory:
 
 *  slot-config.json, for detailed slot data import
 *  slot-config2.json, for slot data import
@@ -50,18 +50,16 @@ two-dimensional array, The mapping relation betwwen raw column value in file and
 ```
   "nameMap": [
     ["serialNo", "FRIB Part Number (w/ SN when applicable)"],
-    ["name", "Alias / Nickname"],
-    ["type", "FRIB Device Type"],
-    ["department", "Associated Department"]
   ]
 ```
+That mean the column, value of which is "FRIB Part Number (w/ SN when applicable)", equals the "serialNo" field in MongoDB.
 * position
 Json Objects list, the data position in file, include sheet name and data range. For example:
 | systm         |subsytem          | devie         |
 | ------------- | ---------------- | ------------- |
 | foo           | 123              | abc           |
 | bar           | 345              | def           |
- If the table is in Devices sheet, and the 'system' is in cell A2, and the 'def' is in cell D66, position defined like this
+ If the table is in Devices sheet, the 'system' is in cell A2, and the 'def' is in cell D66, position should be defined like this
 ```
   "position":[
     {

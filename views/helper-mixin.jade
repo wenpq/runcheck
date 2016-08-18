@@ -1,0 +1,17 @@
+mixin change(h)
+  .change
+    span.user= h.b
+    = ' '
+    | updated
+    each change in h.c
+      = ' '
+      span.property= change.p
+      = ' '
+      | to
+      = ' '
+      span.value= change.v
+      = ' '
+    = ' '
+    | at
+    = ' '
+    span.date= h.a

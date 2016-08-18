@@ -5,9 +5,7 @@ var ObjectId = Schema.Types.ObjectId;
 var assert = require('assert');
 
 var debug = require('debug')('runcheck:history');
-
 var log = require('../lib/log');
-
 var _ = require('underscore');
 
 /**********
@@ -20,8 +18,7 @@ var change = new Schema({
     required: true
   },
   v: {
-    type: Mixed,
-    required: true
+    type: Mixed
   }
 });
 
@@ -63,11 +60,10 @@ var History = mongoose.model('History', history);
  * @param  {Function} cb
  */
 function handleErr(err, cb) {
-  if (err) {
+  if (cb && _.isFunction(cb)) {
+    return cb(err);
+  } else {
     log.error(err);
-    if (cb && _.isFunction(cb)) {
-      return cb(err);
-    }
   }
 }
 
@@ -85,7 +81,7 @@ function addHistory(schema, options) {
     .chain()
     .concat(options.fieldsToWatch)
     .reject(function (field) {
-      return _(['__updates', '_id']).contains(field)
+      return !schema.path(field) || _(['__updates', '_id']).contains(field);
     })
     .valueOf();
 
@@ -97,7 +93,10 @@ function addHistory(schema, options) {
   });
 
   /**
-   * model instance method to save with history
+   * model instance method to save with history. A document should use #set()
+   * to update in order to get the modified check working properly for
+   * embedded document. Otherwise, explicitly #markModified(path) to mark
+   * modified of the path.
    * @param  {String}   userid the user making this update
    * @param  {Function} cb     the callback when save is done
    */
@@ -108,7 +107,9 @@ function addHistory(schema, options) {
     var c = [];
     var h;
     if (doc.isModified()) {
+      debug(options.fieldsToWatch);
       options.fieldsToWatch.forEach(function (field) {
+        debug(field + ' is modified ' + doc.isModified(field));
         if ((doc.isNew && doc.get(field)) || doc.isModified(field)) {
           c.push({
             p: field,
@@ -116,6 +117,7 @@ function addHistory(schema, options) {
           });
         }
       });
+      debug(c);
       if (c.length > 0) {
         h = new History({
           a: Date.now(),
@@ -127,7 +129,7 @@ function addHistory(schema, options) {
         debug(h);
         h.save(function (err, historyDoc) {
           if (err) {
-            debug(err);
+            debug(err.errors);
             return handleErr(err, cb);
           }
           doc.__updates.push(historyDoc._id);
@@ -138,7 +140,53 @@ function addHistory(schema, options) {
             return cb(err, newDoc);
           })
         });
+      } else {
+        // no history need to record, save anyway
+        doc.save(function (err, newDoc) {
+          if (err) {
+            return handleErr(err, cb);
+          }
+          return cb(err, newDoc);
+        })
       }
+    } else {
+      return cb(null);
+    }
+  };
+
+  /**
+   * Save a history first before save the doc. This can be helpful when
+   * you want to save the history manually, e.g. some changes not in the
+   * change watch list, or use update() to update the document.
+   * manually.
+   * @param  {String}     userid the user making this update
+   * @param  {[change]}   c      the change array
+   * @param  {Function}   cb     the callback when the history is saved
+   */
+  schema.methods.saveHistory = function (userid, c, cb) {
+    assert.equal(typeof userid, 'string', 'need a user id');
+    assert.equal(typeof cb, 'function', 'need a callback function');
+    var doc = this;
+    var h;
+    if (c.length > 0) {
+      h = new History({
+        a: Date.now(),
+        b: userid,
+        c: c,
+        t: doc.constructor.modelName,
+        i: doc._id
+      });
+      debug(h);
+      h.save(function (err, historyDoc) {
+        if (err) {
+          debug(err.errors);
+          return handleErr(err, cb);
+        }
+        cb(null, historyDoc._id);
+      });
+    } else {
+      // no history to record, no history _id
+      return cb(null, null);
     }
   };
 }

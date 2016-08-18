@@ -1,6 +1,5 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
-var ObjectId = Schema.Types.ObjectId;
 
 var checklistValues = ['N', 'Y', 'YC'];
 var subjects = ['EE', 'ME', 'CRYO', 'CTRLS', 'PHYS', 'ESHQ'];
@@ -9,7 +8,7 @@ var drrChecklistSubjects = ['DO'].concat(subjects).concat('AM');
 var arrChecklistSubjects = ['DO'].concat(subjects).concat('AM');
 
 /*******
- * A ChecklistItem is the value of an subject in a checklist.
+ * A checklistItem is the response of a subject in a checklist.
  * required: indicate if approval is required
  * value: indicate state of this item
  * comment: extra information
@@ -30,10 +29,36 @@ var checklistItem = {
   }
 };
 
-var deviceChecklist = {};
+/*******
+ * A mandatoryChecklistItem is the response of a subject which is always required.
+ * value: indicate state of this item
+ * comment: extra information
+ *******/
+var mandatoryChecklistItem = {
+  value: {
+    type: String,
+    enum: checklistValues,
+    default: checklistValues[0],
+  },
+  comment: {
+    type: String,
+    default: ''
+  }
+}
+
+var deviceChecklist = {
+  required: {
+    type: Boolean,
+    default: false
+  }
+};
 deviceChecklistSubjects.forEach(function (s) {
-  deviceChecklist[s] = checklistItem;
-})
+  if (s === 'DO') {
+    deviceChecklist[s] = mandatoryChecklistItem;
+  } else {
+    deviceChecklist[s] = checklistItem;
+  }
+});
 
 var deviceChecklistSchema = new Schema(deviceChecklist);
 
@@ -55,6 +80,9 @@ var arrChecklistSchema = new Schema(arrChecklist);
 
 module.exports = {
   checklistValues: checklistValues,
+  deviceChecklistSubjects: deviceChecklistSubjects,
+  drrChecklistSubjects: drrChecklistSubjects,
+  arrChecklistSubjects: arrChecklistSubjects,
   subjects: subjects,
   deviceChecklistSchema: deviceChecklistSchema,
   drrChecklistSchema: drrChecklistSchema,
