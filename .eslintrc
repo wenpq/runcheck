@@ -20,7 +20,7 @@
     "consistent-this": 0,
     "filenames/match-exported": 2,
     "filenames/match-regex": [
-      2,
+      1,
       "^[a-z-]+$",
       true
     ],
