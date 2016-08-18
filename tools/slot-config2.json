@@ -1,0 +1,21 @@
+{
+  "name": "slot",
+  "model": "Slot",
+  "collection": "slots",
+  "file": "CCDB Slot and Device with Attributes Template.xlsx",
+  "nameMap": [
+    ["name", "FRIB Slot Name"],
+    ["area", "Associated Area"],
+    ["level", "Level of Care"],
+    ["deviceType", "Device Type"],
+    ["DRR", "Associated DHR"],
+    ["ARR", "Associated ARR"],
+    ["comment", "Description"]
+  ],
+  "position":[
+    {
+      "sheet": "Slots",
+      "range": "A2:I65"
+    }
+  ]
+}

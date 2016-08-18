@@ -1,0 +1,18 @@
+{
+  "name": "device",
+  "model": "Device",
+  "collection": "devices",
+  "file": "CCDB Slot and Device with Attributes Template.xlsx",
+  "nameMap": [
+    ["serialNo", "FRIB Part Number (w/ SN when applicable)"],
+    ["name", "Alias / Nickname"],
+    ["type", "FRIB Device Type"],
+    ["department", "Associated Department"]
+  ],
+  "position":[
+    {
+      "sheet": "Devices",
+      "range": "A2:D66"
+    }
+  ]
+}

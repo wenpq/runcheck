@@ -10,8 +10,8 @@ var inputPath;
 program.version('0.0.1')
   .option('-d, --dryrun', 'validate data by schema in MongoDB.')
   .option('-m, --mongo', 'save data in defoult MongoDB.')
+  .option('-a, --append', 'force to append data in MongoDB when the DB already has data.')
   .option('-o, --outfile [outfle]', 'save data in specified file.')
-  .option('-f, --force', 'force to save in MongoDB when the DB already has data.')
   .arguments('<spec>')
   .action(function (sp) {
     inputPath = sp;
@@ -128,8 +128,8 @@ function saveInMongo(data, callback) {
       name: global.lconfig.collection
     }).next(function (err, collinfo) {
       // if MongoDB already had data, give up saving
-      if (collinfo && (typeof program.force) === 'undefined') {
-        console.log('Can not save, because MongoDB already had ' + global.lconfig.name + ' data. You can force to save by adding [-f | --force] option.');
+      if (collinfo && (typeof program.append) === 'undefined') {
+        console.log('Can not save, because MongoDB already had ' + global.lconfig.name + ' data. You can force to append data by using [-am] option.');
         callback();
       } else {
         // Save Data

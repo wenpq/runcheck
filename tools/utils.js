@@ -37,7 +37,7 @@ function filtByField(x) {
   for(var i = 0 ;i < field.length; i++) {
     v = v && x[field[i]];
   }
-  return v ? true : false;
+  return v;
 }
 
 /*
@@ -56,7 +56,7 @@ function getXlsxJson(fileName) {
   });
 
   fieldFixed(data, Schema, global.lconfig.nameMap);
-  if(global.lconfig.filterFied) {
+  if(global.lconfig.filterField) {
     data = data.filter(filtByField);
   }
   return data;

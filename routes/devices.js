@@ -4,27 +4,7 @@ var auth = require('../lib/auth');
 var Device = require('../models/device').Device;
 var checklistValues = require('../models/device').checklistValues;
 var checklistSubjects = require('../models/device').checklistSubjects;
-
-var devDocs = [new Device({
-  serialNo: '001',
-  name: 'name1',
-  type: 'type1',
-  department: 'department1',
-  owner: 'wen'
-}), new Device({
-  serialNo: '002',
-  name: 'name2',
-  type: 'type2',
-  department: 'department2',
-  owner: 'wen'
-}), new Device({
-  serialNo: '003',
-  name: 'name3',
-  type: 'type3',
-  department: 'department3',
-  owner: 'wen'
-})];
-
+var log = require('../lib/log');
 
 devices.get('/', auth.ensureAuthenticated, function (req, res) {
   res.render('devices');
@@ -32,7 +12,12 @@ devices.get('/', auth.ensureAuthenticated, function (req, res) {
 
 
 devices.get('/json', auth.ensureAuthenticated, function (req, res) {
-  res.status(200).json(devDocs);
+  Device.find(function(err, devDocs) {
+    if(err){
+      log.error(err.message);
+    }
+    res.status(200).json(devDocs);
+  })
 });
 
 

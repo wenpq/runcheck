@@ -1,0 +1,39 @@
+{
+  "name": "slot",
+  "model": "Slot",
+  "collection": "slots",
+  "file": "slot-data.xlsx",
+  "nameMap": [
+    ["system", "System"],
+    ["subsystem", "Sub-\r\nsystem"],
+    ["deviceNaming", "Device"],
+    ["beamlinePosition", "Beam line position (dm)"],
+    ["name", "Name"],
+    ["deviceType", "Device Type"],
+    ["elementName", "Element Name"],
+    ["level", "Level of Care"],
+    ["DRR", "Associated DHR"],
+    ["ARR", "Associated ARR"],
+    ["InnerDiameter", "Minimum Beam Pipe Inner Diameter (mm)"],
+    ["flangeLength", "Element Flange to Flange Length (m)"],
+    ["placeHolder", "PLACE HOLDER "],
+    ["effectiveLength", "Element Effective Length (m)"],
+    ["coordinateZ", "Global Coordinate Z (m)"],
+    ["coordinateY", "Global Coordinate Y (m)"],
+    ["coordinateX", "Global Coordinate X (m)"],
+    ["center2centerLength", "Accumulated center-to-center Length (m)"],
+    ["end2endLength", "Accumulated end-to-end Length (m)"],
+    ["comment", "Comment"]
+  ],
+  "position":[
+    {
+      "sheet": "branch1",
+      "range": "A6:T3637"
+    },
+    {
+      "sheet": "branch2",
+      "range": "A7:T74"
+    }
+  ],
+  "filterField":["system", "subsystem", "beamlinePosition"]
+}
