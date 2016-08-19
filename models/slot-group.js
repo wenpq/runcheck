@@ -10,10 +10,14 @@ var slotGroup = new Schema({
     unique: true
   },
   area: String,
-  descripton: String,
+  description: String,
   slots: [ObjectId],
   ARRChecklist: Mixed,
-  DRRChecklist: Mixed
+  DRRChecklist: Mixed,
+  createdBy: String,
+  createdOn: {
+    type: Date,
+    default: Date.now }
 });
 
 var SlotGroup = mongoose.model('SlotGroup', slotGroup);
