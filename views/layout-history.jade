@@ -12,12 +12,15 @@ html
         .col-lg-9.col-md-9.col-sm-12.col-xs-12
           block content
         .col-lg-3.col-md-3.col-sm-12.col-xs-12
-          #side
-            h3 History
-            block side
+          h3 History
+          #history
+            block history
     include ./footer.jade
-    script(type='text/javascript', src='/datatables/media/js/jquery.dataTables.js')
-    script(type='text/javascript', src='/datatables/media/js/dataTables.bootstrap.js')
+    script(type='text/javascript', src='/javascripts/active-nav.js')
+    script(type='text/javascript', src='/moment/min/moment.min.js')
+    script(type='text/javascript', src='/javascripts/jade/runtime.js')
+    script(type='text/javascript', src='/javascripts/jade/change.js')
+    script(type='text/javascript', src='/javascripts/history.js')
     block js
 
 
