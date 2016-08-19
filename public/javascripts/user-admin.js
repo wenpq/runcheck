@@ -14,12 +14,12 @@ $(function () {
     }).done(function (json) {
       // display a message
       // update history
-      binder.deserialize(json);
       model = json;
+      History.renderHistory(model.__updates);
     }).fail(function () {
       // display a message
-      // update history
     }).always(function () {
+      binder.deserialize(model);
       $('#update').prop('disabled', false);
     });
   });

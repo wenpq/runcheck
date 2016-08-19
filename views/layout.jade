@@ -5,7 +5,8 @@ html
     block head
   body
     include ./header.jade
-    block content
+    .container
+      block content
     include ./footer.jade
     script(type='text/javascript', src='/javascripts/active-nav.js')
     block js

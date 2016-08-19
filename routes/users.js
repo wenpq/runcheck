@@ -13,6 +13,8 @@ var log = require('../lib/log');
 var reqUtils = require('../lib/req-utils');
 var subjects = require('../models/checklist').subjects;
 
+var moment = require('moment');
+
 var fs = require('fs');
 var pending_photo = {};
 var options = {
@@ -209,13 +211,12 @@ users.get('/:id', auth.ensureAuthenticated, reqUtils.exist('id', User, 'adid'), 
     debug(newUser);
     if (err) {
       log.error(err);
-      return res.status(500).json({
-        error: err.message
-      });
+      return res.status(500).send(err.message);
     }
     return res.render('user', {
       user: newUser,
-      subjects: subjects
+      subjects: subjects,
+      moment: moment
     });
   });
 });
@@ -229,7 +230,13 @@ users.put('/:id', auth.ensureAuthenticated, auth.verifyRole('admin'), reqUtils.i
       return res.status(500).send(err.message);
     }
     if (newUser) {
-      return res.json(newUser);
+      newUser.populate('__updates', function (pErr, u) {
+        if (pErr) {
+          log.error(pErr);
+          return res.status(500).send(err.message);
+        }
+        return res.json(u);
+      });
     } else {
       return res.status(200).send('nothing changed.');
     }

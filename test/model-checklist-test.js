@@ -10,10 +10,11 @@ debug('the device checklist schema is: ' + util.inspect(deviceChecklist, false, 
 
 describe('model/checklist', function () {
   describe('#deviceChecklist', function () {
-    it('has DO and no AM', function () {
-      debug(deviceChecklist.path('DO.required'));
-      assert.ok(deviceChecklist.path('DO.required') instanceof SchemaTypes.Boolean);
-      assert.equal(deviceChecklist.path('AM.required'), undefined);
+    it('DO is mandatory, and no AM', function () {
+      debug(deviceChecklist.path('DO'));
+      assert.ok(deviceChecklist.path('DO.value') instanceof SchemaTypes.String);
+      assert.equal(deviceChecklist.path('DO.required'), undefined);
+      assert.equal(deviceChecklist.path('AM'), undefined);
     });
   });
 });
