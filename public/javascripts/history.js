@@ -11,7 +11,7 @@ var History = (function (parent, $) {
     if (updates && updates.length > 1) {
       $(selector).empty();
       updates.forEach(function (u) {
-        $(selector).prepend(change({
+        $(selector).prepend(changeTemplate({
           h: u,
           moment: moment
         }));
