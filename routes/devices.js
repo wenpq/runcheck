@@ -5,42 +5,6 @@ var Device = require('../models/device').Device;
 var checklistValues = require('../models/checklist').checklistValues;
 var checklistSubjects = require('../models/checklist').deviceChecklistSubjects;
 
-var devDocs = [new Device({
-  serialNo: '001',
-  name: 'name1',
-  type: 'type1',
-  department: 'department1',
-  owner: 'wen'
-}), new Device({
-  serialNo: '002',
-  name: 'name2',
-  type: 'type2',
-  department: 'department2',
-  owner: 'wen'
-}), new Device({
-  serialNo: '003',
-  name: 'name3',
-  type: 'type3',
-  department: 'department3',
-  owner: 'wen'
-})];
-
-// simple mock db functions
-
-function find(callback) {
-  callback(null, devDocs);
-}
-
-function findById(id, callback) {
-  for (var idx=0; idx<devDocs.length; idx+=1) {
-    if (devDocs[idx]._id.equals(id)) {
-      callback(null, devDocs[idx]);
-      return;
-    }
-  }
-  callback('Device not found', null);
-}
-
 
 devices.get('/', auth.ensureAuthenticated, function (req, res) {
   res.render('devices');
@@ -48,7 +12,7 @@ devices.get('/', auth.ensureAuthenticated, function (req, res) {
 
 
 devices.get('/json', auth.ensureAuthenticated, function (req, res) {
-  find(function (err, devices) {
+  Device.find(function (err, devices) {
     if (err) {
       return res.status(500).json({
         error: {
@@ -62,7 +26,7 @@ devices.get('/json', auth.ensureAuthenticated, function (req, res) {
 
 
 devices.get('/:id', auth.ensureAuthenticated, function (req, res) {
-  findById(req.params['id'], function (err, device) {
+  Device.findById(req.params['id'], function (err, device) {
     if (err) {
       return res.status(404).render('error', {
         error: {
@@ -80,7 +44,7 @@ devices.get('/:id', auth.ensureAuthenticated, function (req, res) {
 
 
 devices.post('/:id', auth.ensureAuthenticated, function (req, res) {
-  findById(req.params['id'], function (err, device) {
+  Device.findById(req.params['id'], function (err, device) {
     var idx, item, subject, status = 404;
     var nRequired = 0, nChecked = 0;
     if (err) {
@@ -154,14 +118,16 @@ devices.post('/:id', auth.ensureAuthenticated, function (req, res) {
 
 
 devices.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
-  var deviceId = req.params['id']
-  for( var idx=0; idx<devDocs.length; idx+=1 ) {
-    if( deviceId === devDocs[idx]._id ) {
-      res.status(200).json(devDocs[idx]);
-      return
+  Device.findById(req.params['id'], function (err, device) {
+    if (err) {
+      return res.status(404).render('error', {
+        error: {
+          status: err
+        }
+      });
     }
-  }
-  res.status(404).send('device not found');
+    res.status(200).json(device);
+  });
 });
 
 
