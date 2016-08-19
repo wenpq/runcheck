@@ -2,11 +2,11 @@ include helper-mixin
 doctype html
 html
   head
-    include ./head.jade
+    include ./head.pug
     link(rel='stylesheet', href='/datatables/media/css/dataTables.bootstrap.min.css')
     block head
   body
-    include ./header.jade
+    include ./header.pug
     .container-fluid
       .row
         .col-lg-9.col-md-9.col-sm-12.col-xs-12
@@ -15,11 +15,10 @@ html
           h3 History
           #history
             block history
-    include ./footer.jade
+    include ./footer.pug
     script(type='text/javascript', src='/javascripts/active-nav.js')
     script(type='text/javascript', src='/moment/min/moment.min.js')
-    script(type='text/javascript', src='/javascripts/jade/runtime.js')
-    script(type='text/javascript', src='/javascripts/jade/change.js')
+    script(type='text/javascript', src='/javascripts/template/change.js')
     script(type='text/javascript', src='/javascripts/history.js')
     block js
 

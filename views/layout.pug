@@ -1,13 +1,13 @@
 doctype html
 html
   head
-    include ./head.jade
+    include ./head.pug
     block head
   body
-    include ./header.jade
+    include ./header.pug
     .container
       block content
-    include ./footer.jade
+    include ./footer.pug
     script(type='text/javascript', src='/javascripts/active-nav.js')
     block js
 
