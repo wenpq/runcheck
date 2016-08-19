@@ -19,7 +19,8 @@ The following are the main steps for slot data filter:
 ## command
 ```
 Usage: node xlsx-mongo [options] <spec>
-  <spec>: configuration file path or name.
+  <dataPath>: data file path or name.
+  <configPath>: configuration file path or name.
   Options:
 
     -h, --help              output usage information
@@ -30,15 +31,13 @@ Usage: node xlsx-mongo [options] <spec>
     -a, --append            force to append data in MongoDB when the DB already has data.
 ```
 ## configuration file
-use json format file as configuration. Currently, there are three files in drectory:
+use json format file as configuration. Currently, there are three files available in directory:
 
 *  slot-config.json, for detailed slot data import
-*  slot-config2.json, for slot data import
+*  slot-config2.json, for simple slot data import
 *  device-config.json, for device data mport
 
 #### essential attributes
-* file
-The specified .xlsx fle path or name.
 * name
 Data name(slot or device)
 * model

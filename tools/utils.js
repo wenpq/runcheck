@@ -1,5 +1,6 @@
 var XLSX = require('xlsx');
-var Model = require('../models/' + global.lconfig.name)[global.lconfig.model];
+var lconfig = require('./xlsx-mongo').lconfig;
+var Model = require('../models/' + lconfig.name)[lconfig.model];
 var Schema = Model.schema;
 var mongoose = require('mongoose');
 
@@ -32,7 +33,7 @@ function fieldFixed(datalist, dataSchema, nameMap) {
 
 // filter
 function filtByField(x) {
-  var field = global.lconfig.filterField;
+  var field = lconfig.filterField;
   var v = true;
   for(var i = 0 ;i < field.length; i++) {
     v = v && x[field[i]];
@@ -48,15 +49,15 @@ function getXlsxJson(fileName) {
   // Read data from sheet
   var workbook = XLSX.readFile(fileName);
   var data = [];
-  global.lconfig.position.forEach(function(p){
+  lconfig.position.forEach(function(p){
     var branch = workbook.Sheets[p.sheet];
     branch['!ref'] = p.range;
     var l = XLSX.utils.sheet_to_json(branch);
     data = data.concat(l);
   });
 
-  fieldFixed(data, Schema, global.lconfig.nameMap);
-  if(global.lconfig.filterField) {
+  fieldFixed(data, Schema, lconfig.nameMap);
+  if(lconfig.filterField) {
     data = data.filter(filtByField);
   }
   return data;

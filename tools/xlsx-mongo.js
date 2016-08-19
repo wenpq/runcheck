@@ -6,67 +6,87 @@ var path = require('path');
 var fs = require('fs');
 
 // get arguments starts
-var inputPath;
+var dataPath;
+var configPath;
 program.version('0.0.1')
   .option('-d, --dryrun', 'validate data by schema in MongoDB.')
   .option('-m, --mongo', 'save data in defoult MongoDB.')
   .option('-a, --append', 'force to append data in MongoDB when the DB already has data.')
   .option('-o, --outfile [outfle]', 'save data in specified file.')
-  .arguments('<spec>')
-  .action(function (sp) {
-    inputPath = sp;
+  .arguments('<dataPath>')
+  .arguments('<configPath>')
+  .action(function (dp, cp) {
+    dataPath = dp;
+    configPath = cp;
   });
 program.parse(process.argv);
 // get arguments end
 
-// check path starts
-if (inputPath === undefined) {
-  console.error('Need the input config file path!');
+
+// check dataPath starts
+if (dataPath === undefined) {
+  console.error('Need the input .xlsx data file path!');
   process.exit(1);
 }
-var realPath = path.resolve(process.cwd(), inputPath);
-if (!fs.existsSync(realPath)) {
-  console.log(realPath);
-  console.error(realPath + ' does not exist.');
-  console.error('Please input a valid config file path.');
+var realDataPath = path.resolve(process.cwd(), dataPath);
+if (!fs.existsSync(realDataPath)) {
+  console.error(realDataPath + ' does not exist.');
+  console.error('Please input a valid .xlsx data file path.');
   process.exit(1);
-}
-// check path end
-
-
-// check global.lconfig starts
-global.lconfig = require(realPath);
-// essential field
-var essential = ['name','model','collection','file','nameMap','position'];
-for(var i = 0; i < essential.length; i++) {
-  if(!global.lconfig[essential[i]]) {
-    console.error('error: ' + essential[i] + ' is required in config file.');
-    process.exit(1);
-  }
 }
 // suffix must be xlsx
-var suffix = global.lconfig.file.split('.').pop();
+var suffix = realDataPath.split('.').pop();
 if (suffix !== 'xlsx') {
   console.error('error: File format must be xlsx.');
   process.exit(1);
 }
+// check dataPath end
+
+
+// check configPath starts
+if (configPath === undefined) {
+  console.error('Need the input config file path!');
+  process.exit(1);
+}
+var realConfigPath = path.resolve(process.cwd(), configPath);
+if (!fs.existsSync(realConfigPath)) {
+  console.error(realConfigPath + ' does not exist.');
+  console.error('Please input a valid config file path.');
+  process.exit(1);
+}
+// check configPath end
+
+
+// check config content starts
+var lconfig = require(realConfigPath);
+module.exports = {
+  lconfig: lconfig
+};
+// essential field
+var essential = ['name','model','collection','nameMap','position'];
+for(var i = 0; i < essential.length; i++) {
+  if(!lconfig[essential[i]]) {
+    console.error('error: ' + essential[i] + ' is required in config file.');
+    process.exit(1);
+  }
+}
 // array field
-if(!Array.isArray(global.lconfig.position)) {
+if(!Array.isArray(lconfig.position)) {
   console.error('error: sheet field must be array');
   process.exit(1);
 }
-if(!Array.isArray(global.lconfig.nameMap)) {
+if(!Array.isArray(lconfig.nameMap)) {
   console.error('error: nameMap field must be array');
   process.exit(1);
 }
-// check confg end
+// check config content end
 
 
 console.log('----------Import Data from xlsx file to MongoDB-------------');
 var sutil = require('./utils');
 
-var datalist = sutil.getXlsxJson(global.lconfig.file);
-console.log('Get ' + datalist.length + ' entries from ' + global.lconfig.file);
+var datalist = sutil.getXlsxJson(realDataPath);
+console.log('Get ' + datalist.length + ' entries from ' + realDataPath);
 
 sutil.dataValidate(datalist, function (err, data) {
   if (err) {
@@ -125,11 +145,11 @@ sutil.dataValidate(datalist, function (err, data) {
 function saveInMongo(data, callback) {
   mongoose.connection.on('connected', function () {
     mongoose.connection.db.listCollections({
-      name: global.lconfig.collection
+      name: lconfig.collection
     }).next(function (err, collinfo) {
       // if MongoDB already had data, give up saving
       if (collinfo && (typeof program.append) === 'undefined') {
-        console.log('Can not save, because MongoDB already had ' + global.lconfig.name + ' data. You can force to append data by using [-am] option.');
+        console.log('Can not save, because MongoDB already had ' + lconfig.name + ' data. You can force to append data by using [-am] option.');
         callback();
       } else {
         // Save Data

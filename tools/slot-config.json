@@ -2,7 +2,6 @@
   "name": "slot",
   "model": "Slot",
   "collection": "slots",
-  "file": "slot-data.xlsx",
   "nameMap": [
     ["system", "System"],
     ["subsystem", "Sub-\r\nsystem"],

@@ -2,7 +2,6 @@
   "name": "device",
   "model": "Device",
   "collection": "devices",
-  "file": "CCDB Slot and Device with Attributes Template.xlsx",
   "nameMap": [
     ["serialNo", "FRIB Part Number (w/ SN when applicable)"],
     ["name", "Alias / Nickname"],

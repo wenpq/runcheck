@@ -2,7 +2,6 @@
   "name": "slot",
   "model": "Slot",
   "collection": "slots",
-  "file": "CCDB Slot and Device with Attributes Template.xlsx",
   "nameMap": [
     ["name", "FRIB Slot Name"],
     ["area", "Associated Area"],
