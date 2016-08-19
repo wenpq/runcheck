@@ -51,10 +51,18 @@ function getXlsxJson(fileName) {
   var data = [];
   lconfig.position.forEach(function(p){
     var branch = workbook.Sheets[p.sheet];
+    if(!branch) {
+      console.error('error: can not read data from sheet ' + p.sheet + ', please check the config file.');
+      process.exit(1);
+    }
     branch['!ref'] = p.range;
     var l = XLSX.utils.sheet_to_json(branch);
     data = data.concat(l);
   });
+  if (data.length === 0) {
+    console.error('error: can not convert data to valid json list, please check the config file.');
+    process.exit(1);
+  }
 
   fieldFixed(data, Schema, lconfig.nameMap);
   if(lconfig.filterField) {

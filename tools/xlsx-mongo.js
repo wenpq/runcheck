@@ -31,7 +31,7 @@ if (dataPath === undefined) {
 var realDataPath = path.resolve(process.cwd(), dataPath);
 if (!fs.existsSync(realDataPath)) {
   console.error(realDataPath + ' does not exist.');
-  console.error('Please input a valid .xlsx data file path.');
+  console.error('error: invalid .xlsx data file path.');
   process.exit(1);
 }
 // suffix must be xlsx
@@ -51,7 +51,7 @@ if (configPath === undefined) {
 var realConfigPath = path.resolve(process.cwd(), configPath);
 if (!fs.existsSync(realConfigPath)) {
   console.error(realConfigPath + ' does not exist.');
-  console.error('Please input a valid config file path.');
+  console.error('error: invalid config file path.');
   process.exit(1);
 }
 // check configPath end

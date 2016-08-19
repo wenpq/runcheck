@@ -2,7 +2,7 @@
 ## summarize
 Import lattice data to MongoDB from an xlsx file for runcheck.  Use xlsx (https://github.com/SheetJS/js-xlsx.git) library to read data.
 
-Data files are uploaded on trello.com runcheck sprint2 board. There are some format changes between the Original file and the modified file.
+Slot data files are uploaded on trello.com runcheck sprint2 board. There are some format changes from the Original slot file.
 
 The  format of data in each sheet shall like the following:
 
@@ -35,7 +35,7 @@ use json format file as configuration. Currently, there are three files availabl
 
 *  slot-config.json, for detailed slot data import
 *  slot-config2.json, for simple slot data import
-*  device-config.json, for device data mport
+*  device-config.json, for device data import
 
 #### essential attributes
 * name
