@@ -12,7 +12,6 @@ $('#list-slot').click(function () {
   }
 });
 
-
 $(function () {
   $('#slot-detail').hide();
 });
