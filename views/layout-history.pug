@@ -1,4 +1,4 @@
-include helper-mixin
+include helper-mixin.pug
 doctype html
 html
   head
@@ -13,7 +13,7 @@ html
           block content
         .col-lg-3.col-md-3.col-sm-12.col-xs-12
           h3 History
-          #history
+          div(id='history')
             block history
     include ./footer.pug
     script(type='text/javascript', src='/javascripts/active-nav.js')
@@ -21,5 +21,3 @@ html
     script(type='text/javascript', src='/javascripts/template/change.js')
     script(type='text/javascript', src='/javascripts/history.js')
     block js
-
-
