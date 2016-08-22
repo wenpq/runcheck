@@ -1,5 +1,4 @@
 var passData;
-var selectGroupId;
 $('#remove').click(function (e) {
   e.preventDefault();
   if ($('.row-selected').length == 0) {
@@ -9,7 +8,7 @@ $('#remove').click(function (e) {
   var selectedData = []; // no validation for removing, passData equals selectedData
   $('.row-selected').each(function() {
     var href = $(this).closest('tr').children().eq(1).children().attr('href');
-    var name = $(this).closest('tr').children().eq(2).val();
+    var name = $(this).closest('tr').children().eq(2).text();
     selectedData.push({
       id: href.split('/')[2],
       name: name
@@ -31,27 +30,35 @@ $('#modal').on('click','#modal-cancel',function (e) {
 
 $('#modal').on('click','#modal-submit',function (e) {
   e.preventDefault();
-  for (var i=0; i< passData.length; i++) {
-    var url = window.location.href + '/slot/' + passData[i].id;
-    (function (i) {
-      $.ajax({
-        url: url,
-        type: 'GET'
-      }).done(function () {
-        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: ' + passData[i].name  + ' is removed.</div>');
-        if(i==passData.length-1){
-          deleteRow();
-          reset();
-        }
-      }).fail(function (jqXHR) {
-        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + 'Error: ' + jqXHR.responseText + '. remove ' + passData[i].name + ' faild.</div>');
-        if(i==passData.length-1){
-          deleteRow();
-          reset();
-        }
-      });
-    })(i);
-  }
+  var url = window.location.href + '/removeSlots';
+  $.ajax({
+    url: url,
+    type: 'Post',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      passData: passData,
+    })
+  }).done(function (data) {
+    if(data.doneMsg.length) {
+      var s = '';
+      for(var i = 0; i < data.doneMsg.length; i++){
+        s =  s + data.doneMsg[i]+ '<br>';
+      }
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' +  s +'</div>');
+    }
+    if(data.errMsg.length) {
+      var es = '';
+      for(i = 0; i < data.errMsg.length; i++){
+        es =  es + data.errMsg[i]+ '<br>';
+      }
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' +  es +'</div>');
+    }
+  }).fail(function (jqXHR) {
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' +  jqXHR.responseText + '</div>');
+  }).always(function() {
+    $('#spec-slots-table').DataTable().ajax.reload();// reload table
+    reset();
+  });
 });
 
 function reset() {
@@ -63,9 +70,4 @@ function reset() {
     '<select class="form-control"></select> ' +
     '</form>');
   passData = null;
-  selectGroupId = null;
-}
-
-function deleteRow() {
-  $('#spec-slots-table').DataTable().rows($('.row-selected')).remove().draw();
 }

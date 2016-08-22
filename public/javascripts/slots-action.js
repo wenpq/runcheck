@@ -71,7 +71,7 @@ $('#addGroup').click(function (e) {
   }).fail(function (jqXHR) {
     $('#modal').modal('hide');
     reset();
-    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button> Get slot groups field ' + jqXHR.responseText +  '</div>');
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button> Get slot groups failed ' + jqXHR.responseText +  '</div>');
   });
 });
 
@@ -92,21 +92,33 @@ $('#modal').on('click','#modal-cancel',function (e) {
 
 $('#modal').on('click','#modal-submit',function (e) {
   e.preventDefault();
-  for (var i=0; i< passData.length; i++) {
-    var url = '/slotGroups/' + selectGroupId + '/slot/' + passData[i].id;
-    (function (i) {
-      $.ajax({
-        url: url,
-        type: 'PUT'
-      }).done(function () {
-        $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Success: ' + passData[i].name  + ' is added.</div>');
-        if(i==passData.length-1)reset();
-      }).fail(function (jqXHR) {
-        $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + 'Error: ' + jqXHR.responseText + '. add ' + passData[i].name + ' field.</div>');
-        if(i==passData.length-1)reset();
-      });
-    })(i);
-  }
+  $.ajax({
+    url: '/slotGroups/' + selectGroupId + '/addSlots',
+    type: 'POST',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      passData: passData
+    })
+  }).done(function (data) {
+    if(data.doneMsg.length) {
+      var s = '';
+      for(var i = 0; i < data.doneMsg.length; i++){
+        s =  s + data.doneMsg[i]+ '<br>';
+      }
+      $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>' +  s +'</div>');
+    }
+    if(data.errMsg.length) {
+      var es = '';
+      for(i = 0; i < data.errMsg.length; i++){
+        es =  es + data.errMsg[i]+ '<br>';
+      }
+      $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' +  es +'</div>');
+    }
+  }).fail(function (jqXHR) {
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText + '</div>');
+  }).always(function () {
+    reset();
+  });
 });
 
 function reset() {

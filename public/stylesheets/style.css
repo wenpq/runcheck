@@ -49,3 +49,7 @@ body {
   max-height: 150vh;
   overflow-y: auto;
 }
+
+.modal-content {
+  margin-top: 30%;
+}

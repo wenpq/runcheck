@@ -55,4 +55,3 @@ public/javascripts/template/*
 
 # data in excel
 tools/*.xlsx
-tools/*.json

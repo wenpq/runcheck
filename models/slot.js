@@ -48,6 +48,5 @@ var slot = new Schema({
 var Slot = mongoose.model('Slot', slot);
 
 module.exports = {
-  Slot: Slot,
-  slotSchema: slot
+  Slot: Slot
 };
