@@ -43,7 +43,17 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
       }
     });
   });
+});
 
+
+slots.get('/:id', auth.ensureAuthenticated, function (req, res) {
+  Slot.findOne({_id: req.params.id },function(err, doc) {
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
+    }
+    res.render('slot',{slot: doc});
+  });
 });
 
 module.exports = slots;

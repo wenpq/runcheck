@@ -1,0 +1,101 @@
+extends layout
+
+block head
+  link(rel='stylesheet', href='/datatables/media/css/dataTables.bootstrap.min.css')
+  title RunCheck slot
+
+
+block content
+    br
+    #message
+      #modal.modal.fade(tabindex='-1', role='dialog', aria-labelledby='modalLabel', aria-hidden='true')
+        .modal-dialog
+          .modal-content
+            .modal-header
+              h3#modalLabel
+            .modal-footer
+    .panel.panel-default
+      .panel-heading
+        strong Basic Infomation
+      .panel-body
+        .table-responsive
+          table.table.table-condensed
+            thead
+              tr
+                th Name
+                th Owner
+                th Associated area
+                th Leve of care
+                th Device type
+                th Element name
+                th Approval status
+                th In Slot group
+            tbody
+              tr
+                td #{slot.name}
+                td #{slot.owner}
+                td #{slot.area}
+                td #{slot.level}
+                td #{slot.deviceType}
+                td #{slot.elementName}
+                td #{slot.approvalStatus}
+                td #{slot.inGroup}
+        table.table.table-condensed
+          thead
+            tr
+              th system
+              th Sub-system
+              th Device name
+              th Beam line position (dm)
+              th Minimum Beam Pipe Inner Diameter (mm)
+              th Element Flange to Flange Length (m)
+          tbody
+            tr
+              td #{slot.system}
+              td #{slot.subsystem}
+              td #{slot.deviceNaming}
+              td #{slot.beamlinePosition}
+              td #{slot.InnerDiameter}
+              td #{slot.flangeLength}
+        table.table.table-condensed
+          thead
+            tr
+              th Place holder
+              th Element Effective Length (m)
+              th Location: global Coordinate X (m)
+              th Location: global Coordinate Y (m)
+              th Location: global Coordinate Z (m)
+          tbody
+            tr
+              td #{slot.placeHolder}
+              td #{slot.effectiveLength}
+              td #{slot.coordinateX}
+              td #{slot.coordinateY}
+              td #{slot.coordinateZ}
+        table.table.table-condensed
+          thead
+            tr
+              th Accumulated center-to-center Length (m)
+              th Accumulated end-to-end Length (m)
+              th Distance from Artemis source (m)
+              th machineMode
+              th comment
+          tbody
+            tr
+              td #{slot.center2centerLength}
+              td #{slot.end2endLength}
+              td #{slot.artemisDistance}
+              td #{slot.machineMode}
+              td #{slot.comment}
+
+              device
+
+      .panel.panel-default
+        .panel-heading
+          strong Checklist
+        .panel-body
+
+
+block js
+  script(type='text/javascript', src='/datatables/media/js/jquery.dataTables.js')
+  script(type='text/javascript', src='/datatables/media/js/dataTables.bootstrap.js')
