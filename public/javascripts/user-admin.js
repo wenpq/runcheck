@@ -1,3 +1,5 @@
+/*global Binder:false*/
+
 $(function () {
   $('form input,select').change(function () {
     $('#update').prop('disabled', false);
@@ -15,7 +17,7 @@ $(function () {
       // display a message
       // update history
       model = json;
-      History.renderHistory(model.__updates);
+      History.prependHistory(model.__updates);
     }).fail(function () {
       // display a message
     }).always(function () {

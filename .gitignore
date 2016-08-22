@@ -50,8 +50,8 @@ logs/*
 !logs/README.md
 user-photos/*
 !user-photos/README.md
-public/javascripts/jade/*
-!public/javascripts/jade/README.md
+public/javascripts/template/*
+!public/javascripts/template/README.md
 
 # data in excel
 tools/*.xlsx

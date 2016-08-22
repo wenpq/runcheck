@@ -1,7 +1,7 @@
 mixin change(h, moment)
-  if (typeof h == 'object')
+  if (typeof h === 'object')
     .change(id= h._id)
-      img.user-img-smaller(data-src='holder.js/22x30?size=20&text=' + h.b.substr(0, 1).toUpperCase(), src= '/users/' + h.b + '/photo', title= h.b)
+      img.user-img-smaller(data-src='holder.js/22x30?size=20&text=' + h.b.substr(0, 1).toUpperCase(), src= '/users/' + h.b + '/photo', title= h.b, alt= h.b)
       = ' '
       | updated
       - var i = 0
@@ -13,7 +13,7 @@ mixin change(h, moment)
         = ' '
         span.value.mark= change.v
         - i += 1
-        if (i == h.c.length)
+        if (i === h.c.length)
           = ' '
         else
           = ', and '
