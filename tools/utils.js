@@ -1,30 +1,8 @@
 var XLSX = require('xlsx');
-var Slot = require('../models/slot').Slot;
-var slotSchema = require('../models/slot').slotSchema;
+var lconfig = require('./xlsx-mongo').lconfig;
+var Model = require('../models/' + lconfig.name)[lconfig.model];
+var Schema = Model.schema;
 var mongoose = require('mongoose');
-
-var slotNameMap = [
-  ['system', 'System'],
-  ['subsystem', 'Sub-\r\nsystem'],
-  ['deviceNaming', 'Device'],
-  ['beamlinePosition', 'Beam line position (dm)'],
-  ['name', 'Name'],
-  ['deviceType', 'Device Type'],
-  ['elementName', 'Element Name'],
-  ['level', 'Level of Care'],
-  ['DRR', 'Associated DHR'],
-  ['ARR', 'Associated ARR'],
-  ['InnerDiameter', 'Minimum Beam Pipe Inner Diameter (mm)'],
-  ['flangeLength', 'Element Flange to Flange Length (m)'],
-  ['placeHolder', 'PLACE HOLDER '],
-  ['effectiveLength', 'Element Effective Length (m)'],
-  ['coordinateZ', 'Global Coordinate Z (m)'],
-  ['coordinateY', 'Global Coordinate Y (m)'],
-  ['coordinateX', 'Global Coordinate X (m)'],
-  ['center2centerLength', 'Accumulated center-to-center Length (m)'],
-  ['end2endLength', 'Accumulated end-to-end Length (m)'],
-  ['comment', 'Comment']
-];
 
 /*
  delete null or white space field, rename key ,delete non-number characters(unit) in number field
@@ -53,50 +31,73 @@ function fieldFixed(datalist, dataSchema, nameMap) {
   });
 }
 
-/*
- convert data in xlsx to json format
- */
-function getSlotJson(fileName) {
-  // Read slot data from file
-  var workbook = XLSX.readFile(fileName);
-  var branch1 = workbook.Sheets['branch1'];
-  var branch2 = workbook.Sheets['branch2'];
-  // merge branch1 and branch2
-  var slots = XLSX.utils.sheet_to_json(branch1);
-  var slots2 = XLSX.utils.sheet_to_json(branch2);
-  slots.push(slots2);
+// filter
+function filtByField(x) {
+  var field = lconfig.filterField;
+  var v = true;
+  for(var i = 0 ;i < field.length; i++) {
+    v = v && x[field[i]];
+  }
+  return v;
+}
 
-  fieldFixed(slots, slotSchema, slotNameMap);
-  // delete object that (system || subsystem || beamlinePosition) is empty
-  slots = slots.filter(function (x) {
-    return x.system && x.subsystem && x.beamlinePosition ? true : false;
+/*
+ convert data in xlsx to json format.
+ each sheet will be handled
+ */
+function getXlsxJson(fileName) {
+  // Read data from sheet
+  var workbook = XLSX.readFile(fileName);
+  var data = [];
+  lconfig.position.forEach(function(p){
+    var branch = workbook.Sheets[p.sheet];
+    if(!branch) {
+      console.error('error: can not read data from sheet ' + p.sheet + ', please check the config file.');
+      process.exit(1);
+    }
+    branch['!ref'] = p.range;
+    var l = XLSX.utils.sheet_to_json(branch);
+    data = data.concat(l);
   });
-  return slots;
+  if (data.length === 0) {
+    console.error('error: can not convert data to valid json list, please check the config file.');
+    process.exit(1);
+  }
+
+  fieldFixed(data, Schema, lconfig.nameMap);
+  if(lconfig.filterField) {
+    data = data.filter(filtByField);
+  }
+  return data;
 }
 
 /*
  validate field by schema
- slots: json object list
+ datalist: json object list
  */
-function slotValidate(slots, callback) {
+function dataValidate(datalist, callback) {
   var error;
-  var slotModel = [];
-  for (var i = 0; i < slots.length; i++) {
-    var sobj = new Slot(slots[i]);
+  var dataModel = [];
+  for (var i = 0; i < datalist.length; i++) {
+    var sobj = new Model(datalist[i]);
     // convert string to ObjectId
-    sobj.DRR = mongoose.Types.ObjectId(sobj.DRR);
+    for(var attr in datalist[i]) {
+      if (Model.schema.path(attr).instance === 'ObjectID') {
+        sobj[attr] = mongoose.Types.ObjectId(sobj[attr]);
+      }
+    }
     sobj.ARR = mongoose.Types.ObjectId(sobj.ARR);
     console.log('Validate ' + sobj.name);
     error = sobj.validateSync();
-    // slotModel.push(sobj);
+    // dataModel.push(sobj);
     if (error) {
       break;
     } else {
       console.log('Success.');
-      slotModel.push(sobj);
+      dataModel.push(sobj);
     }
   }
-  callback(error, slotModel);
+  callback(error, dataModel);
 }
 
 
@@ -138,8 +139,8 @@ function saveModel(data, callback) {
 }
 
 module.exports = {
-  getSlotJson: getSlotJson,
-  slotValidate: slotValidate,
+  getXlsxJson: getXlsxJson,
+  dataValidate: dataValidate,
   saveFile: saveFile,
   saveModel: saveModel
 };
