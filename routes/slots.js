@@ -2,6 +2,7 @@ var express = require('express');
 var slots = express.Router();
 var auth = require('../lib/auth');
 var Slot = require('../models/slot').Slot;
+var SlotGroup = require('../models/slot-group').SlotGroup;
 var log = require('../lib/log');
 
 slots.get('/', auth.ensureAuthenticated, function (req, res) {
@@ -47,12 +48,32 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
 
 
 slots.get('/:id', auth.ensureAuthenticated, function (req, res) {
+  Slot.findOne({_id: req.params.id },function(err, slot) {
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
+    }
+    SlotGroup.findOne({_id: slot.inGroup },function(err, slotGroup) {
+      if (err) {
+        log.error(err);
+        return res.status(500).send(err.message);
+      }
+      res.render('slot',{
+        slot: slot,
+        slotGroup: slotGroup
+      });
+    });
+  });
+});
+
+
+slots.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
   Slot.findOne({_id: req.params.id },function(err, doc) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
-    res.render('slot',{slot: doc});
+    res.status(200).send(doc);
   });
 });
 

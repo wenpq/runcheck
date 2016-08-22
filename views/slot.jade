@@ -27,9 +27,8 @@ block content
                 th Associated area
                 th Leve of care
                 th Device type
-                th Element name
                 th Approval status
-                th In Slot group
+                th Slot group
             tbody
               tr
                 td #{slot.name}
@@ -37,65 +36,73 @@ block content
                 td #{slot.area}
                 td #{slot.level}
                 td #{slot.deviceType}
-                td #{slot.elementName}
                 td #{slot.approvalStatus}
-                td #{slot.inGroup}
-        table.table.table-condensed
-          thead
-            tr
-              th system
-              th Sub-system
-              th Device name
-              th Beam line position (dm)
-              th Minimum Beam Pipe Inner Diameter (mm)
-              th Element Flange to Flange Length (m)
-          tbody
-            tr
-              td #{slot.system}
-              td #{slot.subsystem}
-              td #{slot.deviceNaming}
-              td #{slot.beamlinePosition}
-              td #{slot.InnerDiameter}
-              td #{slot.flangeLength}
-        table.table.table-condensed
-          thead
-            tr
-              th Place holder
-              th Element Effective Length (m)
-              th Location: global Coordinate X (m)
-              th Location: global Coordinate Y (m)
-              th Location: global Coordinate Z (m)
-          tbody
-            tr
-              td #{slot.placeHolder}
-              td #{slot.effectiveLength}
-              td #{slot.coordinateX}
-              td #{slot.coordinateY}
-              td #{slot.coordinateZ}
-        table.table.table-condensed
-          thead
-            tr
-              th Accumulated center-to-center Length (m)
-              th Accumulated end-to-end Length (m)
-              th Distance from Artemis source (m)
-              th machineMode
-              th comment
-          tbody
-            tr
-              td #{slot.center2centerLength}
-              td #{slot.end2endLength}
-              td #{slot.artemisDistance}
-              td #{slot.machineMode}
-              td #{slot.comment}
-
-              device
-
-      .panel.panel-default
+                if (slotGroup)
+                  - var sotGroupUrl = {'href': '/slotGroups/' + slotGroup._id};
+                  td
+                    a&attributes(sotGroupUrl) #{slotGroup.name}
+                else
+                  td
+        button#list-slot.btn.btn-default.fa.fa-chevron-down(aria-hidden='true',title='show more details')
+        .row
+          .col-md-6.col-md-offset-3
+            .table-responsive
+              table.table
+                tbody#slot-detail
+                  tr
+                    th Element name
+                    td #{slot.elementName}
+                  tr
+                    th System
+                    td #{slot.system}
+                  tr
+                    th Sub-system
+                    td #{slot.subsystem}
+                  tr
+                    th Device
+                    td #{slot.deviceNaming}
+                  tr
+                    th Beam line position (dm)
+                    td #{slot.beamlinePosition}
+                  tr
+                    th Minimum Beam Pipe Inner Diameter (mm)
+                    td #{slot.InnerDiameter}
+                  tr
+                    th Element Flange to Flange Length (m)
+                    td #{slot.flangeLength}
+                  tr
+                    th PLACE HOLDER
+                    td #{slot.placeHolder}
+                  tr
+                    th Element Effective Length (m)
+                    td #{slot.effectiveLength}
+                  tr
+                    th Global Coordinate Z (m)
+                    td #{slot.coordinateZ}
+                  tr
+                    th Global Coordinate Y (m)
+                    td #{slot.coordinateY}
+                  tr
+                    th Global Coordinate X (m)
+                    td #{slot.coordinateX}
+                  tr
+                    th Accumulated center-to-center Length (m)
+                    td #{slot.center2centerLength}
+                  tr
+                    th Accumulated end-to-end Length (m)
+                    td #{slot.end2endLength}
+                  tr
+                    th Comment
+                    td #{slot.comment}
+                  tr
+                    th Machine mode
+                    td #{slot.machineMode}
+    .panel.panel-default
         .panel-heading
           strong Checklist
         .panel-body
 
-
 block js
   script(type='text/javascript', src='/datatables/media/js/jquery.dataTables.js')
   script(type='text/javascript', src='/datatables/media/js/dataTables.bootstrap.js')
+  script(type='text/javascript', src='/javascripts/slot-action.js')
