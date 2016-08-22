@@ -1,4 +1,3 @@
-
 module.exports = function (grunt) {
 
   require('load-grunt-tasks')(grunt);
@@ -15,17 +14,25 @@ module.exports = function (grunt) {
         src: ['test/**/*.js']
       }
     },
-    watch: {
-      // files: ['<%= eslint.target %>'],
-      // tasks: ['eslint']
+    shell: {
+      templateSource: 'views/client-side/*.pug',
+      templateOutput: 'public/javascripts/template',
+      options: {
+        stderr: false
+      },
+      template: {
+        command: 'pug <%= shell.templateSource %> -D -c --name-after-file -o <%= shell.templateOutput %>'
+      },
+      puglint: {
+        command: './node_modules/pug-lint/bin/pug-lint ./views/*.pug ./views/client-side/*.pug'
+      }
     }
   });
 
-  grunt.loadNpmTasks('grunt-mocha-test');
-  grunt.loadNpmTasks('grunt-contrib-watch');
-
+  grunt.registerTask('template', ['shell:template']);
   grunt.registerTask('test', ['mochaTest']);
-  grunt.registerTask('lint', ['eslint']);
-  grunt.registerTask('default', ['eslint']);
+  grunt.registerTask('puglint', ['shell:puglint']);
+  grunt.registerTask('eslint', ['eslint']);
+  grunt.registerTask('default', ['puglint', 'eslint']);
 
 };
