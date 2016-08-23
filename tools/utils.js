@@ -4,11 +4,12 @@ var Model = require('../models/' + lconfig.name)[lconfig.model];
 var Schema = Model.schema;
 var mongoose = require('mongoose');
 
-/*
- delete null or white space field, rename key ,delete non-number characters(unit) in number field
- datalist:   the originnale json list from xlsx file
- dataschema: the data model schema defined by mongoose
- nameMap:    model field and original column name mapping
+
+/**
+ * delete null or white space field, rename key ,delete non-number characters(unit) in number field
+ * @param datalist    the originnale json list from xlsx file
+ * @param dataSchema  the data model schema defined by mongoose
+ * @param nameMap     model field and original column name mapping
  */
 function fieldFixed(datalist, dataSchema, nameMap) {
   datalist.forEach(function (x) {
@@ -31,7 +32,12 @@ function fieldFixed(datalist, dataSchema, nameMap) {
   });
 }
 
-// filter
+
+/**
+ * filter
+ * @param x
+ * @returns {boolean}
+ */
 function filtByField(x) {
   var field = lconfig.filterField;
   var v = true;
@@ -41,9 +47,11 @@ function filtByField(x) {
   return v;
 }
 
-/*
- convert data in xlsx to json format.
- each sheet will be handled
+
+/**
+ * convert data in xlsx to json format, each sheet will be handled
+ * @param fileName
+ * @returns {Array}
  */
 function getXlsxJson(fileName) {
   // Read data from sheet
@@ -71,13 +79,44 @@ function getXlsxJson(fileName) {
   return data;
 }
 
-/*
- validate field by schema
- datalist: json object list
+
+/**
+ * get unique fields by schema
+ * @returns {Array}
  */
-function dataValidate(datalist, callback) {
-  var error;
+function getUniqueField(){
+  var uniqueFields = [];
+  for (var a in Schema.paths) {
+    if (Schema.paths[a].options.unique) {
+      uniqueFields.push(a);
+    }
+  }
+  return uniqueFields;
+}
+
+// get identity as show name
+var uniqueFields = getUniqueField();
+var identity = uniqueFields.length? uniqueFields[0] : '_id';
+
+/**
+ * remove the duplicate entries and validate field by schema.
+ * @param oridatalist    json object list
+ * @param callback
+ */
+function dataValidate(oridatalist, callback) {
   var dataModel = [];
+  console.log('Format validation start.');
+  var ids = [];
+  oridatalist.forEach(function(d) {
+    ids.push(d[identity]);
+  });
+  // remove duplicate value
+  var datalist = oridatalist.filter(function(elem, pos) {
+    return ids.indexOf(elem[identity]) == pos;
+  });
+  var rn = oridatalist.length - datalist.length;
+  console.log('There are ' + rn + ' duplicate entries removed.');
+
   for (var i = 0; i < datalist.length; i++) {
     var sobj = new Model(datalist[i]);
     // convert string to ObjectId
@@ -87,24 +126,76 @@ function dataValidate(datalist, callback) {
       }
     }
     sobj.ARR = mongoose.Types.ObjectId(sobj.ARR);
-    console.log('Validate ' + sobj.name);
-    error = sobj.validateSync();
-    // dataModel.push(sobj);
-    if (error) {
-      break;
-    } else {
-      console.log('Success.');
+    var err = sobj.validateSync();
+    if (err) {
+      console.error('Validate ' + sobj[identity] + ' format failed.');
+      console.error(err);
+    }else {
       dataModel.push(sobj);
+      console.log('Validate ' + sobj[identity] + ' format successfully.');
     }
   }
-  callback(error, dataModel);
+  // check unique field
+  dataUniqueValidate(dataModel, callback);
 }
 
 
-/*
- save data to file
- data: the validated json object list
- fname: the file name
+/**
+ * validate unqique field.
+ * warning: currently, only validate the first unique field
+ * @param datalist
+ * @param callback
+ */
+function dataUniqueValidate(datalist, callback) {
+  var dataModel = [];
+  console.log('Unique validation.');
+  if(!datalist.length) {
+    callback('Validation failed: all entries are not passed', dataModel);
+    return;
+  }
+  if(!uniqueFields.length) {
+    callback(null, datalist);
+    return;
+  }
+  var ids = [];
+  datalist.forEach(function(d) {
+    ids.push(d[identity]);
+  });
+
+  var queryJson = {};
+  queryJson[identity] = {$in: ids};
+  Model.find(queryJson , function(err, docs){
+    var sames = [];
+    if(err) {
+      console.error(err);
+    }
+    if(docs.length) {
+      docs.forEach(function(d) {
+        sames.push(d[identity]);
+        console.error('Validate ' + d[identity] + ' failed: duplicate value for ' + identity);
+      })
+    }
+    // push passed objects
+    for (var i = 0; i < datalist.length; i++) {
+      if(sames.indexOf(datalist[i][identity]) === -1) {
+        dataModel.push(datalist[i]);
+      }
+    }
+    if (dataModel.length !== datalist.length){
+      var faledNumber = datalist.length - dataModel.length;
+      var error = 'Validation failed: ' + faledNumber + ' entries are not passed, ' + 'only ' + dataModel.length + ' can be saved';
+      callback(error, dataModel);
+    }
+    console.log('Unique validation success.');
+    callback(null, dataModel);
+  });
+}
+
+
+/**
+ * save data to file
+ * @param data    the validated json object list
+ * @param fname   the file name
  */
 function saveFile(data, fname) {
   var fs = require('fs');
@@ -117,18 +208,23 @@ function saveFile(data, fname) {
 }
 
 
-/*
- save data to mongoDB
- data: the validated json object list
+/**
+ * save data to mongoDB
+ * @param data     the validated json object list
+ * @param callback
  */
 function saveModel(data, callback) {
   var count = 0;
+  if (!data.length) {
+    callback(0);
+  }
   data.forEach(function (x) {
-    x.save(function (err, doc) {
+    console.log(x[identity]);
+    x.save(function (err) {
       if (err) {
-        console.error(err);
+        console.error(err.errmsg);
       } else {
-        console.log(doc.name + ' saved');
+        console.log(x[identity] + ' saved');
       }
       count = count + 1;
       if (count === data.length) {
