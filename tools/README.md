@@ -39,28 +39,28 @@ use json format file as configuration. Currently, there are three files availabl
 
 #### Essential attributes
 * name
-> Data name(slot or device)
+  Data name(slot or device)
 * model
-> Mongoose data model name
+  Mongoose data model name
 * collection
-> collection name in MongoDB
+  collection name in MongoDB
 * nameMap
-> two-dimensional array, The mapping relation betwwen raw column value in file and > attrbute in data attribute in MongoDB. The column not defined in nameMap would be ommited, for example:
+  two-dimensional array, The mapping relation betwwen raw column value in file and > attrbute in data attribute in MongoDB. The column not defined in nameMap would be ommited, for example:
 ```
   "nameMap": [
     ["serialNo", "FRIB Part Number (w/ SN when applicable)"],
   ]
 ```
-> That means the column, value of which is "FRIB Part Number (w/ SN when applicable)", equals the "serialNo" field in MongoDB.
+  That means the column, value of which is "FRIB Part Number (w/ SN when applicable)", equals the "serialNo" field in MongoDB.
 * position
-> Json Objects list, the data position in file, include sheet name and data range. For example:
+  Json Objects list, the data position in file, include sheet name and data range. For example:
 
 | systm         |subsytem          | devie         |
 | ------------- | ---------------- | ------------- |
 | foo           | 123              | abc           |
 | bar           | 345              | def           |
 
-> If the table is in Devices sheet, the 'system' is in cell A2, and the 'def' is in cell D66, position should be defined like the following format:
+  If the table is in Devices sheet, the 'system' is in cell A2, and the 'def' is in cell D66, position should be defined like the following format:
 ```
   "position":[
     {
@@ -69,4 +69,4 @@ use json format file as configuration. Currently, there are three files availabl
 ```
 #### Optional  attributes
 * filterField
-> String list, if a field is defined in filterField and the field(column) vaue is null, the row of data would be omitted.
+  String list, if a field is defined in filterField and the field(column) vaue is null, the row of data would be omitted.
