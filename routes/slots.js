@@ -10,24 +10,22 @@ slots.get('/', auth.ensureAuthenticated, function (req, res) {
 });
 
 slots.get('/json', auth.ensureAuthenticated, function (req, res) {
-  var slotDocs = [];
   Slot.find(function (err, docs) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
-    var count = 0;
     // data just for test.
-    docs.forEach(function(d) {
-      var slotDoc = {
-        _id: d._id,
-        name: d.name,
+    var slotDocs = docs.map(function (s) {
+      return {
+        _id: s._id,
+        name: s.name,
         owner: 'wen',
         area: 'unknow in xlsx',
-        level: d.level,
-        deviceType: d.deviceType,
-        location: [d.coordinateX, d.coordinateY, d.coordinateZ],
-        device: d.deviceNaming,
+        level: s.level,
+        deviceType: s.deviceType,
+        location: [s.coordinateX, s.coordinateY, s.coordinateZ],
+        device: s.deviceNaming,
         approvalStatus: 'unknow in xlsx',
         machineMode: 'unknow in xlsx',
         ReadinessCheckedValue: 10,
@@ -35,30 +33,30 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
         DRRCheckedValue: 4,
         DRRTotalValue: 10,
         ARRCheckedValue: 0,
-        ARRTotalValue:10
-      };
-      slotDocs.push(slotDoc);
-      count = count + 1;
-      if(count === docs.length) {
-        res.status(200).json(slotDocs);
+        ARRTotalValue: 10
       }
     });
+    res.status(200).json(slotDocs);
   });
 });
 
 
 slots.get('/:id', auth.ensureAuthenticated, function (req, res) {
-  Slot.findOne({_id: req.params.id },function(err, slot) {
+  Slot.findOne({
+    _id: req.params.id
+  }, function (err, slot) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
-    SlotGroup.findOne({_id: slot.inGroup },function(err, slotGroup) {
+    SlotGroup.findOne({
+      _id: slot.inGroup
+    }, function (err, slotGroup) {
       if (err) {
         log.error(err);
         return res.status(500).send(err.message);
       }
-      res.render('slot',{
+      res.render('slot', {
         slot: slot,
         slotGroup: slotGroup
       });
@@ -68,7 +66,9 @@ slots.get('/:id', auth.ensureAuthenticated, function (req, res) {
 
 
 slots.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
-  Slot.findOne({_id: req.params.id },function(err, doc) {
+  Slot.findOne({
+    _id: req.params.id
+  }, function (err, doc) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
