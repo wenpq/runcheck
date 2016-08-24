@@ -11,7 +11,7 @@ var configPath;
 program.version('0.0.1')
   .option('-d, --dryrun', 'validate data by schema in MongoDB.')
   .option('-m, --mongo', 'save data in defoult MongoDB.')
-  .option('-f, --force', 'force to save the data that passed validation.')
+  .option('-f, --force', 'force to save the data that passed validation, whether dry-run is successful or not.')
   .option('-o, --outfile [outfle]', 'save data in specified file.')
   .arguments('<dataPath>')
   .arguments('<configPath>')
@@ -130,16 +130,16 @@ sutil.dataValidate(datalist, function (err, data) {
   if (err) {
     console.error(err);
   }else {
-    console.log('All data validation completed, Can be saved in MongoDB now.');
+    console.log('All data validation completed successfully.');
   }
   console.log('Dryrun end.');
   if (program.outfile) {
     sutil.saveFile(data, program.outfile);
   }
-  if (program.mongo) {
+  if (program.mongo || program.force) {
     // save to mongo DB
-    if (err && (typeof program.force) === 'undefined') {
-      console.log('Can not save, because some entries are failed in dryrun. You can force to save the data that passed validation by using [-fm] option.');
+    if (err && !program.force) {
+      console.log('Can not save, because some entries are failed in dryrun. You can force to save the data that passed validation by using [-f] option.');
       mongoose.connection.close();
     } else {
       // Save Data

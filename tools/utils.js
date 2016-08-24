@@ -99,24 +99,28 @@ var uniqueFields = getUniqueField();
 var identity = uniqueFields.length? uniqueFields[0] : '_id';
 
 /**
- * remove the duplicate entries and validate field by schema.
+ * remove the duplicate entries and validate field format by schema.
  * @param oridatalist    json object list
  * @param callback
  */
 function dataValidate(oridatalist, callback) {
+  console.log('Entries unique check.');
   var dataModel = [];
-  console.log('Format validation start.');
   var ids = [];
   oridatalist.forEach(function(d) {
     ids.push(d[identity]);
   });
   // remove duplicate value
   var datalist = oridatalist.filter(function(elem, pos) {
+    if (ids.indexOf(elem[identity]) !== pos) {
+      console.log('Duplicate key, ' + elem[identity] + 'deleted');
+    }
     return ids.indexOf(elem[identity]) == pos;
   });
   var rn = oridatalist.length - datalist.length;
-  console.log('There are ' + rn + ' duplicate entries removed.');
+  console.log('There are ' + rn + ' duplicate entries deleted.');
 
+  console.log('Format validation start.');
   for (var i = 0; i < datalist.length; i++) {
     var sobj = new Model(datalist[i]);
     // convert string to ObjectId
@@ -135,6 +139,8 @@ function dataValidate(oridatalist, callback) {
       console.log('Validate ' + sobj[identity] + ' format successfully.');
     }
   }
+
+  // callback(null, dataModel); // for test
   // check unique field
   dataUniqueValidate(dataModel, callback);
 }
@@ -148,7 +154,7 @@ function dataValidate(oridatalist, callback) {
  */
 function dataUniqueValidate(datalist, callback) {
   var dataModel = [];
-  console.log('Unique validation.');
+  console.log('Unique validation from MongoDB.');
   if(!datalist.length) {
     callback('Validation failed: all entries are not passed', dataModel);
     return;
@@ -172,7 +178,7 @@ function dataUniqueValidate(datalist, callback) {
     if(docs.length) {
       docs.forEach(function(d) {
         sames.push(d[identity]);
-        console.error('Validate ' + d[identity] + ' failed: duplicate value for ' + identity);
+        console.error('Validate ' + d[identity] + ' failed: duplicate key for ' + identity);
       })
     }
     // push passed objects
@@ -215,6 +221,7 @@ function saveFile(data, fname) {
  */
 function saveModel(data, callback) {
   var count = 0;
+  var suc = 0;
   if (!data.length) {
     callback(0);
   }
@@ -225,10 +232,11 @@ function saveModel(data, callback) {
         console.error(err.errmsg);
       } else {
         console.log(x[identity] + ' saved');
+        suc++;
       }
       count = count + 1;
       if (count === data.length) {
-        callback(count);
+        callback(suc);
       }
     });
   })
