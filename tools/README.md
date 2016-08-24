@@ -12,6 +12,7 @@ The  format of data in each sheet shall like the following:
 | bar           | 345              | def           |
 
 The following are the main steps for slot data filter:
+  - delete duplicate rows.
   - delete column named 'Distance from Artemis source (m)' in slots data.
   - if type of field is number, delete the unit in field.
   - if specified columns are empty, delete the row.
@@ -28,7 +29,7 @@ Usage: node xlsx-mongo <dataPath> <configPath> [options]
     -d, --dryrun            validate data by schema in MongoDB.
     -m, --mongo             save data in default MongoDB.
     -o, --outfile [outfle]  save data in specified file.
-    -a, --append            force to append data in MongoDB when the DB already has data.
+    -f, --force             force to save the data that passed validation, whether dry-run is successful or not.
 ```
 ## Configuration file
 use json format file as configuration. Currently, there are three files available in directory:

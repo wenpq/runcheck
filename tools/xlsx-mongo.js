@@ -11,7 +11,7 @@ var configPath;
 program.version('0.0.1')
   .option('-d, --dryrun', 'validate data by schema in MongoDB.')
   .option('-m, --mongo', 'save data in defoult MongoDB.')
-  .option('-a, --append', 'force to append data in MongoDB when the DB already has data.')
+  .option('-f, --force', 'force to save the data that passed validation, whether dry-run is successful or not.')
   .option('-o, --outfile [outfle]', 'save data in specified file.')
   .arguments('<dataPath>')
   .arguments('<configPath>')
@@ -20,6 +20,9 @@ program.version('0.0.1')
     configPath = cp;
   });
 program.parse(process.argv);
+if(!program.dryrun) {
+  program.dryrun = true;
+}
 // get arguments end
 
 
@@ -82,6 +85,41 @@ if(!Array.isArray(lconfig.nameMap)) {
 // check config content end
 
 
+// connect mongo starts
+var mongoURL = 'mongodb://' + (config.mongo.address || 'localhost') + ':' + (config.mongo.port || '27017') + '/' + (config.mongo.db || 'runcheck');
+var mongoOptions = {
+  db: {
+    native_parser: true
+  },
+  server: {
+    poolSize: 5,
+    socketOptions: {
+      connectTimeoutMS: 30000,
+      keepAlive: 1
+    }
+  }
+};
+if (config.mongo.user && config.mongo.pass) {
+  mongoOptions.user = config.mongo.user;
+  mongoOptions.pass = config.mongo.pass;
+}
+
+if (config.mongo.auth) {
+  mongoOptions.auth = config.mongo.auth;
+}
+mongoose.connect(mongoURL, mongoOptions);
+mongoose.connection.on('connected', function () {
+  console.log('Mongoose default connection opened.');
+});
+mongoose.connection.on('error', function (err) {
+  console.error('Mongoose default connection error: ' + err);
+});
+mongoose.connection.on('disconnected', function () {
+  console.log('Mongoose default connection disconnected');
+  process.exit(0);
+});
+// connect mongo end
+
 console.log('----------Import Data from xlsx file to MongoDB-------------');
 var sutil = require('./utils');
 
@@ -91,70 +129,27 @@ console.log('Get ' + datalist.length + ' entries from ' + realDataPath);
 sutil.dataValidate(datalist, function (err, data) {
   if (err) {
     console.error(err);
+  }else {
+    console.log('All data validation completed successfully.');
   }
-  console.log('All data validation completed, Can be saved in MongoDB now.');
-  if (program.dryrun) {
-    console.log('Dry run end');
-  }
+  console.log('Dryrun end.');
   if (program.outfile) {
     sutil.saveFile(data, program.outfile);
   }
-  if (program.mongo) {
-    // connect mongo starts
-    var mongoURL = 'mongodb://' + (config.mongo.address || 'localhost') + ':' + (config.mongo.port || '27017') + '/' + (config.mongo.db || 'runcheck');
-    var mongoOptions = {
-      db: {
-        native_parser: true
-      },
-      server: {
-        poolSize: 5,
-        socketOptions: {
-          connectTimeoutMS: 30000,
-          keepAlive: 1
-        }
-      }
-    };
-    if (config.mongo.user && config.mongo.pass) {
-      mongoOptions.user = config.mongo.user;
-      mongoOptions.pass = config.mongo.pass;
-    }
-
-    if (config.mongo.auth) {
-      mongoOptions.auth = config.mongo.auth;
-    }
-    mongoose.connect(mongoURL, mongoOptions);
-    mongoose.connection.on('connected', function () {
-      console.log('Mongoose default connection opened.');
-    });
-    mongoose.connection.on('error', function (err) {
-      console.error('Mongoose default connection error: ' + err);
-    });
-    mongoose.connection.on('disconnected', function () {
-      console.log('Mongoose default connection disconnected');
-      process.exit(0);
-    });
+  if (program.mongo || program.force) {
     // save to mongo DB
-    saveInMongo(data, function (count) {
-      console.log(count + ' entries are saved(' + ' total are ' + data.length + ' )');
+    if (err && !program.force) {
+      console.log('Can not save, because some entries are failed in dryrun. You can force to save the data that passed validation by using [-f] option.');
       mongoose.connection.close();
-    });
+    } else {
+      // Save Data
+      console.log('Start importing Data to MongoDB');
+      sutil.saveModel(data, function (count) {
+        console.log(count + ' entries are saved(' + ' total are ' + data.length + ' )');
+        mongoose.connection.close();
+      });
+    }
+  }else {
+    mongoose.connection.close();
   }
 });
-
-
-function saveInMongo(data, callback) {
-  mongoose.connection.on('connected', function () {
-    mongoose.connection.db.listCollections({
-      name: lconfig.collection
-    }).next(function (err, collinfo) {
-      // if MongoDB already had data, give up saving
-      if (collinfo && (typeof program.append) === 'undefined') {
-        console.log('Can not save, because MongoDB already had ' + lconfig.name + ' data. You can force to append data by using [-am] option.');
-        callback();
-      } else {
-        // Save Data
-        sutil.saveModel(data, callback);
-      }
-    });
-  })
-}
