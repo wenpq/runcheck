@@ -2,9 +2,10 @@ var express = require('express');
 var devices = express.Router();
 var auth = require('../lib/auth');
 var Device = require('../models/device').Device;
+var Slot = require('../models/slot').Slot;
 var checklistValues = require('../models/checklist').checklistValues;
 var checklistSubjects = require('../models/checklist').deviceChecklistSubjects;
-
+var log = require('../lib/log');
 
 devices.get('/', auth.ensureAuthenticated, function (req, res) {
   res.render('devices');
@@ -130,5 +131,44 @@ devices.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
+
+devices.get('/json/serialNos', auth.ensureAuthenticated, function (req, res) {
+  Device.find({}, {serialNo: true}, function (err, docs) {
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
+    }
+    return res.status(200).json(docs);
+  });
+});
+
+
+devices.put('/:id/installToDevice/:targetId', auth.ensureAuthenticated, function (req, res) {
+  Device.update({_id: req.param.id}, {installToDevice: req.param.targetId, status: 1},  function (err) {
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
+    }
+    return res.status(200).end();
+  });
+});
+
+
+devices.put('/:id/installToSlot/:targetId', auth.ensureAuthenticated, function (req, res) {
+  Device.update({_id: req.param.id}, {installToSlot: req.param.targetId, status: 1},  function (err) {
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
+    }
+    // change slot status
+    Slot.update({_id: req.param.targetId}, {device: req.param.id}, function (err) {
+      if (err) {
+        log.error(err);
+        return res.status(500).send(err.message);
+      }
+      return res.status(200).end();
+    })
+  });
+});
 
 module.exports = devices;

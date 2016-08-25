@@ -53,3 +53,7 @@ body {
 .modal-content {
   margin-top: 30%;
 }
+
+.btn-space {
+  margin-right: 5px;
+}

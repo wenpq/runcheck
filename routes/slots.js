@@ -27,7 +27,7 @@ slots.get('/json', auth.ensureAuthenticated, function (req, res) {
         level: d.level,
         deviceType: d.deviceType,
         location: [d.coordinateX, d.coordinateY, d.coordinateZ],
-        device: d.deviceNaming,
+        device: d.device,
         approvalStatus: 'unknow in xlsx',
         machineMode: 'unknow in xlsx',
         ReadinessCheckedValue: 10,
@@ -74,6 +74,17 @@ slots.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
       return res.status(500).send(err.message);
     }
     res.status(200).send(doc);
+  });
+});
+
+
+slots.get('/json/names', auth.ensureAuthenticated, function (req, res) {
+  Slot.find({}, {name: true, _id: false}, function (err, docs) {
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
+    }
+    return res.status(200).json(docs);
   });
 });
 

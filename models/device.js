@@ -4,7 +4,6 @@ var ObjectId = Schema.Types.ObjectId;
 
 var checklist = require('./checklist').deviceChecklistSchema;
 
-
 var device = new Schema({
   serialNo: {
     type: String,
@@ -26,6 +25,20 @@ var device = new Schema({
     type: Number,
     default: 0,
     min: 0
+  },
+  installToDevice: ObjectId,
+  installToSlot: ObjectId,
+  /**
+   * 0: spare
+   * 1: prepare to install
+   * 1.5: prepare installation checklist
+   * 2: approved to install
+   * 3: installed
+   */
+  status: {
+    type: Number,
+    default: 0,
+    enum: [0, 1, 1.5, 2, 3]
   }
 });
 
