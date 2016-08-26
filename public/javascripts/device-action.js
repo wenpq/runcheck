@@ -17,6 +17,7 @@ $(function () {
   if(status === '1' ) {
     infoStyle = 'info';
     $('#approveInstall').removeAttr('disabled');
+    $('#rejectInstall').removeAttr('disabled');
   }
   if(status === '1.5') {
     infoStyle = 'info';
@@ -35,19 +36,22 @@ $(function () {
 });
 
 var nameMap;
+var installTo;
 $('.prepare-install').click(function () {
   var url;
   var att;
   nameMap = {};
   if ($(this).text() === 'slot') {
     $('#prepareTitle').text('Prepare to be installed to Slot');
-    $('#prepareLabel').text('Slot Name: ');
+    $('#prepareLabel').text('Slot Name:');
     url = '/slots/json/names';
+    installTo = 'installToDevice';
     att = 'name'
   }else{
     $('#prepareTitle').text('Prepare to be installed to Device: ');
-    $('#prepareLabel').text('Device serial number: ');
+    $('#prepareLabel').text('Device serial number:');
     url = '/devices/json/serialNos';
+    installTo = 'installToSlot';
     att = 'serialNo'
   }
   $.ajax({
@@ -61,7 +65,7 @@ $('.prepare-install').click(function () {
     }
     $('#prepareInput').typeahead({ source: namelist});
   }).fail(function (jqXHR) {
-    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button> Get slot or devce name list failed, ' + jqXHR.responseText +  '</div>');
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button> Get slot or device name list failed. ' + jqXHR.responseText +  '</div>');
   });
   $('#preparePanel').show();
 });
@@ -74,20 +78,35 @@ $('#prepareConfirm').click(function (e) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + name + ' not found.</div>');
     return;
   }
-  var url;
-  if ($('.prepare-install').text() === 'slot') {
-    url = window.location.pathname + '/installToSlot/' + targetId ;
-  }else{
-    url = window.location.pathname + '/installToDevice/' + targetId ;
-  }
+  var url = window.location.pathname + '/' + installTo +  '/' + targetId ;
   $.ajax({
     url: url,
     type: 'PUT'
-  }).done(function () {
-    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button> Prepare to install this device, waiting for approved.</div>');
+  }).done(function (data) {
+    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button> Prepare to install success.</div>');
+    // refresh page
     $('#preparePanel').hide();
+    $('#preInstall').attr('disabled', 'disabled');
+    $('#deviceStatus td').text(statusMap[data.status]);
+    $('#deviceStatus').addClass('info');
+    $('#approveInstall').removeAttr('disabled');
+    $('#rejectInstall').removeAttr('disabled');
+    $('#deviceInstallTo a').text(data[installTo]);
   }).fail(function (jqXHR) {
-    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button> Can not prepare to install this device, ' + jqXHR.responseText +  '</div>');
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText +  '</div>');
+  });
+});
+
+$('#rejectInstall').click(function (e) {
+  e.preventDefault();
+
+  $.ajax({
+    url: window.location.pathname ,
+    type: 'PUT'
+  }).done(function () {
+
+  }).fail(function (jqXHR) {
+
   });
 });
 

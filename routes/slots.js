@@ -79,7 +79,7 @@ slots.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
 
 
 slots.get('/json/names', auth.ensureAuthenticated, function (req, res) {
-  Slot.find({}, {name: true, _id: false}, function (err, docs) {
+  Slot.find({}, {name: true}, function (err, docs) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
