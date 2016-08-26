@@ -142,7 +142,7 @@ function dataValidate(datalist, callback) {
     var err = sobj.validateSync();
     if (err) {
       console.error('Validate failed for ' + sobj);
-      console.error(err.message);
+      console.error(err.errors);
       errs.push(err);
     }
   }
