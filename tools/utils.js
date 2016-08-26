@@ -111,7 +111,7 @@ function getUniqueField() {
  */
 function dataValidate(datalist, callback) {
   console.log('check unique fields');
-  var dupFields = [];
+  var dupFields = null;
   uniqueFields.forEach(function (f) {
     var values = [];
     var i;
@@ -119,16 +119,23 @@ function dataValidate(datalist, callback) {
       if (values.indexOf(datalist[i][f]) === -1) {
         values.push(datalist[i][f]);
       } else {
-        dupFields.push(f);
-        break;
+        if (!dupFields) {
+          dupFields = {};
+        }
+        if (!dupFields[f]) {
+          dupFields[f] = [];
+        }
+        if (dupFields[f].indexOf(datalist[i][f]) === -1) {
+          dupFields[f].push(datalist[i][f]);
+        }
       }
     }
   });
-  if (dupFields.length > 0) {
+  if (dupFields) {
     if (typeof callback === 'function') {
-      return callback(new Error('Duplicate fields found: ' + dupFields.join()));
+      return callback(new Error('Duplicate fields found: ' + JSON.stringify(dupFields)));
     } else {
-      return console.error('Duplicate fields found: ' + dupFields.join());
+      return console.error('Duplicate fields found: ' + JSON.stringify(dupFields));
     }
   } else {
     console.log('all values in unique fields are unique.');
