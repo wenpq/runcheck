@@ -32,9 +32,11 @@ block content
               tr#deviceInstallTo
                 th Installed to
                 if device.installToDevice
-                  td Device: device.installToDevice
+                  td Device:
+                    a(href='/devices/' + device.installToDevice) #{device.installToDevice}
                 else if device.installToSlot
-                  td Slot: device.installToSlot
+                  td Slot:
+                    a(href='/slots/' + device.installToSlot) #{device.installToSlot}
                 else
                   td Spare
               tr#deviceStatus

@@ -16,7 +16,7 @@ $(function () {
   }
   if(status === '1' ) {
     infoStyle = 'info';
-    $('#approve-nstall').removeAttr('disabled');
+    $('#approveInstall').removeAttr('disabled');
   }
   if(status === '1.5') {
     infoStyle = 'info';
@@ -66,7 +66,8 @@ $('.prepare-install').click(function () {
   $('#preparePanel').show();
 });
 
-$('#prepareConfirm').click(function () {
+$('#prepareConfirm').click(function (e) {
+  e.preventDefault();
   var name = $('#prepareInput').val().trim();
   var targetId = nameMap[name];// get id by name
   if(!targetId) {
@@ -75,15 +76,15 @@ $('#prepareConfirm').click(function () {
   }
   var url;
   if ($('.prepare-install').text() === 'slot') {
-    url = window.location.pathname + '/slot/' + targetId ;
+    url = window.location.pathname + '/installToSlot/' + targetId ;
   }else{
-    url = window.location.pathname + '/device/' + targetId ;
+    url = window.location.pathname + '/installToDevice/' + targetId ;
   }
   $.ajax({
     url: url,
     type: 'PUT'
   }).done(function () {
-    $('#message').append('<div class="alert alert-sucess"><button class="close" data-dismiss="alert">x</button> prepare to install this device, waiting for approved.</div>');
+    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button> Prepare to install this device, waiting for approved.</div>');
     $('#preparePanel').hide();
   }).fail(function (jqXHR) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button> Can not prepare to install this device, ' + jqXHR.responseText +  '</div>');

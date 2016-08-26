@@ -144,30 +144,68 @@ devices.get('/json/serialNos', auth.ensureAuthenticated, function (req, res) {
 
 
 devices.put('/:id/installToDevice/:targetId', auth.ensureAuthenticated, function (req, res) {
-  Device.update({_id: req.param.id}, {installToDevice: req.param.targetId, status: 1},  function (err) {
+  // check conflict
+  Device.findOne({_id: req.params.id}, function(err, device){
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
-    return res.status(200).end();
-  });
-});
-
-
-devices.put('/:id/installToSlot/:targetId', auth.ensureAuthenticated, function (req, res) {
-  Device.update({_id: req.param.id}, {installToSlot: req.param.targetId, status: 1},  function (err) {
-    if (err) {
-      log.error(err);
-      return res.status(500).send(err.message);
+    if (device.installToDevice) {
+      return res.status(409).send('Conflict: installToDevice attribute is not empty, the value is ' + device.installToDevice);
     }
-    // change slot status
-    Slot.update({_id: req.param.targetId}, {device: req.param.id}, function (err) {
+    if (device.status !== 0) {
+      return res.status(409).send('Conflict: status is not spare, the value is ' + device.status);
+    }
+    // update
+    Device.update({_id: req.params.id}, {installToDevice: req.params.targetId, status: 1},  function (err) {
       if (err) {
         log.error(err);
         return res.status(500).send(err.message);
       }
       return res.status(200).end();
-    })
+    });
+  });
+});
+
+
+devices.put('/:id/installToSlot/:targetId', auth.ensureAuthenticated, function (req, res) {
+  // check conflict for slot
+  Slot.findOne({_id: req.params.targetId}, function(err, slot) {
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
+    }
+    if (slot.device) {
+      return res.status(409).send('Conflict: device attribute of target slot is not empty, the value is ' +  slot.device);
+    }
+  });
+  // check conflict for device
+  Device.findOne({_id: req.params.id}, function(err, device){
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
+    }
+    if (device.installToSlot) {
+      return res.status(409).send('Conflict: installToSlot attribute is not empty, the value is ' + device.installToSlot);
+    }
+    if (device.status !== 0) {
+      return res.status(409).send('Conflict: status is not spare, the value is ' + device.status);
+    }
+    // update
+    Device.update({_id: req.params.id}, {installToSlot: req.params.targetId, status: 1},  function (err) {
+      if (err) {
+        log.error(err);
+        return res.status(500).send(err.message);
+      }
+      // change slot status
+      Slot.update({_id: req.params.targetId}, {device: req.params.id}, function (err) {
+        if (err) {
+          log.error(err);
+          return res.status(500).send(err.message);
+        }
+        return res.status(200).end();
+      })
+    });
   });
 });
 
