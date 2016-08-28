@@ -121,16 +121,12 @@ devices.post('/:id', auth.ensureAuthenticated, function (req, res) {
 devices.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
   Device.findById(req.params['id'], function (err, device) {
     if (err) {
-      return res.status(404).render('error', {
-        error: {
-          status: err
-        }
-      });
+      log.error(err);
+      return res.status(500).send(err.message);
     }
     res.status(200).json(device);
   });
 });
-
 
 devices.get('/json/serialNos', auth.ensureAuthenticated, function (req, res) {
   Device.find({}, {serialNo: true}, function (err, docs) {
@@ -157,7 +153,7 @@ devices.put('/:id/installToDevice/:targetId', auth.ensureAuthenticated, function
       return res.status(409).send('Conflict: status is not spare, the value is ' + device.status);
     }
     // update
-    Device.update({_id: req.params.id}, {installToDevice: req.params.targetId, status: 1},  function (err, newDevice) {
+    Device.findOneAndUpdate({_id: req.params.id}, {installToDevice: req.params.targetId, status: 1}, { new: true }, function (err, newDevice) {
       if (err) {
         log.error(err);
         return res.status(500).send(err.message);
@@ -192,7 +188,7 @@ devices.put('/:id/installToSlot/:targetId', auth.ensureAuthenticated, function (
         return res.status(409).send('Conflict: status is not spare, the value is ' + device.status);
       }
       // update
-      Device.update({_id: req.params.id}, {installToSlot: req.params.targetId, status: 1},  function (err, newDevice) {
+      Device.findOneAndUpdate({_id: req.params.id}, {installToSlot: req.params.targetId, status: 1},  { new: true }, function (err, newDevice) {
         if (err) {
           log.error(err);
           return res.status(500).send(err.message);

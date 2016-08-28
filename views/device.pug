@@ -7,6 +7,7 @@ block head
 
 block content
   br
+  div#device(style='display: none') #{JSON.stringify(device)}
   #message
   .well
     .row
@@ -16,35 +17,28 @@ block content
             tbody
               tr
                 th Name
-                td #{device.name}
+                td#dName
               tr
                 th Serial Number
-                td #{device.serialNo}
+                td#dSerialNo
               tr
                 th Type
-                td #{device.type}
+                td#dType
               tr
                 th Department
-                td #{device.department}
+                td#dDepartment
               tr
                 th Owner
-                td #{device.owner}
-              tr#deviceInstallTo
+                td#dOwner
+              tr
                 th Installed to
-                if device.installToDevice
-                  td Device:
-                    a(href='/devices/' + device.installToDevice) #{device.installToDevice}
-                else if device.installToSlot
-                  td Slot:
-                    a(href='/slots/' + device.installToSlot) #{device.installToSlot}
-                else
-                  td Spare
-              tr#deviceStatus
+                td#dInstallTo
+              tr
                 th Status
-                td #{device.status}
+                td#dStatus
   form.form-inline
     .btn-group
-      button.btn.btn-space.btn-primary.dropdown-toggle(type='button', disabled='disabled', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')#preInstall
+      button.btn.btn-space.btn-primary.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')#preInstall
         | Prepare install
         span.caret
       ul.dropdown-menu
@@ -52,9 +46,9 @@ block content
           a.prepare-install(href='#') device
         li
           a.prepare-install(href='#') slot
-    button.btn.btn-space.btn-primary(disabled='disabled')#rejectInstall Reject
-    button.btn.btn-space.btn-primary(disabled='disabled')#approveInstall Approve
-    button.btn.btn-space.btn-primary(disabled='disabled')#install Install
+    button.btn.btn-space.btn-primary#rejectInstall Reject
+    button.btn.btn-space.btn-primary#approveInstall Approve
+    button.btn.btn-space.btn-primary#install Install
   br
   .panel.panel-default#preparePanel
     .panel-heading
