@@ -10,7 +10,7 @@ var History = (function (parent, $) {
 
   function renderHistory(updates, selector) {
     selector = typeof selector === 'undefined' ? '#history' : selector;
-    if (updates && updates.length > 1) {
+    if (updates && updates.length > 0) {
       $(selector).empty();
       updates.forEach(function (u) {
         $(selector).prepend(changeTemplate({
@@ -27,7 +27,7 @@ var History = (function (parent, $) {
     $(selector).children('.change').each(function () {
       changeIds.push($(this).prop('id'));
     });
-    if (updates && updates.length > 1) {
+    if (updates && updates.length > 0) {
       updates.forEach(function (u) {
         if (changeIds.indexOf(u._id) === -1) {
           $(selector).prepend(changeTemplate({
