@@ -6,10 +6,10 @@ function dataRender(device){
   $('#dOwner').text(device.owner);
 
   if(device.installToSlot) {
-    var s = 'Slot:<a href="/slots/' + device.installToSlot + '">' + device.installToSlot + '<a>';
+    var s = 'Slot:<a href="/slots/' + device.installToSlot + '">' + device.installToSlot + '</a>';
     $('#dInstallTo').html(s);
   }else if(device.installToDevice) {
-    s = 'Device:<a href="/devices/' + device.installToDevice + '">' + device.installToDevice + '<a>';
+    s = 'Device:<a href="/devices/' + device.installToDevice + '">' + device.installToDevice + '</a>';
     $('#dInstallTo').html(s);
   }else{
     $('#dInstallTo').html('Spare');
@@ -37,10 +37,14 @@ function dataRender(device){
   $('#preparePanel').hide();
 
   // hide buttons
-  // TODO: get the role
+  $('#preInstall').removeAttr('disabled');
+  $('#approveInstall').removeAttr('disabled');
+  $('#rejectInstall').removeAttr('disabled');
+  $('#install').removeAttr('disabled');
   var role = 'AM';
-  disableButton(status, role);
+  disableButton(status, role); // TODO: get the role
 }
+
 
 /**
  * disable buttons by status and role
@@ -77,13 +81,10 @@ function disableButton(status, role) {
   }
 }
 
-$(function () {
-  var device = JSON.parse($('#device').text());
-  dataRender(device );
-});
 
 var nameMap;
 var installTo;
+var device;
 $('.prepare-install').click(function () {
   var url;
   var att;
@@ -117,6 +118,7 @@ $('.prepare-install').click(function () {
   $('#preparePanel').show();
 });
 
+
 $('#prepareConfirm').click(function (e) {
   e.preventDefault();
   var name = $('#prepareInput').val().trim();
@@ -125,33 +127,51 @@ $('#prepareConfirm').click(function (e) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + name + ' not found.</div>');
     return;
   }
-  var url = window.location.pathname + '/' + installTo +  '/' + targetId ;
+  var url = window.location.pathname + '/' + installTo +  '/null/' + targetId + '/status/0/1';
   $.ajax({
     url: url,
     type: 'PUT'
-  }).done(function (data) {
+  }).done(function (device) {
     $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button> Prepare to install success.</div>');
-    // refresh page
-    dataRender(data)
+    $('#device').text(JSON.stringify( device));
+    dataRender(device)
   }).fail(function (jqXHR) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText +  '</div>');
   });
 });
 
+
 $('#rejectInstall').click(function (e) {
   e.preventDefault();
+  var oldId = $('#dInstallTo a').text();
+  installTo = device.installToSlot ? device.installToSlot: device.installToDevice;
+  if (device.installToSlot) {
+    installTo = 'installToSlot';
+  }else if(device.installToDevice) {
+    installTo = 'installToDevice';
+  }else {
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Both installToDevice and installToSlot have objects.</div>');
+  }
+  var url = window.location.pathname + '/' + installTo +  '/' + oldId + '/null/status/1/0';
   $.ajax({
-    url: window.location.pathname ,
+    url: url ,
     type: 'PUT'
-  }).done(function () {
-
+  }).done(function (device) {
+    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Reject success, the device status become spare.</div>');
+    $('#device').text(JSON.stringify( device));
+    dataRender(device)
   }).fail(function (jqXHR) {
-
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText +  '</div>');
   });
 });
+
 
 $('#prepareCancel').click(function () {
   $('#preparePanel').hide();
 });
 
 
+$(function () {
+  device = JSON.parse($('#device').text());
+  dataRender(device);
+});

@@ -140,26 +140,19 @@ devices.get('/json/serialNos', auth.ensureAuthenticated, function (req, res) {
 
 
 /**
- * set prepare and set spare for installToDevice
- * set prepare: status 0 --> 1 and installToDevice nul --> targetId
- * set spare: status (1|1.5|2|3) --> 0 and installToDevice targetId--> null
+ * update status and installToDevice for device
+ * set prepare: status 0 --> 1 and installToDevice nul --> id
+ * set spare: status (1|1.5|2|3) --> 0 and installToDevice id--> null
  */
-devices.put('/:id/installToDevice/:targetId/:status', auth.ensureAuthenticated, function (req, res) {
-  var condition;
-  if (req.params.status == 1 ) {
-    // prepare
-    condition = {_id: req.params.id,
-      installToDevice: null,
-      status: 0
-    };
-  }else if(req.params.status == 0) {
-    // spare
-    condition = {_id: req.params.id,
-      installToDevice: req.params.targetId,
-      status: { $ne: 0}
-    };
-  }
-  Device.findOneAndUpdate(condition, {installToDevice: req.params.targetId, status: 1}, { new: true }, function (err, newDevice) {
+devices.put('/:id/installToDevice/:oldId/:newId/status/:oldStatus/:newStatus', auth.ensureAuthenticated, checkStatusTransition, function (req, res) {
+  var condition = {_id: req.params.id,
+    installToDevice: req.params.oldId,
+    status: req.params.oldStatus
+  };
+  var updateInfo =  { installToDevice: req.params.newId,
+    status: req.params.newStatus
+  };
+  Device.findOneAndUpdate(condition, updateInfo, { new: true }, function (err, newDevice) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
@@ -173,35 +166,20 @@ devices.put('/:id/installToDevice/:targetId/:status', auth.ensureAuthenticated, 
 
 
 /**
- * set prepare and set spare for installToSlot
+ * update status and installToSlot for device
  * set prepare: status 0 --> 1 and installToDevice nul --> targetId and slot.device null --> targetId
  * set spare: status (1|1.5|2|3) --> 0 and installToDevice targetId--> null slot.device targetId --> null
+ * TODO: MongoDB transaction?
  */
-devices.put('/:id/installToSlot/:targetId/:status', auth.ensureAuthenticated, function (req, res) {
-  var condition;
-  var slotCondition;
-  if (req.params.status == 1 ) {
-    // prepare
-    condition = {_id: req.params.id,
-      installToSlot: null,
-      status: 0
-    };
-    slotCondition = {
-      _id: req.params.targetId,
-      device: null
-    };
-  }else if(req.params.status == 0) {
-    // spare
-    condition = {_id: req.params.id,
-      installToSlot: req.params.targetId,
-      status: { $ne: 0}
-    };
-    slotCondition = {
-      _id: req.params.targetId,
-      device: req.params.id
-    };
-  }
-  Device.findOneAndUpdate(condition, {installToSlot: req.params.targetId, status: 1},  { new: true }, function (err, newDevice) {
+devices.put('/:id/installToSlot/:oldId/:newId/status/:oldStatus/:newStatus', auth.ensureAuthenticated, checkStatusTransition, function (req, res) {
+  var condition = {_id: req.params.id,
+    installToSlot: req.params.oldId,
+    status: req.params.oldStatus
+  };
+  var updateInfo =  { installToSlot: req.params.newId,
+    status: req.params.newStatus
+  };
+  Device.findOneAndUpdate(condition, updateInfo, { new: true }, function (err, newDevice) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
@@ -209,18 +187,79 @@ devices.put('/:id/installToSlot/:targetId/:status', auth.ensureAuthenticated, fu
     if (!newDevice) {
       return res.status(404).send('No device meet condition.');
     }
-    Slot.updateOne(slotCondition, {device: req.params.id}, function (err, raw) {
+    if (req.params.oldId === req.params.newId) {
+      return res.status(200).json(newDevice);
+    }
+    // update slot
+    var slotCondition;
+    var slotUpdateInfo;
+    if (req.params.oldStatus === '0') { // to install
+      slotCondition = {_id: req.params.newId,
+        device: {$exists: false}
+      };
+      slotUpdateInfo = {device: req.params.id}
+    }else if (req.params.newStatus === '0'){ // to spare
+      slotCondition = {_id: req.params.oldId,
+        device: {$exists: true}
+      };
+      slotUpdateInfo = {device: null};
+    }
+    Slot.update(slotCondition, slotUpdateInfo, function (err, raw) {
       if (err) {
         log.error(err);
+        log.error('Slot ' + slotCondition._id + 'is inconsistent with device ' + newDevice._id);
         return res.status(500).send(err.message);
       }
       if (raw.nModified == 0) {
-        // TODO: MongoDB transaction
-        return res.status(404).send('No slot meet condition.');
+        log.error('Slot ' + slotCondition._id + 'is inconsistent with device ' + newDevice._id);
+        return res.status(404).send('No slot meet condition, slot not modified.');
       }
       return res.status(200).json(newDevice);
     })
   });
 });
+
+
+/**
+ * check parameters for device status transition
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}   400 error message
+ */
+function checkStatusTransition(req, res, next) {
+  var successTransition = {
+    '1': '1.5',
+    '1.5': '2',
+    '2': '3'
+  };
+  var startTransition = {
+    '0': '1'
+  };
+  var backTransition = {
+    '1': '0',
+    '1.5': '0',
+    '2': '0',
+    '3': '0'
+  };
+  if(req.params.oldId === req.params.newId) {
+    if(successTransition[req.params.oldStatus] !== req.params.newStatus) {
+      return res.status(400).send('Wrong status transition.');
+    }
+  }else if(req.params.oldId === 'null' && req.params.newId) {
+    req.params.oldId = null;
+    if(startTransition[req.params.oldStatus] !== req.params.newStatus) {
+      return res.status(400).send('Wrong status transition.');
+    }
+  }else if(req.params.oldId && req.params.newId === 'null' ) {
+    req.params.newId = null;
+    if(backTransition[req.params.oldStatus] !== req.params.newStatus) {
+      return res.status(400).send('Wrong status transition.');
+    }
+  }else{
+    return res.status(400).send('Wrong instalToDevice id or instalToSlot id transition.');
+  }
+  next();
+}
 
 module.exports = devices;
