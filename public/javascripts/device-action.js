@@ -1,22 +1,38 @@
-function dataRender(device){
-  $('#dName').text(device.name);
-  $('#dSerialNo').text(device.serialNo);
-  $('#dType').text(device.type);
-  $('#dDepartment').text(device.department);
-  $('#dOwner').text(device.owner);
+var statusMap = {
+  '0': 'Spare',
+  '1': 'Prepare to install',
+  '1.5': 'Prepare installation checklist',
+  '2': 'approved to install',
+  '3': 'installed'
+};
+var nameMap;
+var installTo;
+var device;
+var oldId;
 
-  if(device.installToSlot) {
-    var s = 'Slot:<a href="/slots/' + device.installToSlot + '">' + device.installToSlot + '</a>';
+/**
+ * render page styles
+ * @param data:  device json
+ */
+function dataRender(data){
+  $('#dName').text(data.name);
+  $('#dSerialNo').text(data.serialNo);
+  $('#dType').text(data.type);
+  $('#dDepartment').text(data.department);
+  $('#dOwner').text(data.owner);
+
+  if(data.installToSlot) {
+    var s = 'Slot:<a href="/slots/' + data.installToSlot + '">' + data.installToSlot + '</a>';
     $('#dInstallTo').html(s);
-  }else if(device.installToDevice) {
-    s = 'Device:<a href="/devices/' + device.installToDevice + '">' + device.installToDevice + '</a>';
+  }else if(data.installToDevice) {
+    s = 'Device:<a href="/devices/' + data.installToDevice + '">' + data.installToDevice + '</a>';
     $('#dInstallTo').html(s);
   }else{
     $('#dInstallTo').html('Spare');
   }
 
   // show status
-  var status = device.status;
+  var status = data.status;
   var styleMap = {
     '0': 'warning',
     '1': 'info',
@@ -24,16 +40,7 @@ function dataRender(device){
     '2': 'info',
     '3': 'success'
   };
-  var statusMap = {
-    '0': 'Spare',
-    '1': 'Prepare to install',
-    '1.5': 'Prepare installation checklist',
-    '2': 'approved to install',
-    '3': 'installed'
-  };
-  $('#dStatus').text(statusMap[status]);
-  $('#dStatus').removeClass();
-  $('#dStatus').addClass(styleMap[status]);
+  $('#dStatus').text(statusMap[status]).removeClass().addClass(styleMap[status]);
   $('#preparePanel').hide();
 
   // hide buttons
@@ -82,9 +89,48 @@ function disableButton(status, role) {
 }
 
 
-var nameMap;
-var installTo;
-var device;
+/**
+ * set installTo and oldId
+ */
+function getInstalltoId(){
+  oldId = device.installToSlot ? device.installToSlot: device.installToDevice;
+  if (device.installToSlot) {
+    installTo = 'installToSlot';
+    oldId = device.installToSlot;
+  }else if(device.installToDevice) {
+    installTo = 'installToDevice';
+    oldId = device.installToDevice;
+  }else {
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Must have one and only one ID of installToDevice and installToSlot.</div>');
+    return;
+  }
+}
+
+
+/**
+ * call ajax to change device status
+ * @param installTo   field name, 'installToSlot' or 'installToDevce'
+ * @param oldId       content of installToSlot or installToDevce
+ * @param newId       content of  installToSlot or installToDevce
+ * @param oldStatus
+ * @param newStatus
+ */
+function changeStatus(installTo, oldId, newId, oldStatus, newStatus) {
+  var url = window.location.pathname + '/' + installTo +  '/' + oldId + '/' + newId + '/status/' + oldStatus + '/' + newStatus;
+  $.ajax({
+    url: url ,
+    type: 'PUT'
+  }).done(function (data) {
+    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Device status become ' + statusMap[newStatus] + '</div>');
+    device = data;
+    $('#device').text(JSON.stringify(data));
+    dataRender(device)
+  }).fail(function (jqXHR) {
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText +  '</div>');
+  });
+}
+
+
 $('.prepare-install').click(function () {
   var url;
   var att;
@@ -122,51 +168,38 @@ $('.prepare-install').click(function () {
 $('#prepareConfirm').click(function (e) {
   e.preventDefault();
   var name = $('#prepareInput').val().trim();
-  var targetId = nameMap[name];// get id by name
-  if(!targetId) {
+  var newId = nameMap[name];// get id by name
+  if(!newId) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + name + ' not found.</div>');
     return;
   }
-  var url = window.location.pathname + '/' + installTo +  '/null/' + targetId + '/status/0/1';
-  $.ajax({
-    url: url,
-    type: 'PUT'
-  }).done(function (device) {
-    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button> Prepare to install success.</div>');
-    $('#device').text(JSON.stringify( device));
-    dataRender(device)
-  }).fail(function (jqXHR) {
-    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText +  '</div>');
-  });
+  changeStatus(installTo, 'null', newId, 0, 1);
 });
 
 
 $('#rejectInstall').click(function (e) {
   e.preventDefault();
-  var oldId = $('#dInstallTo a').text();
-  installTo = device.installToSlot ? device.installToSlot: device.installToDevice;
-  if (device.installToSlot) {
-    installTo = 'installToSlot';
-  }else if(device.installToDevice) {
-    installTo = 'installToDevice';
-  }else {
-    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Both installToDevice and installToSlot have objects.</div>');
-  }
-  var url = window.location.pathname + '/' + installTo +  '/' + oldId + '/null/status/1/0';
-  $.ajax({
-    url: url ,
-    type: 'PUT'
-  }).done(function (device) {
-    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Reject success, the device status become spare.</div>');
-    $('#device').text(JSON.stringify( device));
-    dataRender(device)
-  }).fail(function (jqXHR) {
-    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText +  '</div>');
-  });
+  getInstalltoId();
+  changeStatus(installTo, oldId, 'null', 1, 0);
 });
 
 
-$('#prepareCancel').click(function () {
+$('#approveInstall').click(function (e) {
+  e.preventDefault();
+  getInstalltoId();
+  changeStatus(installTo, oldId, oldId, 1, 2)
+});
+
+
+$('#install').click(function (e) {
+  e.preventDefault();
+  getInstalltoId();
+  changeStatus(installTo, oldId, oldId, 2, 3)
+});
+
+
+$('#prepareCancel').click(function (e) {
+  e.preventDefault();
   $('#preparePanel').hide();
 });
 
