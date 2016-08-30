@@ -48,6 +48,7 @@ function dataRender(data){
   $('#approveInstall').removeAttr('disabled');
   $('#rejectInstall').removeAttr('disabled');
   $('#install').removeAttr('disabled');
+  $('#setSpare').removeAttr('disabled');
   var role = 'AM';
   disableButton(status, role); // TODO: get the role
 }
@@ -65,6 +66,7 @@ function disableButton(status, role) {
       $('#approveInstall').attr('disabled','disabled');
       $('#rejectInstall').attr('disabled','disabled');
       $('#install').attr('disabled','disabled');
+      $('#setSpare').attr('disabled','disabled');
     }
     if(status === 1 ) {
       $('#preInstall').attr('disabled','disabled');
@@ -181,9 +183,15 @@ $('#prepareConfirm').click(function (e) {
 $('#rejectInstall').click(function (e) {
   e.preventDefault();
   getInstalltoId();
-  changeStatus(installTo, oldId, 'null', 1, 0);
+  changeStatus(installTo, oldId, 'null', device.status, 0);
 });
 
+
+$('#setSpare').click(function (e) {
+  e.preventDefault();
+  getInstalltoId();
+  changeStatus(installTo, oldId, 'null', device.status, 0);
+});
 
 $('#approveInstall').click(function (e) {
   e.preventDefault();
