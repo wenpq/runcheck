@@ -136,13 +136,13 @@ $('.prepare-install').click(function () {
   var att;
   nameMap = {};
   if ($(this).text() === 'slot') {
-    $('#prepareTitle').text('Prepare to be installed to Slot');
+    $('#prepareTitle').text('Prepare to install to Slot');
     $('#prepareLabel').text('Slot Name:');
     url = '/slots/json/names';
     installTo = 'installToSlot';
     att = 'name'
   }else{
-    $('#prepareTitle').text('Prepare to be installed to Device: ');
+    $('#prepareTitle').text('Prepare to install to Device: ');
     $('#prepareLabel').text('Device serial number:');
     url = '/devices/json/serialNos';
     installTo = 'installToDevice';
@@ -157,6 +157,7 @@ $('.prepare-install').click(function () {
       namelist.push(data[i][att]);
       nameMap[data[i][att]] = data[i]._id;
     }
+    $('#prepareInput').typeahead('destroy');
     $('#prepareInput').typeahead({ source: namelist});
   }).fail(function (jqXHR) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button> Get slot or device name list failed. ' + jqXHR.responseText +  '</div>');

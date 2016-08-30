@@ -60,7 +60,12 @@ block content
                     td #{slot.deviceNaming}
                   tr
                     th Installed device
-                    td #{slot.device}
+                    if (slot.device)
+                      - var deviceUrl = {'href': '/devices/' + slot.device};
+                      td
+                        a&attributes(deviceUrl) #{slot.device}
+                    else
+                      td
                   tr
                     th Element name
                     td #{slot.elementName}

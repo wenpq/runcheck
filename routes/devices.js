@@ -195,12 +195,12 @@ devices.put('/:id/installToSlot/:oldId/:newId/status/:oldStatus/:newStatus', aut
     var slotUpdateInfo;
     if (req.params.oldStatus === '0') { // to install
       slotCondition = {_id: req.params.newId,
-        device: {$exists: false}
+        device: null
       };
       slotUpdateInfo = {device: req.params.id}
     }else if (req.params.newStatus === '0'){ // to spare
       slotCondition = {_id: req.params.oldId,
-        device: {$exists: true}
+        device: {$ne: null}
       };
       slotUpdateInfo = {device: null};
     }
@@ -212,7 +212,7 @@ devices.put('/:id/installToSlot/:oldId/:newId/status/:oldStatus/:newStatus', aut
       }
       if (raw.nModified == 0) {
         log.error('Slot ' + slotCondition._id + 'is inconsistent with device ' + newDevice._id);
-        return res.status(404).send('No slot meet condition, slot not modified.');
+        return res.status(404).send('Slot not modified, no slot meet condition.');
       }
       return res.status(200).json(newDevice);
     })
@@ -228,37 +228,30 @@ devices.put('/:id/installToSlot/:oldId/:newId/status/:oldStatus/:newStatus', aut
  * @returns {*}   400 error message
  */
 function checkStatusTransition(req, res, next) {
-  var successTransition = {
-    '1': '1.5',
-    '1.5': '2',
-    '1': '2',
-    '2': '3'
-  };
-  var startTransition = {
-    '0': '1'
-  };
-  var backTransition = {
-    '1': '0',
-    '1.5': '0',
-    '2': '0',
-    '3': '0'
-  };
-  if(req.params.oldId === req.params.newId) {
-    if(successTransition[req.params.oldStatus] !== req.params.newStatus) {
-      return res.status(400).send('Wrong status transition.');
-    }
-  }else if(req.params.oldId === 'null' && req.params.newId) {
-    req.params.oldId = null;
-    if(startTransition[req.params.oldStatus] !== req.params.newStatus) {
-      return res.status(400).send('Wrong status transition.');
-    }
-  }else if(req.params.oldId && req.params.newId === 'null' ) {
-    req.params.newId = null;
-    if(backTransition[req.params.oldStatus] !== req.params.newStatus) {
-      return res.status(400).send('Wrong status transition.');
-    }
-  }else{
-    return res.status(400).send('Wrong instalToDevice id or instalToSlot id transition.');
+  var transition = [
+    '0-1',
+    '1-1.5',
+    '1-2',
+    '1.5-2',
+    '2-3',
+    '1-0',
+    '1.5-0',
+    '2-0',
+    '3-0'
+  ];
+  // 'null' -> null
+  if(req.params.oldId === 'null') req.params.oldId = null;
+  if(req.params.newId === 'null') req.params.newId = null;
+
+  if(!req.params.newId && !req.params.oldId) {
+    return res.status(400).send('Forbidden to set installToSlot or installToDevice value from null to null.');
+  }
+  if(req.params.newId && req.params.oldId && req.params.newId !== req.params.oldId) {
+    return res.status(400).send('Forbidden to set installToSlot or installToDevice value from ' + req.params.oldId + ' to ' + req.params.newId);
+  }
+  var tran = req.params.oldStatus + '-' + req.params.newStatus;
+  if(transition.indexOf(tran) === -1) {
+    return res.status(400).send('Forbidden to set status value from ' + req.params.oldStatus + ' to ' + req.params.newStatus);
   }
   next();
 }
