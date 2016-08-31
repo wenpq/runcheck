@@ -110,7 +110,6 @@ if (config.mongo.auth) {
 }
 
 if (program.mongo) {
-  mongoose.connect(mongoURL, mongoOptions);
   mongoose.connection.on('connected', function () {
     console.log('Mongoose default connection opened.');
   });
@@ -156,5 +155,6 @@ if (program.dryrun) {
       }
       mongoose.connection.close();
     });
+    mongoose.connect(mongoURL, mongoOptions);
   }
 }

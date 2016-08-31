@@ -190,7 +190,9 @@ function saveFile(data, fname) {
  * @param callback
  */
 function saveModel(datalist, callback) {
+  var indexTriggered = false;
   Model.on('index', function(err) {
+    indexTriggered = true;
     if(err) {
       return callback(err);
     }
@@ -223,6 +225,14 @@ function saveModel(datalist, callback) {
       });
     }
   });
+  var timeout = setTimeout(function () {
+    if (indexTriggered) {
+      clearTimeout(timeout);
+    } else {
+      console.log('30 seconds passed, and not index event triggered. Give up now.');
+      callback(new Error('no index event within 30 seconds.'));
+    }
+  }, 30000);
 }
 
 module.exports = {
