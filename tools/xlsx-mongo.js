@@ -149,7 +149,11 @@ if (program.dryrun) {
     // Save Data
     console.log('Start importing Data to MongoDB');
     sutil.saveModel(datalist, function (err, success, count) {
-      console.log(count + ' items were processed, and ' + success + ' were inserted');
+      if(err) {
+        console.error(err.message);
+      }else {
+        console.log('Success: ' + count + ' items were processed, and ' + success + ' were inserted');
+      }
       mongoose.connection.close();
     });
   }
