@@ -128,6 +128,7 @@ devices.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
+
 devices.get('/json/serialNos', auth.ensureAuthenticated, function (req, res) {
   Device.find({}, {serialNo: true}, function (err, docs) {
     if (err) {
@@ -139,26 +140,110 @@ devices.get('/json/serialNos', auth.ensureAuthenticated, function (req, res) {
 });
 
 
-/**
- * update status and installToDevice for device
- * set prepare: status 0 --> 1 and installToDevice nul --> id
- * set spare: status (1|1.5|2|3) --> 0 and installToDevice id--> null
- */
-devices.put('/:id/installToDevice/:oldId/:newId/status/:oldStatus/:newStatus', auth.ensureAuthenticated, checkStatusTransition, function (req, res) {
-  var condition = {_id: req.params.id,
-    installToDevice: req.params.oldId,
-    status: req.params.oldStatus
-  };
-  var updateInfo =  { installToDevice: req.params.newId,
-    status: req.params.newStatus
-  };
-  Device.findOneAndUpdate(condition, updateInfo, { new: true }, function (err, newDevice) {
+devices.put('/:id/installToDevice/:targetId', auth.ensureAuthenticated, function (req, res) {
+  Device.findOne({_id: req.params.id}, function (err, device) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
-    if (!newDevice) {
-      return res.status(404).send('No device meet condition.');
+    // check status
+    if (req.params.targetId === 'null') { // to spare
+      if (!device.installToDevice || device.status === 0) {
+        return res.status(409).send('Device has been uninstalled or status is spare.');
+      }
+    } else { // to install
+      if (device.installToDevice || device.status !== 0) {
+        return res.status(409).send('Device has been installed or status not spare.');
+      }
+    }
+    // update
+    if(req.params.targetId === 'null') {
+      device.installToDevice = null;
+      device.status = 0;
+    }else {
+      device.installToDevice = req.params.targetId;
+      device.status = 1;
+    }
+    device.save(function(err, newDevice) {
+      if (err) {
+        log.error(err);
+        return res.status(500).send(err.message);
+      }
+      return res.status(200).send(newDevice)
+    })
+  })
+});
+
+
+devices.put('/:id/installToSlot/:targetId', auth.ensureAuthenticated, function (req, res) {
+  Device.findOne({_id: req.params.id}, function (err, device) {
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
+    }
+    // check status
+    if(req.params.targetId === 'null' ) { // to spare
+      if(!device.installToSlot || device.status === 0) {
+        return res.status(409).send('Device has been uninstalled or status is spare.');
+      }
+    }else { // to install
+      if(device.installToSlot || device.status !== 0) {
+        return res.status(409).send('Device has been installed or status not spare.');
+      }
+    }
+    var preInstallToSlot = device.installToSlot;
+    // update
+    if(req.params.targetId === 'null') {
+      device.installToSlot = null;
+      device.status = 0;
+    }else {
+      device.installToSlot = req.params.targetId;
+      device.status = 1;
+    }
+    device.save(function(err, newDevice) {
+      if (err) {
+        log.error(err);
+        return res.status(500).send(err.message);
+      }
+      // update slot
+      var slotCondition;
+      var slotUpdateInfo;
+      if (req.params.targetId === 'null') {
+        slotCondition = {
+          _id: preInstallToSlot,
+          device: {$ne: null}
+        };
+        slotUpdateInfo = {device: null};
+      }else{
+        slotCondition = {
+          _id: req.params.targetId,
+          device: null
+        };
+        slotUpdateInfo = {device: req.params.id}
+      }
+      Slot.update(slotCondition, slotUpdateInfo, function (err, raw) {
+        if (err) {
+          log.error(err);
+          log.error('Slot ' + slotCondition._id + 'is inconsistent with device ' + newDevice._id);
+          return res.status(500).send(err.message);
+        }
+        if (raw.nModified == 0) {
+          log.error('Slot ' + slotCondition._id + 'is inconsistent with device ' + newDevice._id);
+          return res.status(404).send('Slot not modified, no slot meet condition.');
+        }
+        return res.status(200).json(newDevice);
+      })
+    });
+  });
+});
+
+
+devices.put('/:id/status/:status', auth.ensureAuthenticated, checkStatusTransition, function (req, res) {
+  req.params.device.status = req.params.status;
+  req.params.device.save(function (err, newDevice) {
+    if (err) {
+      log.error(err);
+      return res.status(500).send(err.message);
     }
     return res.status(200).json(newDevice);
   });
@@ -166,94 +251,34 @@ devices.put('/:id/installToDevice/:oldId/:newId/status/:oldStatus/:newStatus', a
 
 
 /**
- * update status and installToSlot for device
- * set prepare: status 0 --> 1 and installToDevice nul --> targetId and slot.device null --> targetId
- * set spare: status (1|1.5|2|3) --> 0 and installToDevice targetId--> null slot.device targetId --> null
- * TODO: MongoDB transaction?
+ * check device status transition
+ * @param req
+ * @param res
+ * @param next
+ * @returns {*}   400 404 500 error message
  */
-devices.put('/:id/installToSlot/:oldId/:newId/status/:oldStatus/:newStatus', auth.ensureAuthenticated, checkStatusTransition, function (req, res) {
-  var condition = {_id: req.params.id,
-    installToSlot: req.params.oldId,
-    status: req.params.oldStatus
-  };
-  var updateInfo =  { installToSlot: req.params.newId,
-    status: req.params.newStatus
-  };
-  Device.findOneAndUpdate(condition, updateInfo, { new: true }, function (err, newDevice) {
+function checkStatusTransition(req, res, next) {
+  var transition = [
+    '1-1.5',
+    '1-2',
+    '1.5-2',
+    '2-3'
+  ];
+  Device.findOne({_id: req.params.id},function(err, device){
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
-    if (!newDevice) {
-      return res.status(404).send('No device meet condition.');
+    if (!device) {
+      return res.status(404).send('No device id is ' + req.params.id);
     }
-    if (req.params.oldId === req.params.newId) {
-      return res.status(200).json(newDevice);
+    var tran = device.status + '-' + req.params.status;
+    if(transition.indexOf(tran) === -1) {
+      return res.status(400).send('Forbidden to set status value from ' + req.params.oldStatus + ' to ' + req.params.newStatus);
     }
-    // update slot
-    var slotCondition;
-    var slotUpdateInfo;
-    if (req.params.oldStatus === '0') { // to install
-      slotCondition = {_id: req.params.newId,
-        device: null
-      };
-      slotUpdateInfo = {device: req.params.id}
-    }else if (req.params.newStatus === '0'){ // to spare
-      slotCondition = {_id: req.params.oldId,
-        device: {$ne: null}
-      };
-      slotUpdateInfo = {device: null};
-    }
-    Slot.update(slotCondition, slotUpdateInfo, function (err, raw) {
-      if (err) {
-        log.error(err);
-        log.error('Slot ' + slotCondition._id + 'is inconsistent with device ' + newDevice._id);
-        return res.status(500).send(err.message);
-      }
-      if (raw.nModified == 0) {
-        log.error('Slot ' + slotCondition._id + 'is inconsistent with device ' + newDevice._id);
-        return res.status(404).send('Slot not modified, no slot meet condition.');
-      }
-      return res.status(200).json(newDevice);
-    })
+    req.params.device = device;
+    next();
   });
-});
-
-
-/**
- * check parameters for device status transition
- * @param req
- * @param res
- * @param next
- * @returns {*}   400 error message
- */
-function checkStatusTransition(req, res, next) {
-  var transition = [
-    '0-1',
-    '1-1.5',
-    '1-2',
-    '1.5-2',
-    '2-3',
-    '1-0',
-    '1.5-0',
-    '2-0',
-    '3-0'
-  ];
-  // 'null' -> null
-  if(req.params.oldId === 'null') req.params.oldId = null;
-  if(req.params.newId === 'null') req.params.newId = null;
-
-  if(!req.params.newId && !req.params.oldId) {
-    return res.status(400).send('Forbidden to set installToSlot or installToDevice value from null to null.');
-  }
-  if(req.params.newId && req.params.oldId && req.params.newId !== req.params.oldId) {
-    return res.status(400).send('Forbidden to set installToSlot or installToDevice value from ' + req.params.oldId + ' to ' + req.params.newId);
-  }
-  var tran = req.params.oldStatus + '-' + req.params.newStatus;
-  if(transition.indexOf(tran) === -1) {
-    return res.status(400).send('Forbidden to set status value from ' + req.params.oldStatus + ' to ' + req.params.newStatus);
-  }
-  next();
 }
 
 module.exports = devices;
