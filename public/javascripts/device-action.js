@@ -123,7 +123,7 @@ function setInstallToAjax(url, targetId) {
       targetId: targetId
     })
   }).done(function (data) {
-    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Set Device ' + installTo + ' field to ' + targetId + '</div>');
+    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Install Device to ' + $('#prepareInput').val().trim() + '</div>');
     device = data;
     $('#device').text(JSON.stringify(data));
     dataRender(device)

@@ -136,7 +136,7 @@ devices.put('/:id/installToDevice', auth.ensureAuthenticated, function (req, res
       return res.status(500).send(err.message);
     }
     if (!device) {
-      return res.status(404).send('No device found with _id' + req.params.id);
+      return res.status(404).send('No device found with _id ' + req.params.id);
     }
     // check status
     if (!req.body.targetId) { // to spare
@@ -146,6 +146,9 @@ devices.put('/:id/installToDevice', auth.ensureAuthenticated, function (req, res
     } else { // to install
       if (device.installToDevice || device.installToSlot || device.status !== 0) {
         return res.status(409).send('Device has been installed or status not spare.');
+      }
+      if (req.body.targetId === req.params.id) {
+        return res.status(409).send('Forbidden to install device to self.');
       }
     }
     // update
@@ -199,10 +202,10 @@ devices.put('/:id/installToSlot', auth.ensureAuthenticated, function (req, res) 
         return res.status(404).send('No slot found with id ' + slotCondition._id);
       }
       if (!req.body.targetId && !slot.device) {
-        return res.status(409).send('slot is spare.');
+        return res.status(409).send('Slot is spare.');
       }
       if (req.body.targetId && slot.device) {
-        return res.status(409).send('slot is not spare, ' + 'installed with ' + slot.device);
+        return res.status(409).send('Slot is not spare, ' + 'installed with ' + slot.device);
       }
       // update device
       if(!req.body.targetId) {
