@@ -77,15 +77,4 @@ slots.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
   });
 });
 
-
-slots.get('/json/names', auth.ensureAuthenticated, function (req, res) {
-  Slot.find({}, {name: true}, function (err, docs) {
-    if (err) {
-      log.error(err);
-      return res.status(500).send(err.message);
-    }
-    return res.status(200).json(docs);
-  });
-});
-
 module.exports = slots;

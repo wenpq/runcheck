@@ -129,39 +129,31 @@ devices.get('/:id/json', auth.ensureAuthenticated, function (req, res) {
 });
 
 
-devices.get('/json/serialNos', auth.ensureAuthenticated, function (req, res) {
-  Device.find({}, {serialNo: true}, function (err, docs) {
-    if (err) {
-      log.error(err);
-      return res.status(500).send(err.message);
-    }
-    return res.status(200).json(docs);
-  });
-});
-
-
-devices.put('/:id/installToDevice/:targetId', auth.ensureAuthenticated, function (req, res) {
+devices.put('/:id/installToDevice', auth.ensureAuthenticated, function (req, res) {
   Device.findOne({_id: req.params.id}, function (err, device) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
+    if (!device) {
+      return res.status(404).send('No device found with _id' + req.params.id);
+    }
     // check status
-    if (req.params.targetId === 'null') { // to spare
+    if (!req.body.targetId) { // to spare
       if (!device.installToDevice || device.status === 0) {
         return res.status(409).send('Device has been uninstalled or status is spare.');
       }
     } else { // to install
-      if (device.installToDevice || device.status !== 0) {
+      if (device.installToDevice || device.installToSlot || device.status !== 0) {
         return res.status(409).send('Device has been installed or status not spare.');
       }
     }
     // update
-    if(req.params.targetId === 'null') {
+    if(!req.body.targetId) {
       device.installToDevice = null;
       device.status = 0;
     }else {
-      device.installToDevice = req.params.targetId;
+      device.installToDevice = req.body.targetId;
       device.status = 1;
     }
     device.save(function(err, newDevice) {
@@ -175,64 +167,66 @@ devices.put('/:id/installToDevice/:targetId', auth.ensureAuthenticated, function
 });
 
 
-devices.put('/:id/installToSlot/:targetId', auth.ensureAuthenticated, function (req, res) {
+// TODO: MongoDB transaction
+devices.put('/:id/installToSlot', auth.ensureAuthenticated, function (req, res) {
   Device.findOne({_id: req.params.id}, function (err, device) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
-    // check status
-    if(req.params.targetId === 'null' ) { // to spare
+    if (!device) {
+      return res.status(404).send('No device found with _id' + req.params.id);
+    }
+    // check device
+    if(!req.body.targetId) { // to spare
       if(!device.installToSlot || device.status === 0) {
         return res.status(409).send('Device has been uninstalled or status is spare.');
       }
     }else { // to install
-      if(device.installToSlot || device.status !== 0) {
+      if(device.installToSlot || device.installToDevice || device.status !== 0) {
         return res.status(409).send('Device has been installed or status not spare.');
       }
     }
     var preInstallToSlot = device.installToSlot;
-    // update
-    if(req.params.targetId === 'null') {
-      device.installToSlot = null;
-      device.status = 0;
-    }else {
-      device.installToSlot = req.params.targetId;
-      device.status = 1;
-    }
-    device.save(function(err, newDevice) {
+    // check slot
+    var slotCondition = req.body.targetId? { _id: req.body.targetId}: {_id: preInstallToSlot};
+    Slot.findOne(slotCondition, function(err, slot){
       if (err) {
         log.error(err);
         return res.status(500).send(err.message);
       }
-      // update slot
-      var slotCondition;
-      var slotUpdateInfo;
-      if (req.params.targetId === 'null') {
-        slotCondition = {
-          _id: preInstallToSlot,
-          device: {$ne: null}
-        };
-        slotUpdateInfo = {device: null};
-      }else{
-        slotCondition = {
-          _id: req.params.targetId,
-          device: null
-        };
-        slotUpdateInfo = {device: req.params.id}
+      if (!slot) {
+        return res.status(404).send('No slot found with id ' + slotCondition._id);
       }
-      Slot.update(slotCondition, slotUpdateInfo, function (err, raw) {
+      if (!req.body.targetId && !slot.device) {
+        return res.status(409).send('slot is spare.');
+      }
+      if (req.body.targetId && slot.device) {
+        return res.status(409).send('slot is not spare, ' + 'installed with ' + slot.device);
+      }
+      // update device
+      if(!req.body.targetId) {
+        device.installToSlot = null;
+        device.status = 0;
+      }else {
+        device.installToSlot = req.body.targetId;
+        device.status = 1;
+      }
+      device.save(function(err, newDevice) {
         if (err) {
           log.error(err);
-          log.error('Slot ' + slotCondition._id + 'is inconsistent with device ' + newDevice._id);
           return res.status(500).send(err.message);
         }
-        if (raw.nModified == 0) {
-          log.error('Slot ' + slotCondition._id + 'is inconsistent with device ' + newDevice._id);
-          return res.status(404).send('Slot not modified, no slot meet condition.');
-        }
-        return res.status(200).json(newDevice);
-      })
+        slot.device = req.body.targetId? req.params.id: null;
+        slot.save(function (err) {
+          if (err) {
+            log.error(err);
+            log.error('Slot ' + slotCondition._id + ' is inconsistent with device ' + newDevice._id);
+            return res.status(500).send(err.message);
+          }
+          return res.status(200).json(newDevice);
+        })
+      });
     });
   });
 });
@@ -270,7 +264,7 @@ function checkStatusTransition(req, res, next) {
       return res.status(500).send(err.message);
     }
     if (!device) {
-      return res.status(404).send('No device id is ' + req.params.id);
+      return res.status(404).send('No device found with id' + req.params.id);
     }
     var tran = device.status + '-' + req.params.status;
     if(transition.indexOf(tran) === -1) {

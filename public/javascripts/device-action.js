@@ -21,9 +21,11 @@ function dataRender(data){
   $('#dOwner').text(data.owner);
 
   if(data.installToSlot) {
+    installTo = 'installToSlot';
     var s = 'Slot:<a href="/slots/' + data.installToSlot + '">' + data.installToSlot + '</a>';
     $('#dInstallTo').html(s);
   }else if(data.installToDevice) {
+    installTo = 'installToDevice';
     s = 'Device:<a href="/devices/' + data.installToDevice + '">' + data.installToDevice + '</a>';
     $('#dInstallTo').html(s);
   }else{
@@ -107,6 +109,29 @@ function setStatusAjax(url) {
   });
 }
 
+
+/**
+ * call ajax to change device status
+ * @param url
+ */
+function setInstallToAjax(url, targetId) {
+  $.ajax({
+    url: url ,
+    type: 'PUT',
+    contentType: 'application/json',
+    data: JSON.stringify({
+      targetId: targetId
+    })
+  }).done(function (data) {
+    $('#message').append('<div class="alert alert-success"><button class="close" data-dismiss="alert">x</button>Set Device ' + installTo + ' field to ' + targetId + '</div>');
+    device = data;
+    $('#device').text(JSON.stringify(data));
+    dataRender(device)
+  }).fail(function (jqXHR) {
+    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + jqXHR.responseText +  '</div>');
+  });
+}
+
 $('.prepare-install').click(function () {
   var url;
   var att;
@@ -114,13 +139,13 @@ $('.prepare-install').click(function () {
   if ($(this).text() === 'slot') {
     $('#prepareTitle').text('Prepare to install to Slot');
     $('#prepareLabel').text('Slot Name:');
-    url = '/slots/json/names';
+    url = '/slots/json';
     installTo = 'installToSlot';
     att = 'name'
   }else{
     $('#prepareTitle').text('Prepare to install to Device: ');
     $('#prepareLabel').text('Device serial number:');
-    url = '/devices/json/serialNos';
+    url = '/devices/json';
     installTo = 'installToDevice';
     att = 'serialNo'
   }
@@ -149,30 +174,22 @@ $('#prepareConfirm').click(function (e) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>' + name + ' not found.</div>');
     return;
   }
-  var url = window.location.pathname + '/' + installTo + '/' + newId;
-  setStatusAjax(url);
+  var url = window.location.pathname + '/' + installTo;
+  setInstallToAjax(url, newId);
 });
 
 
 $('#rejectInstall').click(function (e) {
   e.preventDefault();
-  var url = window.location.pathname + '/' + installTo + '/null';
-  setStatusAjax(url);
+  var url = window.location.pathname + '/' + installTo;
+  setInstallToAjax(url, null);
 });
 
 
 $('#setSpare').click(function (e) {
   e.preventDefault();
-  if (device.installToSlot) {
-    installTo = 'installToSlot';
-  }else if(device.installToDevice) {
-    installTo = 'installToDevice';
-  }else {
-    $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button>Must have one and only one ID of installToDevice and installToSlot.</div>');
-    return;
-  }
-  var url = window.location.pathname + '/' + installTo + '/null';
-  setStatusAjax(url);
+  var url = window.location.pathname + '/' + installTo;
+  setInstallToAjax(url, null);
 });
 
 $('#approveInstall').click(function (e) {
