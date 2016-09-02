@@ -42,7 +42,7 @@ function dataRender(data){
     '3': 'success'
   };
   $('#dStatus').text(statusMap[status]).removeClass().addClass(styleMap[status]);
-  $('#preparePanel').hide();
+  $('#preparePanel .panel-body').hide();
 
   // hide buttons
   $('#preInstall').removeAttr('disabled');
@@ -149,6 +149,7 @@ $('.prepare-install').click(function () {
     installTo = 'installToDevice';
     att = 'serialNo'
   }
+  $('#preparePanel .panel-body input').val('');
   $.ajax({
     url: url,
     type: 'GET'
@@ -162,7 +163,7 @@ $('.prepare-install').click(function () {
   }).fail(function (jqXHR) {
     $('#message').append('<div class="alert alert-danger"><button class="close" data-dismiss="alert">x</button> Get slot or device name list failed. ' + jqXHR.responseText +  '</div>');
   });
-  $('#preparePanel').show();
+  $('#preparePanel .panel-body').show();
 });
 
 
@@ -208,7 +209,7 @@ $('#install').click(function (e) {
 
 $('#prepareCancel').click(function (e) {
   e.preventDefault();
-  $('#preparePanel').hide();
+  $('#preparePanel .panel-body').hide();
 });
 
 

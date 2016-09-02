@@ -1,9 +1,8 @@
-extends layout-history
+extends layout-history.pug
 
 block head
   link(rel='stylesheet', href='/datatables/media/css/dataTables.bootstrap.min.css')
   title RunCheck device
-
 
 block content
   br
@@ -36,23 +35,24 @@ block content
               tr
                 th Status
                 td#dStatus
-  form.form-inline
-    .btn-group
-      button.btn.btn-space.btn-primary.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')#preInstall
-        | Prepare install
-        span.caret
-      ul.dropdown-menu
-        li
-          a.prepare-install(href='#') device
-        li
-          a.prepare-install(href='#') slot
-    button.btn.btn-space.btn-primary#rejectInstall Reject
-    button.btn.btn-space.btn-primary#approveInstall Approve
-    button.btn.btn-space.btn-primary#install Install
-    button.btn.btn-space.btn-danger#setSpare Set spare
+  //- form.form-inline
   br
   .panel.panel-default#preparePanel
     .panel-heading
+      .btn-group
+        button.btn.btn-space.btn-primary.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')#preInstall
+          | Prepare install
+          span.caret
+        ul.dropdown-menu
+          li
+            a.prepare-install device
+          li
+            a.prepare-install slot
+      button.btn.btn-space.btn-primary#rejectInstall Reject
+      button.btn.btn-space.btn-primary#approveInstall Approve
+      button.btn.btn-space.btn-primary#install Install
+      button.btn.btn-space.btn-danger#setSpare Set spare
+
       Strong#prepareTitle
     .panel-body
       form.form-inline
@@ -60,7 +60,7 @@ block content
           label#prepareLabel
           .input-group
             input#prepareInput.form-control(type='text', data-provide='typeahead', autocomplete='off')
-        | &nbsp
+        = ' '
         button.btn.btn-space.btn-primary(type='submit')#prepareConfirm Confirm
         button.btn.btn-space(type='submit')#prepareCancel Cancel
   .well
