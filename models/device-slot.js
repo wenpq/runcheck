@@ -3,14 +3,20 @@ var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
 /**
- * deviceSlot is used to commit transaction of device install to slot
+ * deviceSlot is used to commit transaction for device install to slot
  */
 var deviceSlot = new Schema({
-  deviceId: ObjectId,
-  slotId: ObjectId
+  deviceId: {
+    type: ObjectId,
+    index: true,
+    unique: true
+  },
+  slotId: {
+    type: ObjectId,
+    index: true,
+    unique: true
+  }
 });
-
-deviceSlot.index({ deviceId: 1, soltId: 1}, { unique: true });
 
 var DeviceSlot= mongoose.model('DeviceSlot', deviceSlot);
 
