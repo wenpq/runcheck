@@ -6,77 +6,123 @@ block head
 
 
 block content
-  .container(style="margin-top: 10px")
-    .well
-      dl
-        dt Name
-        dd #{device.name}
-        dt Serial Number
-        dd #{device.serialNo}
-        dt Type
-        dd #{device.type}
-        dt Department
-        dd #{device.department}
-        dt Owner
-        dd #{device.owner}
-  .container(style="margin-top: 10px")
-    .well
-      if !device.checklist || !device.checklist.required
-        form(method='POST')
-          input(type='hidden' name='action', value="require-checklist")
-          button(type='submit') Request Checklist
-      else
-        //- update checklist
-        form#updateChecklist(method="POST")
-          input(type="hidden" name="action" value="update-checklist")
+  br
+  div#device(style='display: none') #{JSON.stringify(device)}
+  #message
+  .well
+    .row
+      .col-md-6
+        .table-responsive
           table.table
-            thead
-              tr
-                for subject in checklistSubjects
-                  th.text-center #{subject} OK
             tbody
               tr
-                for subject in checklistSubjects
-                  - var item = device.checklist[subject];
-                  td.text-center
-                    if item.required !== false
-                      select(name="#{subject}" value="#{item.value}")
-                        for checklistValue in checklistValues
-                          if item.value === checklistValue
-                            option(selected="selected")= checklistValue
-                          else
-                            option= checklistValue
-                    else
-                      span N/A
-          .row
-            .col-xs-6.text-left
-              button(type="button" onclick="$('#configChecklist,#updateChecklist').toggleClass('hidden');")  Edit
-            .col-xs-6.text-right
-              button(type="submit") Save
-        //- configure checklist
-        form#configChecklist.hidden(method="POST")
-          input(type="hidden" name="action" value="config-checklist")
-          table.table
-            thead
+                th Name
+                td#dName
               tr
-                th
-                for subject in checklistSubjects
-                  th.text-center #{subject} OK
-            tbody
+                th Serial Number
+                td#dSerialNo
               tr
-                th Required
-                for subject in checklistSubjects
-                  - var item = device.checklist[subject]; 
-                  td.text-center
-                    if item.required === undefined
-                      input(type="checkbox" name="#{subject}" value="true" checked="checked" disabled='disabled')
-                    else if item.required === true
-                      input(type="checkbox" name="#{subject}" value="true" checked="checked")
-                    else
-                      input(type="checkbox" name="#{subject}" value="true")
-          .row
-            .col-xs-6.text-left
-              button(type='button' onclick='window.location="/devices/#{device._id}"') Cancel
-            .col-xs-6.text-right
-              button(type="submit") Save
+                th Type
+                td#dType
+              tr
+                th Department
+                td#dDepartment
+              tr
+                th Owner
+                td#dOwner
+              tr
+                th Installed to
+                td#dInstallTo
+              tr
+                th Status
+                td#dStatus
+  form.form-inline
+    .btn-group
+      button.btn.btn-space.btn-primary.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')#preInstall
+        | Prepare install
+        span.caret
+      ul.dropdown-menu
+        li
+          a.prepare-install(href='#') device
+        li
+          a.prepare-install(href='#') slot
+    button.btn.btn-space.btn-primary#rejectInstall Reject
+    button.btn.btn-space.btn-primary#approveInstall Approve
+    button.btn.btn-space.btn-primary#install Install
+    button.btn.btn-space.btn-danger#setSpare Set spare
+  br
+  .panel.panel-default#preparePanel
+    .panel-heading
+      Strong#prepareTitle
+    .panel-body
+      form.form-inline
+        .form-group
+          label#prepareLabel
+          .input-group
+            input#prepareInput.form-control(type='text', data-provide='typeahead', autocomplete='off')
+        | &nbsp
+        button.btn.btn-space.btn-primary(type='submit')#prepareConfirm Confirm
+        button.btn.btn-space(type='submit')#prepareCancel Cancel
+  .well
+    if !device.checklist || !device.checklist.required
+      form(method='POST')
+        input(type='hidden' name='action', value="require-checklist")
+        button(type='submit') Request Checklist
+    else
+      //- update checklist
+      form#updateChecklist(method="POST")
+        input(type="hidden" name="action" value="update-checklist")
+        table.table
+          thead
+            tr
+              for subject in checklistSubjects
+                th.text-center #{subject} OK
+          tbody
+            tr
+              for subject in checklistSubjects
+                - var item = device.checklist[subject];
+                td.text-center
+                  if item.required !== false
+                    select(name="#{subject}" value="#{item.value}")
+                      for checklistValue in checklistValues
+                        if item.value === checklistValue
+                          option(selected="selected")= checklistValue
+                        else
+                          option= checklistValue
+                  else
+                    span N/A
+        .row
+          .col-xs-6.text-left
+            button(type="button" onclick="$('#configChecklist,#updateChecklist').toggleClass('hidden');")  Edit
+          .col-xs-6.text-right
+            button(type="submit") Save
+      //- configure checklist
+      form#configChecklist.hidden(method="POST")
+        input(type="hidden" name="action" value="config-checklist")
+        table.table
+          thead
+            tr
+              th
+              for subject in checklistSubjects
+                th.text-center #{subject} OK
+          tbody
+            tr
+              th Required
+              for subject in checklistSubjects
+                - var item = device.checklist[subject];
+                td.text-center
+                  if item.required === undefined
+                    input(type="checkbox" name="#{subject}" value="true" checked="checked" disabled='disabled')
+                  else if item.required === true
+                    input(type="checkbox" name="#{subject}" value="true" checked="checked")
+                  else
+                    input(type="checkbox" name="#{subject}" value="true")
+        .row
+          .col-xs-6.text-left
+            button(type='button' onclick='window.location="/devices/#{device._id}"') Cancel
+          .col-xs-6.text-right
+            button(type="submit") Save
 
+block js
+  script(type='text/javascript', src='/javascripts/device-action.js')
+  script(type='text/javascript', src='/bootstrap3-typeahead/bootstrap3-typeahead.min.js')

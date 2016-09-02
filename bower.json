@@ -22,6 +22,7 @@
     "datatables": "1.10.12",
     "holderjs": "2.9.3",
     "formbinder": "https://github.com/dongliu/formbinder.git",
-    "moment": "2.14.1"
+    "moment": "2.14.1",
+    "bootstrap3-typeahead": "git://github.com/bassjobsen/Bootstrap-3-Typeahead.git#master"
   }
 }

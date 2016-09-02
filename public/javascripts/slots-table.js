@@ -52,7 +52,10 @@ var deviceColumn = {
   title: 'Device',
   data: 'device',
   render: function (data) {
-    return '<a href="' + '/device/' + data + '/" target="_blank" data-toggle="tooltip" title="go to the slot serialized device"><i class="fa fa-link fa-2x"></i></a>';
+    if (!data) {
+      return 'Not installed';
+    }
+    return '<a href="' + '/device/' + data + '" target="_blank" data-toggle="tooltip" title="go to the slot serialized device"><i class="fa fa-link fa-2x"></i></a>';
   },
   order: false
 };
@@ -137,7 +140,7 @@ $(function () {
 
   $('#spec-slots-table').DataTable({
     ajax: {
-      url: window.location.href +'/slots',
+      url: window.location.pathname +'/slots',
       dataSrc: ''
     },
     initComplete: function () {
