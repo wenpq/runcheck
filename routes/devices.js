@@ -3,6 +3,7 @@ var devices = express.Router();
 var auth = require('../lib/auth');
 var Device = require('../models/device').Device;
 var Slot = require('../models/slot').Slot;
+var DeviceSlot = require('../models/device-slot').DeviceSlot;
 var checklistValues = require('../models/checklist').checklistValues;
 var checklistSubjects = require('../models/checklist').deviceChecklistSubjects;
 var log = require('../lib/log');
@@ -170,65 +171,39 @@ devices.put('/:id/installToDevice', auth.ensureAuthenticated, function (req, res
 });
 
 
-// TODO: MongoDB transaction
-devices.put('/:id/installToSlot', auth.ensureAuthenticated, function (req, res) {
+devices.put('/:id/installToSlot', auth.ensureAuthenticated, checkDeviceSlot, function (req, res) {
+
+  var status = req.body.targetId? 1: 0;
   Device.findOne({_id: req.params.id}, function (err, device) {
     if (err) {
       log.error(err);
       return res.status(500).send(err.message);
     }
     if (!device) {
-      return res.status(404).send('No device found with _id' + req.params.id);
+      var errMsg = 'Device of _id ' + req.params.id + 'not found';
+      log.error(errMsg);
+      return res.status(404).send(errMsg);
     }
-    // check device
-    if(!req.body.targetId) { // to spare
-      if(!device.installToSlot || device.status === 0) {
-        return res.status(409).send('Device has been uninstalled or status is spare.');
-      }
-    }else { // to install
-      if(device.installToSlot || device.installToDevice || device.status !== 0) {
-        return res.status(409).send('Device has been installed or status not spare.');
-      }
-    }
-    var preInstallToSlot = device.installToSlot;
-    // check slot
-    var slotCondition = req.body.targetId? { _id: req.body.targetId}: {_id: preInstallToSlot};
-    Slot.findOne(slotCondition, function(err, slot){
-      if (err) {
+    var slotId = req.body.targetId? req.body.targetId: device.installToSlot;
+    var slotDeviceId = req.body.targetId? req.params.id: null;
+    // update device
+    device.installToSlot = req.body.targetId;
+    device.status = status;
+    device.save(function(err) {
+      if(err) {
         log.error(err);
-        return res.status(500).send(err.message);
       }
-      if (!slot) {
-        return res.status(404).send('No slot found with id ' + slotCondition._id);
-      }
-      if (!req.body.targetId && !slot.device) {
-        return res.status(409).send('Slot is spare.');
-      }
-      if (req.body.targetId && slot.device) {
-        return res.status(409).send('Slot is not spare, ' + 'installed with ' + slot.device);
-      }
-      // update device
-      if(!req.body.targetId) {
-        device.installToSlot = null;
-        device.status = 0;
-      }else {
-        device.installToSlot = req.body.targetId;
-        device.status = 1;
-      }
-      device.save(function(err, newDevice) {
+      Slot.update({_id: slotId}, {device: slotDeviceId}, function (err, raw) {
         if (err) {
           log.error(err);
           return res.status(500).send(err.message);
         }
-        slot.device = req.body.targetId? req.params.id: null;
-        slot.save(function (err) {
-          if (err) {
-            log.error(err);
-            log.error('Slot ' + slotCondition._id + ' is inconsistent with device ' + newDevice._id);
-            return res.status(500).send(err.message);
-          }
-          return res.status(200).json(newDevice);
-        })
+        if(raw.nModified === 0) {
+          var errMsg = 'Slot of _id ' + slotId + ' not modified';
+          log.error(errMsg);
+          return res.status(404).send(errMsg);
+        }
+        return res.status(200).json(device);
       });
     });
   });
@@ -252,7 +227,6 @@ devices.put('/:id/status/:status', auth.ensureAuthenticated, checkStatusTransiti
  * @param req
  * @param res
  * @param next
- * @returns {*}   400 404 500 error message
  */
 function checkStatusTransition(req, res, next) {
   var transition = [
@@ -276,6 +250,34 @@ function checkStatusTransition(req, res, next) {
     req.params.device = device;
     next();
   });
+}
+
+/**
+ * check device and slot 1 to 1 mapping, ensure consistency.
+ * @param req
+ * @param res
+ * @param next
+ */
+function checkDeviceSlot(req, res, next) {
+  if(req.body.targetId) { // to install
+    var deviceSlot = new DeviceSlot({deviceId: req.params.id, slotId: req.body.targetId});
+    deviceSlot.save(function(err) {
+      if(err) {
+        return res.status(500).send(err.message);
+      }
+      next();
+    });
+  }else { // to spare
+    DeviceSlot.remove({deviceId: req.params.id}, function(err, raw) {
+      if(err) {
+        return res.status(500).send(err.message);
+      }
+      if (raw.result.n === 0) {
+        return res.status(404).send('Device ' + req.params.id + 'installed to slot not found.');
+      }
+      next();
+    });
+  }
 }
 
 module.exports = devices;
