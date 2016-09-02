@@ -241,7 +241,7 @@ function checkStatusTransition(req, res, next) {
       return res.status(500).send(err.message);
     }
     if (!device) {
-      return res.status(404).send('No device found with id' + req.params.id);
+      return res.status(404).send('No device found with id ' + req.params.id);
     }
     var tran = device.status + '-' + req.params.status;
     if(transition.indexOf(tran) === -1) {
@@ -273,7 +273,7 @@ function checkDeviceSlot(req, res, next) {
         return res.status(500).send(err.message);
       }
       if (raw.result.n === 0) {
-        return res.status(404).send('Device ' + req.params.id + ' installed to slot not found.');
+        return res.status(404).send('Device ' + req.params.id + ' installed to specifed slot not found.');
       }
       next();
     });
