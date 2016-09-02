@@ -2,8 +2,6 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 
-var checklist = require('./checklist').deviceChecklistSchema;
-
 
 var device = new Schema({
   serialNo: {
@@ -16,7 +14,23 @@ var device = new Schema({
   department: String,
   owner: String,
   details: ObjectId,
-  checklist: checklist,
+  irrChecklist: {
+    id: ObjectId,
+    required: {
+      type: Boolean,
+      default: false
+    }
+  },
+  irrApproval: {
+    status: {
+      type: String,
+      default: ''
+    },
+    comment: {
+      type: String,
+      default: ''
+    }
+  },
   checkedValue: {
     type: Number,
     default: 0,

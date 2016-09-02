@@ -2,8 +2,8 @@ var express = require('express');
 var devices = express.Router();
 var auth = require('../lib/auth');
 var Device = require('../models/device').Device;
-var checklistValues = require('../models/checklist').checklistValues;
-var checklistSubjects = require('../models/checklist').deviceChecklistSubjects;
+var Checklist = require('../models/checklist').Checklist;
+var defaultDeviceChecklist = require('../models/checklist').defaultDeviceChecklist;
 
 
 devices.get('/', auth.ensureAuthenticated, function (req, res) {
@@ -35,9 +35,7 @@ devices.get('/:id', auth.ensureAuthenticated, function (req, res) {
       });
     }
     return res.render('device', {
-      device: device,
-      checklistValues: checklistValues,
-      checklistSubjects: checklistSubjects
+      device: device
     });
   });
 });
@@ -45,74 +43,68 @@ devices.get('/:id', auth.ensureAuthenticated, function (req, res) {
 
 devices.post('/:id', auth.ensureAuthenticated, function (req, res) {
   Device.findById(req.params['id'], function (err, device) {
-    var idx, item, subject, status = 404;
-    var nRequired = 0, nChecked = 0;
     if (err) {
-      return res.status(status).render('error', {
+      return res.status(404).render('error', {
         error: {
           status: err
         }
       });
     }
-    if (req.body['action'] === 'require-checklist') {
-      if (device.checklist) {
-        status = 200;
+    if (req.body['action'] === 'checklist-required') {
+      if (device.irrChecklist && device.irrChecklist.id) {
         // checklist already created
-        device.checklist.required = true;
+        Checklist.findById(device.irrChecklist.id, function (err, checklist) {
+          if (err) {
+            return res.status(500).render('error', {
+              error: {
+                status: err
+              }
+            });
+          }
+          device.irrChecklist.required = true;
+          device.save(function (err) {
+            if (err) {
+              return res.status(500).render('error', {
+                error: {
+                  status: err
+                }
+              });
+            }
+            return res.status(200).render('device', {
+              device: device,
+              checklist: checklist
+            });
+          });
+        });
       } else {
-        status = 201;
-        // create checklist based on its schema
-        device.checklist = { required: true };
+        // checklist must be created
+        var checklist = new Checklist(defaultDeviceChecklist);
+        checklist.save(function (err) {
+          if (err) {
+            return res.status(500).render('error', {
+              error: {
+                status: err
+              }
+            });
+          }
+          device.irrChecklist.id = checklist._id;
+          device.irrChecklist.required = true;
+          device.save(function (err) {
+            if (err) {
+              return res.status(500).render('error', {
+                error: {
+                  status: err
+                }
+              });
+            }
+            return res.status(201).render('device', {
+              device: device,
+              checklist: checklist
+            });
+          });
+        });
       }
     }
-    if (req.body['action'] === 'config-checklist') {
-      for (idx in checklistSubjects) {
-        subject = checklistSubjects[idx];
-        item = device.checklist[subject];
-        if (item.required !== undefined) {
-          if (req.body[subject] && req.body[subject] === 'true') {
-            item.required = true;
-          } else {
-            item.required = false;
-          }
-        }
-        // need to update the total required and checked
-        if (item.required != false) {
-          nRequired += 1;
-          if ((item.value === 'Y') || (item.value === 'YC') ) {
-            nChecked += 1;
-          }
-        }
-      }
-      device.totalValue = nRequired;
-      device.checkedValue = nChecked;
-      status = 200;
-    }
-    if (req.body['action'] === 'update-checklist') {
-      for (idx in checklistSubjects) {
-        subject = checklistSubjects[idx];
-        item = device.checklist[subject];
-        if (req.body[subject]) {
-          item.value = req.body[subject];
-        }
-        // need to update the total required and checked
-        if (item.required !== false) {
-          nRequired += 1;
-          if ((item.value === 'Y') || (item.value === 'YC')) {
-            nChecked += 1;
-          }
-        }
-      }
-      device.totalValue = nRequired;
-      device.checkedValue = nChecked;
-      status = 200;
-    }
-    // TODO: save the device to the db
-    res.status(status).render('device', {
-      device: device,
-      checklistValues: checklistValues,
-      checklistSubjects: checklistSubjects
-    });
   });
 });
 

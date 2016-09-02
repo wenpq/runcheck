@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
+var addHistory = require('./history').addHistory;
 
 var checklistValues = ['N', 'Y', 'YC'];
 var subjects = ['EE', 'ME', 'CRYO', 'CTRLS', 'PHYS', 'ESHQ'];
@@ -8,74 +9,114 @@ var drrChecklistSubjects = ['DO'].concat(subjects).concat('AM');
 var arrChecklistSubjects = ['DO'].concat(subjects).concat('AM');
 
 /*******
- * A checklistItem is the response of a subject in a checklist.
- * required: indicate if approval is required
- * value: indicate state of this item
- * comment: extra information
+ * A checklistItem is the configuration information for an item in a checklist.
+ * name: unique identifier for the item within the checklist
+ * subject: title of the item that is displayed to the user
+ * assignee: user id of person required to respond to this item
+ * required: indicate if the item must have a response
+ * mandatory: (virtual) indicate if the item must be required
+ * custom: (virtual) indicate if the item is user created
  *******/
-var checklistItem = {
+var checklistItem = Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  subject: {
+    type: String,
+    required: true
+  },
+  assignee: {
+    type: String,
+    default: ''
+  },
   required: {
     type: Boolean,
     default: true
-  },
-  value: {
-    type: String,
-    enum: checklistValues,
-    default: checklistValues[0],
-  },
-  comment: {
-    type: String,
-    default: ''
-  }
-};
-
-/*******
- * A mandatoryChecklistItem is the response of a subject which is always required.
- * value: indicate state of this item
- * comment: extra information
- *******/
-var mandatoryChecklistItem = {
-  value: {
-    type: String,
-    enum: checklistValues,
-    default: checklistValues[0],
-  },
-  comment: {
-    type: String,
-    default: ''
-  }
-}
-
-var deviceChecklist = {
-  required: {
-    type: Boolean,
-    default: false
-  }
-};
-deviceChecklistSubjects.forEach(function (s) {
-  if (s === 'DO') {
-    deviceChecklist[s] = mandatoryChecklistItem;
-  } else {
-    deviceChecklist[s] = checklistItem;
   }
 });
 
-var deviceChecklistSchema = new Schema(deviceChecklist);
+checklistItem.virtual('mandatory').get(function () {
+  return (subjects.indexOf(this.name) === -1);
+});
 
-var drrChecklist = {};
+checklistItem.virtual('custom').get(function () {
+  return (subjects.indexOf(this.name) === -1)
+          && (['DO', 'AM'].indexOf(this.name) === -1);
+});
+
+/*******
+ * A checklistInput is the response for a checklist item.
+ * name: unique identifier for the item to which this input belongs
+ * value: the value of the input
+ * comment: extra information
+ * inputOn: date when the input was submitted
+ * inputBy: user id of the persion who submitted the input
+ *******/
+var checklistInput = Schema({
+  name: {
+    type: String,
+    required: true
+  },
+  value: {
+    type: String,
+    enum: checklistValues,
+    required: true
+  },
+  comment: {
+    type: String,
+    default: ''
+  },
+  inputOn: {
+    type: Date,
+    required: true
+  },
+  inputBy: {
+    type: String,
+    required: true
+  }
+});
+
+
+/*******
+ * A checklist is a list of responses for various subjects
+ * items: list of checklist items
+ * input: list of checklist inputs
+ */
+var checklist = Schema({
+  items: [checklistItem],
+  inputs: [checklistInput]
+});
+
+checklist.plugin(addHistory, {
+  fieldsToWatch: ['items']
+});
+
+
+var Checklist = mongoose.model('Checklist', checklist);
+
+
+var defaultDeviceChecklist = { items: [] };
+deviceChecklistSubjects.forEach(function (s) {
+  defaultDeviceChecklist.items.push({
+    name: s,
+    subject: s
+  });
+});
+
+var defaultDRRChecklist = { items: [] };
 drrChecklistSubjects.forEach(function (s) {
-  drrChecklist[s] = checklistItem;
-})
+  defaultDRRChecklist.items.push({
+    subject: s
+  });
+});
 
-var drrChecklistSchema = new Schema(drrChecklist);
-
-
-var arrChecklist = {};
+var defaultARRChecklist = { items: [] };
 arrChecklistSubjects.forEach(function (s) {
-  arrChecklist[s] = checklistItem;
-})
-
-var arrChecklistSchema = new Schema(arrChecklist);
+  defaultARRChecklist.items.push({
+    subject: s
+  });
+});
 
 
 module.exports = {
@@ -83,8 +124,8 @@ module.exports = {
   deviceChecklistSubjects: deviceChecklistSubjects,
   drrChecklistSubjects: drrChecklistSubjects,
   arrChecklistSubjects: arrChecklistSubjects,
-  subjects: subjects,
-  deviceChecklistSchema: deviceChecklistSchema,
-  drrChecklistSchema: drrChecklistSchema,
-  arrChecklistSchema: arrChecklistSchema
+  defaultDeviceChecklist: defaultDeviceChecklist,
+  defaultDRRChecklist: defaultDRRChecklist,
+  defaultARRChecklist: defaultARRChecklist,
+  Checklist: Checklist
 };

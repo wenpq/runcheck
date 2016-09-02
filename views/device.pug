@@ -21,62 +21,19 @@ block content
         dd #{device.owner}
   .container(style="margin-top: 10px")
     .well
-      if !device.checklist || !device.checklist.required
-        form(method='POST')
-          input(type='hidden' name='action', value="require-checklist")
-          button(type='submit') Request Checklist
+      if device.irrChecklist && device.irrChecklist.required
+        h4 Pre-installation Checklist
+        #irrChecklist
       else
-        //- update checklist
-        form#updateChecklist(method="POST")
-          input(type="hidden" name="action" value="update-checklist")
-          table.table
-            thead
-              tr
-                for subject in checklistSubjects
-                  th.text-center #{subject} OK
-            tbody
-              tr
-                for subject in checklistSubjects
-                  - var item = device.checklist[subject];
-                  td.text-center
-                    if item.required !== false
-                      select(name="#{subject}" value="#{item.value}")
-                        for checklistValue in checklistValues
-                          if item.value === checklistValue
-                            option(selected="selected")= checklistValue
-                          else
-                            option= checklistValue
-                    else
-                      span N/A
-          .row
-            .col-xs-6.text-left
-              button(type="button" onclick="$('#configChecklist,#updateChecklist').toggleClass('hidden');")  Edit
-            .col-xs-6.text-right
-              button(type="submit") Save
-        //- configure checklist
-        form#configChecklist.hidden(method="POST")
-          input(type="hidden" name="action" value="config-checklist")
-          table.table
-            thead
-              tr
-                th
-                for subject in checklistSubjects
-                  th.text-center #{subject} OK
-            tbody
-              tr
-                th Required
-                for subject in checklistSubjects
-                  - var item = device.checklist[subject]; 
-                  td.text-center
-                    if item.required === undefined
-                      input(type="checkbox" name="#{subject}" value="true" checked="checked" disabled='disabled')
-                    else if item.required === true
-                      input(type="checkbox" name="#{subject}" value="true" checked="checked")
-                    else
-                      input(type="checkbox" name="#{subject}" value="true")
-          .row
-            .col-xs-6.text-left
-              button(type='button' onclick='window.location="/devices/#{device._id}"') Cancel
-            .col-xs-6.text-right
-              button(type="submit") Save
+        form(method='POST')
+          input(type='hidden' name='action', value="checklist-required")
+          button(type='submit') Request Checklist
 
+
+block js
+  script(type='text/javascript' src='/javascripts/checklist-helper.js')
+  script(type='text/javascript' src='/javascripts/template/checklist-input.js')
+  script(type='text/javascript' src='/javascripts/template/checklist-config.js')
+  script(type='text/javascript' src='/javascripts/template/checklist-config-item.js')
+  if device.irrChecklist && device.irrChecklist.required
+    script ChecklistHelper().render('#irrChecklist', '#{device.irrChecklist.id}');

@@ -53,3 +53,7 @@ body {
 .modal-content {
   margin-top: 30%;
 }
+
+.like-btn {
+  padding: 6px 12px;
+}
