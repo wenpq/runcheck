@@ -23,7 +23,6 @@ block content
             thead
               tr
                 th Name
-                th Owner
                 th Associated area
                 th Leve of care
                 th Device type
@@ -32,11 +31,11 @@ block content
             tbody
               tr
                 td #{slot.name}
-                td #{slot.owner}
                 td #{slot.area}
                 td #{slot.level}
                 td #{slot.deviceType}
-                td #{slot.approvalStatus}
+                -var statusMap = {0: 'Device not installed', 1: 'Device installed', 2: 'DO OK', 2.5: 'Slot DRR checklist', 3: 'AM approved', '4':'DRR approved'}
+                td #{statusMap[slot.status]}
                 if (slotGroup)
                   - var sotGroupUrl = {'href': '/slotGroups/' + slotGroup._id};
                   td
@@ -55,6 +54,9 @@ block content
                   tr
                     th Sub-system
                     td #{slot.subsystem}
+                  tr
+                    th Owner
+                    td #{slot.owner}
                   tr
                     th Device naming
                     td #{slot.deviceNaming}
@@ -105,6 +107,11 @@ block content
                   tr
                     th Machine mode
                     td #{slot.machineMode}
+    button.btn.btn-space.btn-primary#DOApprove DO Approve
+    button.btn.btn-space.btn-primary#AMpprove AM Approve
+    button.btn.btn-space.btn-primary#DRRApprove DRR Approve
+    br
+    br
     .panel.panel-default
         .panel-heading
           strong Checklist

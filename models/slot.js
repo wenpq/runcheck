@@ -37,9 +37,18 @@ var slot = new Schema({
   owner: String,
   area: String,
   device: ObjectId,
-  approvalStatus: {
-    type: Boolean,
-    default: false
+  /**
+   * 0: device not installed
+   * 1: device installed
+   * 2: DO OK
+   * 2.5: slot DRR checklist
+   * 3: AM approved
+   * 4: DRR approved
+   */
+  status: {
+    type: Number,
+    default: 0,
+    enum: [0, 1, 2, 2.5, 3, 4]
   },
   machineMode: String,
   inGroup: ObjectId
