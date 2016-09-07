@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
+var addHistory = require('./history').addHistory;
 
 var checklist = require('./checklist').deviceChecklistSchema;
 
@@ -26,8 +27,14 @@ var device = new Schema({
     default: 0,
     min: 0
   },
-  installToDevice: ObjectId,
-  installToSlot: ObjectId,
+  installToDevice: {
+    serialNo: {type: String, default: null},
+    id: {type: String, default: null},
+  },
+  installToSlot: {
+    name: {type: String, default: null},
+    id: {type: String, default: null},
+  },
   /**
    * 0: spare
    * 1: prepare to install
@@ -40,6 +47,10 @@ var device = new Schema({
     default: 0,
     enum: [0, 1, 1.5, 2, 3]
   }
+});
+
+device.plugin(addHistory, {
+  watchAll: true
 });
 
 var Device = mongoose.model('Device', device);
