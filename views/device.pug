@@ -1,68 +1,57 @@
-extends layout-history
+extends layout-history.pug
 
 block head
   link(rel='stylesheet', href='/datatables/media/css/dataTables.bootstrap.min.css')
+  link(rel='stylesheet', href='/stylesheets/typeaheadjs.css')
   title RunCheck device
-
+    = ' '
+    = device.serialNo
 
 block content
   br
-  div#device(style='display: none') #{JSON.stringify(device)}
-  #message
-  .well
-    .row
-      .col-md-6
-        .table-responsive
-          table.table
-            tbody
-              tr
-                th Name
-                td#dName
-              tr
-                th Serial Number
-                td#dSerialNo
-              tr
-                th Type
-                td#dType
-              tr
-                th Department
-                td#dDepartment
-              tr
-                th Owner
-                td#dOwner
-              tr
-                th Installed to
-                td#dInstallTo
-              tr
-                th Status
-                td#dStatus
-  form.form-inline
-    .btn-group
-      button.btn.btn-space.btn-primary.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')#preInstall
-        | Prepare install
-        span.caret
-      ul.dropdown-menu
-        li
-          a.prepare-install(href='#') device
-        li
-          a.prepare-install(href='#') slot
-    button.btn.btn-space.btn-primary#rejectInstall Reject
-    button.btn.btn-space.btn-primary#approveInstall Approve
-    button.btn.btn-space.btn-primary#install Install
-    button.btn.btn-space.btn-danger#setSpare Set spare
+  //- div#device(style='display: none') #{JSON.stringify(device)}
+  div(id = 'message')
+  .well(id = 'device-details')
+    include ./client-side/device-details.pug
+  .btn-toolbar
+    button.btn.btn-space.btn-primary(id = 'reject-install') Reject
+    button.btn.btn-space.btn-primary(id = 'approve-install') Approve
+    button.btn.btn-space.btn-primary(id = 'install') Install
+    button.btn.btn-space.btn-danger(id = 'set-spare') Set spare
   br
-  .panel.panel-default#preparePanel
+  - var spare = _.get(device, 'installToDevice.id') === null && _.get(device, 'installToSlot.id') === null;
+  .panel.panel-default(id = 'prepare-panel' class=spare? '' : 'hidden')
     .panel-heading
-      Strong#prepareTitle
+      .btn-group
+        button.btn.btn-space.btn-primary.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')#preInstall
+          | Prepare install
+          = ' '
+          span.caret
+        ul.dropdown-menu
+          li
+            a.prepare-install device
+          li
+            a.prepare-install slot
+      Strong(id = 'prepare-title')
     .panel-body
-      form.form-inline
+      form.form-inline.slot.hidden
         .form-group
-          label#prepareLabel
+          label Slot:
+          = ' '
           .input-group
-            input#prepareInput.form-control(type='text', data-provide='typeahead', autocomplete='off')
-        | &nbsp
-        button.btn.btn-space.btn-primary(type='submit')#prepareConfirm Confirm
-        button.btn.btn-space(type='submit')#prepareCancel Cancel
+            input.form-control(type='text')
+        = ' '
+        button.btn.btn-space.btn-primary(type='submit', value='slot') Confirm
+        button.btn.btn-space(type='reset') Cancel
+      form.form-inline.device.hidden
+        .form-group
+          label Device:
+          = ' '
+          .input-group
+            input.form-control(type='text')
+        = ' '
+        button.btn.btn-space.btn-primary(type='submit', value='device') Confirm
+        button.btn.btn-space(type='reset') Cancel
   .well
     if !device.checklist || !device.checklist.required
       form(method='POST')
@@ -122,7 +111,11 @@ block content
             button(type='button' onclick='window.location="/devices/#{device._id}"') Cancel
           .col-xs-6.text-right
             button(type="submit") Save
-
+block history
+  each h in device.__updates.reverse()
+    +change(h, moment)
 block js
+  script(type='text/javascript', src='/typeahead.js/dist/typeahead.bundle.js')
+  script(type='text/javascript', src='/javascripts/typeahead.js')
   script(type='text/javascript', src='/javascripts/device-action.js')
-  script(type='text/javascript', src='/bootstrap3-typeahead/bootstrap3-typeahead.min.js')
+  script(type='text/javascript', src='/javascripts/template/device-details.js')
