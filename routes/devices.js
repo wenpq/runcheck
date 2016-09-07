@@ -293,7 +293,6 @@ devices.put('/:id/install-to-slot', auth.ensureAuthenticated, reqUtils.exist('id
   });
 });
 
-
 /**
  * check device and slot 1 to 1 mapping, ensure consistency.
  * @param req
@@ -320,7 +319,7 @@ function checkDeviceSlot(req, res, next) {
         return res.status(500).send(err.message);
       }
       if (raw.result.n === 0) {
-        return res.status(404).send('Device ' + req.params.id + 'installed to slot not found.');
+        return res.status(404).send('Device ' + req.params.id + ' installed to specifed slot not found.');
       }
       next();
     });
