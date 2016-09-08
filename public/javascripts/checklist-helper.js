@@ -5,7 +5,7 @@ function ChecklistHelper() {
   function renderConfigTemplate(elem, checklist) {
     var count = 0;
 
-    elem.html(checklistConfigTemplate({
+    elem.off().html(checklistConfigTemplate({
       items: checklist.items
     }));
 
@@ -96,7 +96,7 @@ function ChecklistHelper() {
       }
     }
 
-    elem.html(checklistInputTemplate({
+    elem.off().html(checklistInputTemplate({
       items: checklist.items,
       inputs: inputs,
       history: history
