@@ -2,7 +2,6 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 var addHistory = require('./history').addHistory;
-
 var checklist = require('./checklist').deviceChecklistSchema;
 
 var device = new Schema({
@@ -29,11 +28,11 @@ var device = new Schema({
   },
   installToDevice: {
     serialNo: {type: String, default: null},
-    id: {type: String, default: null},
+    id: {type: String, default: null}
   },
   installToSlot: {
     name: {type: String, default: null},
-    id: {type: String, default: null},
+    id: {type: String, default: null}
   },
   /**
    * 0: spare

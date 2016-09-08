@@ -1,6 +1,7 @@
 var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
+var addHistory = require('./history').addHistory;
 
 var slot = new Schema({
   system: String,
@@ -36,7 +37,6 @@ var slot = new Schema({
   // the following attributes not in slot excel file
   owner: String,
   area: String,
-  device: ObjectId,
   /**
    * 0: device not installed
    * 1: device installed
@@ -50,8 +50,20 @@ var slot = new Schema({
     default: 0,
     enum: [0, 1, 2, 2.5, 3, 4]
   },
+  device: {
+    serialNo: {type: String, default: null},
+    id: {type: String, default: null}
+  },
+  approvalStatus: {
+    type: Boolean,
+    default: false
+  },
   machineMode: String,
   inGroup: ObjectId
+});
+
+slot.plugin(addHistory, {
+  watchAll: true
 });
 
 var Slot = mongoose.model('Slot', slot);
