@@ -80,7 +80,6 @@ devices.post('/:id', auth.ensureAuthenticated, function (req, res) {
             }
             return res.status(200).render('device', {
               device: device,
-              checklist: checklist,
               moment: moment,
               _: _
             });
@@ -109,7 +108,6 @@ devices.post('/:id', auth.ensureAuthenticated, function (req, res) {
             }
             return res.status(201).render('device', {
               device: device,
-              checklist: checklist,
               moment: moment,
               _: _
             });
