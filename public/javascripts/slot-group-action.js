@@ -30,7 +30,7 @@ $('#modal').on('click','#modal-cancel',function (e) {
 
 $('#modal').on('click','#modal-submit',function (e) {
   e.preventDefault();
-  var url = window.location.href + '/removeSlots';
+  var url = window.location.pathname + '/removeSlots';
   $.ajax({
     url: url,
     type: 'Post',

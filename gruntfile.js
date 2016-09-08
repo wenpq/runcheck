@@ -4,7 +4,7 @@ module.exports = function (grunt) {
   grunt.initConfig({
     pkg: grunt.file.readJSON('package.json'),
     eslint: {
-      target: ['Gruntfile.js', 'lib/**/*.js', 'routes/**/*/js', 'public/javascripts/*.js', 'test/**/*.js']
+      target: ['gruntfile.js', 'lib/**/*.js', 'routes/**/*.js', 'public/javascripts/*.js', 'test/**/*.js']
     },
     mochaTest: {
       test: {
@@ -32,7 +32,5 @@ module.exports = function (grunt) {
   grunt.registerTask('template', ['shell:template']);
   grunt.registerTask('test', ['mochaTest']);
   grunt.registerTask('puglint', ['shell:puglint']);
-  grunt.registerTask('eslint', ['eslint']);
   grunt.registerTask('default', ['puglint', 'eslint']);
-
 };

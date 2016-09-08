@@ -2,35 +2,72 @@ extends layout-history
 
 block head
   link(rel='stylesheet', href='/datatables/media/css/dataTables.bootstrap.min.css')
+  link(rel='stylesheet', href='/stylesheets/typeaheadjs.css')
   title RunCheck device
-
+    = ' '
+    = device.serialNo
 
 block content
-  .container(style="margin-top: 10px")
-    .well
-      dl
-        dt Name
-        dd #{device.name}
-        dt Serial Number
-        dd #{device.serialNo}
-        dt Type
-        dd #{device.type}
-        dt Department
-        dd #{device.department}
-        dt Owner
-        dd #{device.owner}
-  .container(style="margin-top: 10px")
-    .well
-      if device.irrChecklist && device.irrChecklist.required
-        h4 Pre-installation Checklist
-        #irrChecklist
-      else
-        form(method='POST')
-          input(type='hidden' name='action', value="checklist-required")
-          button(type='submit') Request Checklist
-
-
+  br
+  //- div#device(style='display: none') #{JSON.stringify(device)}
+  div(id = 'message')
+  .well(id = 'device-details')
+    include ./client-side/device-details.pug
+  .btn-toolbar
+    button.btn.btn-space.btn-primary(id = 'reject-install') Reject
+    button.btn.btn-space.btn-primary(id = 'approve-install') Approve
+    button.btn.btn-space.btn-primary(id = 'install') Install
+    button.btn.btn-space.btn-danger(id = 'set-spare') Set spare
+  br
+  - var spare = _.get(device, 'installToDevice.id') === null && _.get(device, 'installToSlot.id') === null;
+  .panel.panel-default(id = 'prepare-panel' class=spare? '' : 'hidden')
+    .panel-heading
+      .btn-group
+        button.btn.btn-space.btn-primary.dropdown-toggle(type='button', data-toggle='dropdown', aria-haspopup='true', aria-expanded='false')#preInstall
+          | Prepare install
+          = ' '
+          span.caret
+        ul.dropdown-menu
+          li
+            a.prepare-install device
+          li
+            a.prepare-install slot
+      Strong(id = 'prepare-title')
+    .panel-body
+      form.form-inline.slot.hidden
+        .form-group
+          label Slot:
+          = ' '
+          .input-group
+            input.form-control(type='text')
+        = ' '
+        button.btn.btn-space.btn-primary(type='submit', value='slot') Confirm
+        button.btn.btn-space(type='reset') Cancel
+      form.form-inline.device.hidden
+        .form-group
+          label Device:
+          = ' '
+          .input-group
+            input.form-control(type='text')
+        = ' '
+        button.btn.btn-space.btn-primary(type='submit', value='device') Confirm
+        button.btn.btn-space(type='reset') Cancel
+  .well
+    if device.irrChecklist && device.irrChecklist.required
+      h4 Pre-installation Checklist
+      #irrChecklist
+    else
+      form(method='POST')
+        input(type='hidden' name='action', value="checklist-required")
+        button(type='submit') Request Checklist
+block history
+  each h in device.__updates.reverse()
+    +change(h, moment)
 block js
+  script(type='text/javascript', src='/typeahead.js/dist/typeahead.bundle.js')
+  script(type='text/javascript', src='/javascripts/typeahead.js')
+  script(type='text/javascript', src='/javascripts/device-action.js')
+  script(type='text/javascript', src='/javascripts/template/device-details.js')
   script(type='text/javascript' src='/javascripts/checklist-helper.js')
   script(type='text/javascript' src='/javascripts/template/checklist-input.js')
   script(type='text/javascript' src='/javascripts/template/checklist-config.js')

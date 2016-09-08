@@ -19,8 +19,8 @@ var slot = new Schema({
     default: 'Low',
     enum: ['Low', 'Medium', 'High']
   },
-  DRR: ObjectId,
-  ARR: ObjectId,
+  DRR: String,
+  ARR: String,
   InnerDiameter: String,// Minimum Beam Pipe Inner Diameter (mm)
   flangeLength: Number,// Element Flange to Flange Length (m)
   placeHolder: Number,
@@ -33,8 +33,8 @@ var slot = new Schema({
   comment: String,
   artemisDistance: Number,// Distance from Artemis source (m) ???
 
-  // the following atrributes not in slot excel file
-  owner: ObjectId,
+  // the following attributes not in slot excel file
+  owner: String,
   area: String,
   device: ObjectId,
   approvalStatus: {

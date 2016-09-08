@@ -57,3 +57,7 @@ body {
 .like-btn {
   padding: 6px 12px;
 }
+
+.btn-space {
+  margin-right: 5px;
+}

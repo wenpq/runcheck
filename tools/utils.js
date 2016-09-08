@@ -149,7 +149,7 @@ function dataValidate(datalist, callback) {
     var err = sobj.validateSync();
     if (err) {
       console.error('Validate failed for ' + sobj);
-      console.error(err.message);
+      console.error(err.errors);
       errs.push(err);
     }
   }
@@ -185,39 +185,54 @@ function saveFile(data, fname) {
 
 
 /**
- * save data to mongoDB
+ * Make sure indexes are built successfully, then save data to MongoDB
  * @param data     the validated json object list
  * @param callback
  */
 function saveModel(datalist, callback) {
-  var i;
-  var count = 0;
-  var success = 0;
-  if (datalist.length === 0) {
-    if (typeof callback === 'function') {
-      return callback(null, 0, 0);
+  var indexTriggered = false;
+  Model.on('index', function(err) {
+    indexTriggered = true;
+    if(err) {
+      return callback(err);
     }
-  }
-  for (i = 0; i < datalist.length; i += 1) {
-    var m = new Model(datalist[i]);
-    var error = null;
-    m.save(function (err) {
-      if (err) {
-        console.error(err.message);
-      } else {
-        success += 1;
+    var i;
+    var count = 0;
+    var success = 0;
+    if (datalist.length === 0) {
+      if (typeof callback === 'function') {
+        return callback(null, 0, 0);
       }
-      count += 1;
-      if (count === datalist.length) {
-        if (typeof callback === 'function') {
-          if (success != count) {
-            error = new Error('Failed: ' + (count - success));
-          }
-          return callback(error, success, count);
+    }
+    for (i = 0; i < datalist.length; i += 1) {
+      var m = new Model(datalist[i]);
+      var error = null;
+      m.save(function (err) {
+        if (err) {
+          console.error(err.message);
+        } else {
+          success += 1;
         }
-      }
-    });
-  }
+        count += 1;
+        if (count === datalist.length) {
+          if (typeof callback === 'function') {
+            if (success != count) {
+              error = new Error('Failed: ' + count + ' items were processed, but only ' + success + ' were inserted');
+            }
+            return callback(error, success, count);
+          }
+        }
+      });
+    }
+  });
+  var timeout = setTimeout(function () {
+    if (indexTriggered) {
+      clearTimeout(timeout);
+    } else {
+      console.log('30 seconds passed, and not index event triggered. Give up now.');
+      callback(new Error('no index event within 30 seconds.'));
+    }
+  }, 30000);
 }
 
 module.exports = {
