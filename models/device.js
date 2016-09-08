@@ -28,12 +28,24 @@ var device = new Schema({
     min: 0
   },
   installToDevice: {
-    serialNo: {type: String, default: null},
-    id: {type: String, default: null},
+    serialNo: {
+      type: String,
+      default: null
+    },
+    id: {
+      type: String,
+      default: null
+    },
   },
   installToSlot: {
-    name: {type: String, default: null},
-    id: {type: String, default: null},
+    name: {
+      type: String,
+      default: null
+    },
+    id: {
+      type: String,
+      default: null
+    },
   },
   /**
    * 0: spare
