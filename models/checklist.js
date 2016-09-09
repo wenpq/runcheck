@@ -121,6 +121,7 @@ arrChecklistSubjects.forEach(function (s) {
 
 module.exports = {
   checklistValues: checklistValues,
+  subjects: subjects,
   deviceChecklistSubjects: deviceChecklistSubjects,
   drrChecklistSubjects: drrChecklistSubjects,
   arrChecklistSubjects: arrChecklistSubjects,
