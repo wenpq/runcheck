@@ -77,13 +77,13 @@ function addHistory(schema, options) {
   if (options.watchAll === true) {
     options.fieldsToWatch = Object.keys(schema.paths);
   }
-  options.fieldsToWatch = _([])
+  options.fieldsToWatch = _
     .chain()
     .concat(options.fieldsToWatch)
     .reject(function (field) {
-      return !schema.path(field) || _(['__updates', '_id']).contains(field);
+      return !schema.path(field) || _.includes(['__updates', '_id'], field);
     })
-    .valueOf();
+    .value();
 
   schema.add({
     __updates: [{
