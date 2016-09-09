@@ -1,0 +1,23 @@
+tr.checklist-item.form-group
+  td.text-left
+    if item.custom
+      button.btn.btn-danger.checklist-item-remove(type='button')
+        span.glyphicon.glyphicon-minus
+    else
+      .form-control-static
+        span.like-btn.glyphicon.glyphicon-lock.checklist-item-lock
+  td.text-left
+    input.form-control.checklist-item-name(type='hidden', value=item.name)
+    if item.custom
+      input.form-control.checklist-item-subject(type='text', value=item.subject)
+    else
+      span.form-control-static.checklist-item-subject= item.subject
+  td.text-center
+    if item.mandatory
+      input.form-control.checklist-item-required(type='checkbox', value='true', checked='checked', disabled='disabled')
+    else if item.required
+      input.form-control.checklist-item-required(type='checkbox', value='true', checked='checked')
+    else
+      input.form-control.checklist-item-required(type="checkbox", value='true')
+  td.text-left
+    input.form-control.checklist-item-assignee(type='text', value=item.assignee)
