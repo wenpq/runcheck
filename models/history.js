@@ -6,7 +6,7 @@ var assert = require('assert');
 
 var debug = require('debug')('runcheck:history');
 var log = require('../lib/log');
-var _ = require('underscore');
+var _ = require('lodash');
 
 /**********
  * p: the property of an object
