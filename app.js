@@ -103,6 +103,7 @@ var users = require('./routes/users');
 var devices = require('./routes/devices');
 var slots = require('./routes/slots');
 var slotGroups = require('./routes/slot-groups');
+var checklists = require('./routes/checklists');
 var auth = require('./lib/auth');
 var app = express();
 
@@ -153,6 +154,7 @@ app.use('/users', users);
 app.use('/devices', devices);
 app.use('/slots', slots);
 app.use('/slotgroups', slotGroups);
+app.use('/checklists', checklists);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {

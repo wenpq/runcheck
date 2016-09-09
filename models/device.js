@@ -2,7 +2,6 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 var addHistory = require('./history').addHistory;
-var checklist = require('./checklist').deviceChecklistSchema;
 
 var device = new Schema({
   serialNo: {
@@ -15,7 +14,23 @@ var device = new Schema({
   department: String,
   owner: String,
   details: ObjectId,
-  checklist: checklist,
+  irrChecklist: {
+    id: ObjectId,
+    required: {
+      type: Boolean,
+      default: false
+    }
+  },
+  irrApproval: {
+    status: {
+      type: String,
+      default: ''
+    },
+    comment: {
+      type: String,
+      default: ''
+    }
+  },
   checkedValue: {
     type: Number,
     default: 0,
@@ -27,12 +42,24 @@ var device = new Schema({
     min: 0
   },
   installToDevice: {
-    serialNo: {type: String, default: null},
-    id: {type: String, default: null}
+    serialNo: {
+      type: String,
+      default: null
+    },
+    id: {
+      type: String,
+      default: null
+    }
   },
   installToSlot: {
-    name: {type: String, default: null},
-    id: {type: String, default: null}
+    name: {
+      type: String,
+      default: null
+    },
+    id: {
+      type: String,
+      default: null
+    }
   },
   /**
    * 0: spare
