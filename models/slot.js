@@ -2,6 +2,7 @@ var mongoose = require('mongoose');
 var Schema = mongoose.Schema;
 var ObjectId = Schema.Types.ObjectId;
 var addHistory = require('./history').addHistory;
+var SlotGroup = require('../models/slot-group').SlotGroup;
 
 var slot = new Schema({
   system: String,
@@ -59,7 +60,11 @@ var slot = new Schema({
     default: false
   },
   machineMode: String,
-  inGroup: ObjectId
+  inGroup: {
+    type: ObjectId,
+    ref: 'SlotGroup'
+  }
+
 });
 
 slot.plugin(addHistory, {

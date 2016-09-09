@@ -323,7 +323,7 @@ function deleteInstallToSlot(req, res) {
     // slot
     slot.device.id = null;
     slot.device.serialNo = null;
-    slot.status = null;
+    slot.status = 0;
     slot.saveWithHistory(req.session.userid, function (sErr) {
       if (sErr) {
         log.error(sErr);
